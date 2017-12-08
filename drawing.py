@@ -1,6 +1,7 @@
 
 from io import StringIO
 
+from . import Raster
 from . import elements as elementsModule
 
 
@@ -94,6 +95,13 @@ class Drawing:
     def saveSvg(self, fname):
         with open(fname, 'w') as f:
             self.asSvg(outputFile=f)
+    def savePng(self, fname):
+        self.rasterize(toFile=fname)
+    def rasterize(self, toFile=None):
+        if toFile:
+            return Raster.fromSvgToFile(self.asSvg(), toFile)
+        else:
+            return Raster.fromSvg(self.asSvg())
     def _repr_svg_(self):
         ''' Display in Jupyter notebook '''
         return self.asSvg()

@@ -41,6 +41,7 @@ Example:
 ```
 '''
 
+from .raster import Raster
 from .drawing import Drawing
 from .elements import *
 
