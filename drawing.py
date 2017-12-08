@@ -42,7 +42,7 @@ class Drawing:
         elif self.renderWidth is None:
             s = self.renderHeight / self.height
             return self.width * s, self.renderHeight
-        elif self.renderWidth is None:
+        elif self.renderHeight is None:
             s = self.renderWidth / self.width
             return self.renderWidth, self.height * s
         else:
