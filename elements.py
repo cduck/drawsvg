@@ -46,7 +46,7 @@ class NoElement(DrawingElement):
 class Rectangle(DrawingBasicElement):
     ''' A rectangle
 
-        Additional keyword arguments are ouput as additional arguments to the
+        Additional keyword arguments are output as additional arguments to the
         SVG node e.g. fill="red", stroke="#ff4477", stroke_width=2. '''
     TAG_NAME = 'rect'
     def __init__(self, x, y, width, height, **kwargs):
@@ -56,7 +56,7 @@ class Rectangle(DrawingBasicElement):
 class Circle(DrawingBasicElement):
     ''' A circle
 
-        Additional keyword arguments are ouput as additional properties to the
+        Additional keyword arguments are output as additional properties to the
         SVG node e.g. fill="red", stroke="#ff4477", stroke_width=2. '''
     TAG_NAME = 'circle'
     def __init__(self, cx, cy, r, **kwargs):
@@ -69,7 +69,7 @@ class ArcLine(Circle):
         stroke-dasharray SVG property to make the edge of a circle look like
         an arc.
 
-        Additional keyword arguments are ouput as additional arguments to the
+        Additional keyword arguments are output as additional arguments to the
         SVG node e.g. fill="red", stroke="#ff4477", stroke_width=2. '''
     def __init__(self, cx, cy, r, startDeg, endDeg, **kwargs):
         if endDeg - startDeg == 360:
@@ -104,7 +104,7 @@ class Path(DrawingBasicElement):
         Path Supports building an SVG path by calling instance methods
         corresponding to path commands.
 
-        Additional keyword arguments are ouput as additional properties to the
+        Additional keyword arguments are output as additional properties to the
         SVG node e.g. fill="red", stroke="#ff4477", stroke_width=2. '''
     TAG_NAME = 'path'
     def __init__(self, d='', **kwargs):
@@ -153,7 +153,7 @@ class Path(DrawingBasicElement):
 class Lines(Path):
     ''' A sequence of connected lines (or a polygon)
 
-        Additional keyword arguments are ouput as additional properties to the
+        Additional keyword arguments are output as additional properties to the
         SVG node e.g. fill="red", stroke="#ff4477", stroke_width=2. '''
     def __init__(self, sx, sy, *points, close=False, **kwargs):
         super().__init__(d='', **kwargs)
@@ -167,7 +167,7 @@ class Lines(Path):
 class Line(Lines):
     ''' A line
 
-        Additional keyword arguments are ouput as additional properties to the
+        Additional keyword arguments are output as additional properties to the
         SVG node e.g. fill="red", stroke="#ff4477", stroke_width=2. '''
     def __init__(self, sx, sy, ex, ey, **kwargs):
         super().__init__(sx, sy, ex, ey, close=False, **kwargs)
@@ -175,7 +175,7 @@ class Line(Lines):
 class Arc(Path):
     ''' An arc
 
-        Additional keyword arguments are ouput as additional properties to the
+        Additional keyword arguments are output as additional properties to the
         SVG node e.g. fill="red", stroke="#ff4477", stroke_width=2. '''
     def __init__(self, cx, cy, r, startDeg, endDeg, cw=False, **kwargs):
         super().__init__(d='', **kwargs)
