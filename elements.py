@@ -1,5 +1,8 @@
 
 import math
+import os.path
+import base64
+import warnings
 
 # TODO: Support drawing ellipses without manually using Path
 
@@ -24,6 +27,7 @@ class DrawingBasicElement(DrawingElement):
         outputFile.write(self.TAG_NAME)
         outputFile.write(' ')
         for k, v in self.args.items():
+            k = k.replace('__', ':')
             k = k.replace('_', '-')
             outputFile.write('{}="{}" '.format(k,v))
         outputFile.write('/>')
@@ -42,6 +46,51 @@ class NoElement(DrawingElement):
         if isinstance(other, type(self)):
             return True
         return False
+
+class Image(DrawingBasicElement):
+    ''' A linked or embedded raster image '''
+    TAG_NAME = 'image'
+    MIME_MAP = {
+        '.bm':  'image/bmp',
+        '.bmp': 'image/bmp',
+        '.gif': 'image/gif',
+        '.jpeg':'image/jpeg',
+        '.jpg': 'image/jpeg',
+        '.png': 'image/png',
+        '.tif': 'image/tiff',
+        '.tiff':'image/tiff',
+        '.pdf': 'application/pdf',
+        '.txt': 'text/plain',
+    }
+    MIME_DEFAULT = 'image/png'
+    def __init__(self, x, y, width, height, path=None, data=None, embed=False,
+                 mimeType=None, **kwargs):
+        ''' Specify either the path or data argument.  If path is used and
+            embed is True, the image file is embedded in a data URI. '''
+        if path is None and data is None:
+            raise ValueError('Either path or data arguments must be given')
+        if mimeType is None and path is not None:
+                ext = os.path.splitext(path)[1].lower()
+                if ext in self.MIME_MAP:
+                    mimeType = self.MIME_MAP[ext]
+                else:
+                    mimeType = self.MIME_DEFAULT
+                    warnings.warn('Unknown image file type "{}"'.format(ext), Warning)
+        if mimeType is None:
+            mimeType = self.MIME_DEFAULT
+            warnings.warn('Unspecified image type; assuming png'.format(ext), Warning)
+        if data is not None:
+            embed = True
+        if embed and data is None:
+            with open(path, 'rb') as f:
+                data = f.read()
+        if not embed:
+            uri = path
+        else:
+            encData = base64.b64encode(data).decode()
+            uri = 'data:{};base64,{}'.format(mimeType, encData)
+        super().__init__(x=x, y=-y-height, width=width, height=height,
+                         href=uri, **kwargs)
 
 class Rectangle(DrawingBasicElement):
     ''' A rectangle
