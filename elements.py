@@ -3,6 +3,7 @@ import math
 import os.path
 import base64
 import warnings
+import xml.sax.saxutils as xml
 
 # TODO: Support drawing ellipses without manually using Path
 
@@ -20,6 +21,7 @@ class DrawingBasicElement(DrawingElement):
     ''' Base class for SVG drawing elements that are a single node with no
         child nodes '''
     TAG_NAME = '_'
+    hasContent = False
     def __init__(self, **args):
         self.args = args
     def writeSvgElement(self, outputFile):
@@ -30,7 +32,18 @@ class DrawingBasicElement(DrawingElement):
             k = k.replace('__', ':')
             k = k.replace('_', '-')
             outputFile.write('{}="{}" '.format(k,v))
-        outputFile.write('/>')
+        if not self.hasContent:
+            outputFile.write('/>')
+        else:
+            outputFile.write('>')
+            self.writeContent(outputFile)
+            outputFile.write('</')
+            outputFile.write(self.TAG_NAME)
+            outputFile.write('>')
+    def writeContent(self, outputFile):
+        ''' Override in a subclass to add data between the start and end
+            tags.  This will not be called if hasContent is False. '''
+        raise RuntimeError('This element has no content')
     def __eq__(self, other):
         if isinstance(other, type(self)):
             return (self.tagName == other.tagName and
@@ -90,7 +103,32 @@ class Image(DrawingBasicElement):
             encData = base64.b64encode(data).decode()
             uri = 'data:{};base64,{}'.format(mimeType, encData)
         super().__init__(x=x, y=-y-height, width=width, height=height,
-                         href=uri, **kwargs)
+                         xlink__href=uri, **kwargs)
+
+class Text(DrawingBasicElement):
+    ''' Text
+
+        Additional keyword arguments are output as additional arguments to the
+        SVG node e.g. fill="red", font_size=20, text_anchor="middle". '''
+    TAG_NAME = 'text'
+    hasContent = True
+    def __init__(self, text, fontSize, x, y, center=False, **kwargs):
+        if center:
+            if 'text_anchor' not in kwargs:
+                kwargs['text_anchor'] = 'middle'
+            try:
+                fontSize = float(fontSize)
+                translate = 'translate(0,{})'.format(fontSize*0.5*center)
+                if 'transform' in kwargs:
+                    kwargs['transform'] = translate + ' ' + kwargs['transform']
+                else:
+                    kwargs['transform'] = translate
+            except TypeError:
+                pass
+        super().__init__(x=x, y=-y, font_size=fontSize, **kwargs)
+        self.escapedText = xml.escape(text)
+    def writeContent(self, outputFile):
+        outputFile.write(self.escapedText)
 
 class Rectangle(DrawingBasicElement):
     ''' A rectangle
