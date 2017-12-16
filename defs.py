@@ -19,6 +19,26 @@ class DrawingDefSub(DrawingParentElement):
     ''' Parent class of SVG nodes that are meant to be descendants of a Def '''
     pass
 
+class LinearGradient(DrawingDef):
+    ''' A linear gradient to use as a fill or other color
+
+        Has <stop> nodes as children. '''
+    TAG_NAME = 'linearGradient'
+    def __init__(self, x1, y1, x2, y2, gradientUnits='userSpaceOnUse', **kwargs):
+        yShift = 0
+        if gradientUnits != 'userSpaceOnUse':
+            yShift = 1
+        try: y1 = yShift - y1
+        except TypeError: pass
+        try: y2 = yShift - y2
+        except TypeError: pass
+        super().__init__(x1=x1, y1=y1, x2=x2, y2=y2, gradientUnits=gradientUnits,
+                         **kwargs)
+    def addStop(self, offset, color, opacity=None, **kwargs):
+        stop = GradientStop(offset=offset, stop_color=color,
+                            stop_opacity=opacity, **kwargs)
+        self.append(stop)
+
 class RadialGradient(DrawingDef):
     ''' A radial gradient to use as a fill or other color
 
