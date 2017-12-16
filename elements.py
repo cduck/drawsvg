@@ -1,9 +1,14 @@
 
+import sys
 import math
 import os.path
 import base64
 import warnings
 import xml.sax.saxutils as xml
+
+from . import defs
+
+elementsModule = sys.modules[__name__]
 
 # TODO: Support drawing ellipses without manually using Path
 
@@ -14,6 +19,14 @@ class DrawingElement:
         Subclasses must implement writeSvgElement '''
     def writeSvgElement(self, outputFile):
         raise NotImplementedError('Abstract base class')
+    def getSvgDefs(self):
+        return ()
+    def writeSvgDefs(self, idGen, isDuplicate, outputFile):
+        for defn in self.getSvgDefs():
+            if isDuplicate(defn): continue
+            defn.id = idGen()
+            defn.writeSvgElement(outputFile)
+            outputFile.write('\n')
     def __eq__(self, other):
         return self is other
 
@@ -27,13 +40,15 @@ class DrawingBasicElement(DrawingElement):
     def writeSvgElement(self, outputFile):
         outputFile.write('<')
         outputFile.write(self.TAG_NAME)
-        outputFile.write(' ')
         for k, v in self.args.items():
+            if v is None: continue
             k = k.replace('__', ':')
             k = k.replace('_', '-')
-            outputFile.write('{}="{}" '.format(k,v))
+            if isinstance(v, defs.DrawingDef):
+                v = 'url(#{})'.format(v.id)
+            outputFile.write(' {}="{}"'.format(k,v))
         if not self.hasContent:
-            outputFile.write('/>')
+            outputFile.write(' />')
         else:
             outputFile.write('>')
             self.writeContent(outputFile)
@@ -44,11 +59,48 @@ class DrawingBasicElement(DrawingElement):
         ''' Override in a subclass to add data between the start and end
             tags.  This will not be called if hasContent is False. '''
         raise RuntimeError('This element has no content')
+    def getSvgDefs(self):
+        return [v for v in self.args.values() if isinstance(v, defs.DrawingDef)]
     def __eq__(self, other):
         if isinstance(other, type(self)):
             return (self.tagName == other.tagName and
                     self.args == other.args)
         return False
+
+class DrawingParentElement(DrawingBasicElement):
+    ''' Base class for SVG elements that can have child nodes '''
+    hasContent = True
+    def __init__(self, children=(), **args):
+        super().__init__(**args)
+        self.children = list(children)
+        if len(self.children) > 0:
+            self.checkChildrenAllowed()
+    def checkChildrenAllowed(self):
+        if not self.hasContent:
+            raise RuntimeError('{} does not support children'.format(type(self)))
+    def draw(self, obj, **kwargs):
+        if not hasattr(obj, 'writeSvgElement'):
+            elements = obj.toDrawables(elements=elementsModule, **kwargs)
+            self.extend(elements)
+        else:
+            assert len(kwargs) == 0
+            self.append(obj)
+    def append(self, element):
+        self.checkChildrenAllowed()
+        self.children.append(element)
+    def extend(self, iterable):
+        self.checkChildrenAllowed()
+        self.children.extend(iterable)
+    def writeContent(self, outputFile):
+        outputFile.write('\n')
+        for child in self.children:
+            child.writeSvgElement(outputFile)
+            outputFile.write('\n')
+    def writeSvgDefs(self, idGen, isDuplicate, outputFile):
+        super().writeSvgDefs(idGen, isDuplicate, outputFile)
+        for child in self.children:
+            child.writeSvgDefs(idGen, isDuplicate, outputFile)
+            outputFile.write('\n')
 
 class NoElement(DrawingElement):
     ''' A drawing element that has no effect '''

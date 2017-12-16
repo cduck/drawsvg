@@ -41,7 +41,17 @@ Example:
 ```
 '''
 
+from .defs import *
 from .raster import Raster
 from .drawing import Drawing
 from .elements import *
+
+# Make all elements available in the elements module
+from . import defs
+from . import elements
+elementsDir = dir(elements)
+for k in dir(defs):
+    if k.startswith('_'): continue
+    if k in elementsDir: continue
+    setattr(elements, k, getattr(defs, k))
 

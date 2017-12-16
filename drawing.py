@@ -82,7 +82,27 @@ class Drawing:
             imgWidth, imgHeight, *self.viewBox)
         endStr = '</svg>'
         outputFile.write(startStr)
-        outputFile.write('\n')
+        outputFile.write('\n<defs>\n')
+        # Write definition elements
+        idIndex = 0
+        def idGen(base='d'):
+            nonlocal idIndex
+            idStr = base + str(idIndex)
+            idIndex += 1
+            return idStr
+        prevSet = set()
+        def isDuplicate(obj):
+            nonlocal prevSet
+            dup = id(obj) in prevSet
+            prevSet.add(id(obj))
+            return dup
+        for element in self.elements:
+            try:
+                element.writeSvgDefs(idGen, isDuplicate, outputFile)
+            except AttributeError:
+                pass
+        outputFile.write('</defs>\n')
+        # Write normal elements
         for element in self.elements:
             try:
                 element.writeSvgElement(outputFile)
