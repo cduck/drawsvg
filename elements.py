@@ -12,6 +12,15 @@ elementsModule = sys.modules[__name__]
 
 # TODO: Support drawing ellipses without manually using Path
 
+def writeXmlNodeArgs(args, outputFile):
+    for k, v in args.items():
+        if v is None: continue
+        k = k.replace('__', ':')
+        k = k.replace('_', '-')
+        if isinstance(v, defs.DrawingDef):
+            v = 'url(#{})'.format(v.id)
+        outputFile.write(' {}="{}"'.format(k,v))
+
 
 class DrawingElement:
     ''' Base class for drawing elements
@@ -40,13 +49,7 @@ class DrawingBasicElement(DrawingElement):
     def writeSvgElement(self, outputFile):
         outputFile.write('<')
         outputFile.write(self.TAG_NAME)
-        for k, v in self.args.items():
-            if v is None: continue
-            k = k.replace('__', ':')
-            k = k.replace('_', '-')
-            if isinstance(v, defs.DrawingDef):
-                v = 'url(#{})'.format(v.id)
-            outputFile.write(' {}="{}"'.format(k,v))
+        writeXmlNodeArgs(self.args, outputFile)
         if not self.hasContent:
             outputFile.write(' />')
         else:

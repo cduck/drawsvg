@@ -10,7 +10,7 @@ class Drawing:
 
         Supports iPython: If a Drawing is the last line of a cell, it will be
         displayed as an SVG below. '''
-    def __init__(self, width, height, origin=(0,0)):
+    def __init__(self, width, height, origin=(0,0), **svgArgs):
         assert float(width) == width
         assert float(height) == height
         self.width = width
@@ -27,6 +27,7 @@ class Drawing:
         self.pixelScale = 1
         self.renderWidth = None
         self.renderHeight = None
+        self.svgArgs = svgArgs
     def setRenderSize(self, w=None, h=None):
         self.renderWidth = w
         self.renderHeight = h
@@ -78,11 +79,12 @@ class Drawing:
         imgWidth, imgHeight = self.calcRenderSize()
         startStr = '''<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-     width="{}" height="{}" viewBox="{} {} {} {}">'''.format(
+     width="{}" height="{}" viewBox="{} {} {} {}"'''.format(
             imgWidth, imgHeight, *self.viewBox)
         endStr = '</svg>'
         outputFile.write(startStr)
-        outputFile.write('\n<defs>\n')
+        elementsModule.writeXmlNodeArgs(self.svgArgs, outputFile)
+        outputFile.write('>\n<defs>\n')
         # Write definition elements
         idIndex = 0
         def idGen(base='d'):
