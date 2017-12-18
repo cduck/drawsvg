@@ -4,12 +4,6 @@ from .elements import DrawingElement, DrawingParentElement
 
 class DrawingDef(DrawingParentElement):
     ''' Parent class of SVG nodes that must be direct children of <defs> '''
-    @property
-    def id(self):
-        return self.args.get('id', None)
-    @id.setter
-    def id(self, newId):
-        self.args['id'] = newId
     def getSvgDefs(self):
         return (self,)
     def writeSvgDefs(self, idGen, isDuplicate, outputFile):

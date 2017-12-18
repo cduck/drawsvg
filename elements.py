@@ -46,6 +46,12 @@ class DrawingBasicElement(DrawingElement):
     hasContent = False
     def __init__(self, **args):
         self.args = args
+    @property
+    def id(self):
+        return self.args.get('id', None)
+    @id.setter
+    def id(self, newId):
+        self.args['id'] = newId
     def writeSvgElement(self, outputFile):
         outputFile.write('<')
         outputFile.write(self.TAG_NAME)
@@ -114,6 +120,13 @@ class NoElement(DrawingElement):
         if isinstance(other, type(self)):
             return True
         return False
+
+class Group(DrawingParentElement):
+    ''' A group of drawing elements
+
+        Any transform will apply to its children and other attributes will be
+        inherited by its children. '''
+    TAG_NAME = 'g'
 
 class Image(DrawingBasicElement):
     ''' A linked or embedded raster image '''
