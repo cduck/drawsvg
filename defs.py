@@ -58,3 +58,10 @@ class GradientStop(DrawingDefSub):
     TAG_NAME = 'stop'
     hasContent = False
 
+class ClipPath(DrawingDef):
+    ''' A shape used to crop another element by not drawing outside of this
+        shape
+
+        Has regular drawing elements as children. '''
+    TAG_NAME = 'clipPath'
+
