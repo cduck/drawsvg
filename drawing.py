@@ -24,6 +24,7 @@ class Drawing:
         self.viewBox = (-self.viewBox[0], self.viewBox[1]-self.viewBox[3],
                         self.viewBox[2], self.viewBox[3])
         self.elements = []
+        self.otherDefs = []
         self.pixelScale = 1
         self.renderWidth = None
         self.renderHeight = None
@@ -72,6 +73,15 @@ class Drawing:
         self.elements.count(element)
     def reverse(self):
         self.elements.reverse()
+    def drawDef(self, obj, **kwargs):
+        if not hasattr(obj, 'writeSvgElement'):
+            elements = obj.toDrawables(elements=elementsModule, **kwargs)
+        else:
+            assert len(kwargs) == 0
+            elements = (obj,)
+        self.otherDefs.extend(elements)
+    def appendDef(self, element):
+        self.otherDefs.append(element)
     def asSvg(self, outputFile=None):
         returnString = outputFile is None
         if returnString:
@@ -92,12 +102,18 @@ class Drawing:
             idStr = base + str(idIndex)
             idIndex += 1
             return idStr
-        prevSet = set()
+        prevSet = set((id(defn) for defn in self.otherDefs))
         def isDuplicate(obj):
             nonlocal prevSet
             dup = id(obj) in prevSet
             prevSet.add(id(obj))
             return dup
+        for element in self.otherDefs:
+            try:
+                element.writeSvgElement(outputFile)
+                outputFile.write('\n')
+            except AttributeError:
+                pass
         for element in self.elements:
             try:
                 element.writeSvgDefs(idGen, isDuplicate, outputFile)

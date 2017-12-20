@@ -72,7 +72,7 @@ class DrawingBasicElement(DrawingElement):
         return [v for v in self.args.values() if isinstance(v, defs.DrawingDef)]
     def __eq__(self, other):
         if isinstance(other, type(self)):
-            return (self.tagName == other.tagName and
+            return (self.TAG_NAME == other.TAG_NAME and
                     self.args == other.args)
         return False
 
@@ -109,7 +109,6 @@ class DrawingParentElement(DrawingBasicElement):
         super().writeSvgDefs(idGen, isDuplicate, outputFile)
         for child in self.children:
             child.writeSvgDefs(idGen, isDuplicate, outputFile)
-            outputFile.write('\n')
 
 class NoElement(DrawingElement):
     ''' A drawing element that has no effect '''
@@ -127,6 +126,22 @@ class Group(DrawingParentElement):
         Any transform will apply to its children and other attributes will be
         inherited by its children. '''
     TAG_NAME = 'g'
+
+class Use(DrawingBasicElement):
+    ''' A copy of another element
+
+        Specify the other element by its id: href='#otherElemId'. '''
+    TAG_NAME = 'use'
+    def __init__(self, otherElem, x, y, **kwargs):
+        y = -y
+        if isinstance(otherElem, str):
+            otherElemId = otherElem
+        else:
+            if otherElem.id is None:
+                raise ValueError('otherElem must have an id')
+            otherElemId = otherElem.id
+        href = '#{}'.format(otherElemId)
+        super().__init__(xlink__href=href, x=x, y=y, **kwargs)
 
 class Image(DrawingBasicElement):
     ''' A linked or embedded raster image '''
