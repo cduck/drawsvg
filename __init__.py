@@ -20,10 +20,10 @@ Example:
 
     p = draw.Path(stroke_width=2, stroke='green',
                   fill='black', fill_opacity=0.5)
-    p.M(-30,5)
-    p.l(60,30)
-    p.h(-70)
-    p.Z()
+    p.M(-30,5)  # Start path at point (-30, 5)
+    p.l(60,30)  # Draw line to (60, 30)
+    p.h(-70)    # Draw horizontal line to x=-70
+    p.Z()       # Draw line to start
     d.append(p)
 
     d.append(draw.ArcLine(60,-20,20,60,270,
@@ -49,9 +49,11 @@ from .elements import *
 # Make all elements available in the elements module
 from . import defs
 from . import elements
+def registerElement(name, elem):
+    setattr(elements, name, elem)
 elementsDir = dir(elements)
 for k in dir(defs):
     if k.startswith('_'): continue
     if k in elementsDir: continue
-    setattr(elements, k, getattr(defs, k))
+    registerElement(k, getattr(defs, k))
 
