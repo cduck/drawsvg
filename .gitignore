@@ -1,2 +1,6 @@
 *.pyc
+__pycache__
+/MANIFEST
+/dist
+/*.egg-info
 
