@@ -36,8 +36,11 @@ Example:
     d.setPixelScale(2)  # Set number of pixels per geometry unit
     #d.setRenderSize(400,200)  # Alternative to setPixelScale
     d.saveSvg('example.svg')
+    d.savePng('example.png')
 
-    d  # Display in iPython notebook
+    # Display in iPython notebook
+    d.rasterize()  # Display as PNG
+    d  # Display as SVG
 ```
 '''
 
