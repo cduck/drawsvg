@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="400" height="200" viewBox="-100.0 -50.0 200 100">
+<defs>
+</defs>
+<path d="M-80,45 L70,49 L95,-49 L-90,-40" fill="#eeee00" stroke="black" />
+<rect x="0" y="-50" width="40" height="50" fill="#1248ff" />
+<circle cx="-40" cy="10" r="30" fill="red" stroke-width="2" stroke="black" />
+<path d="M-30,-5 l60,-30 h-70 Z" stroke-width="2" stroke="green" fill="black" fill-opacity="0.5" />
+<circle cx="60" cy="20" r="20" stroke-dasharray="73.30382858376184 52.35987755982988" stroke-dashoffset="-31.41592653589793" stroke="red" stroke-width="5" fill="red" fill-opacity="0.2" />
+<path d="M70.0,2.679491924311229 A20,20,0,1,0,59.99999999999999,40.0" stroke="green" stroke-width="3" fill="none" />
+<path d="M59.99999999999999,40.0 A20,20,0,1,1,70.0,2.679491924311229" stroke="blue" stroke-width="1" fill="black" fill-opacity="0.3" />
+</svg>

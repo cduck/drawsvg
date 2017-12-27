@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="600" height="320.0" viewBox="-0.75 -0.4 1.5 0.8">
+<defs>
+<radialGradient cx="0" cy="0.35" r="7.0" gradientUnits="userSpaceOnUse" id="d0">
+<stop offset="0.07142857142857142" stop-color="green" stop-opacity="1" />
+<stop offset="0.1" stop-color="red" stop-opacity="0" />
+</radialGradient>
+<linearGradient x1="0.1" y1="0.35" x2="0.7" y2="0.14999999999999997" gradientUnits="userSpaceOnUse" id="d1">
+<stop offset="0" stop-color="green" stop-opacity="1" />
+<stop offset="1" stop-color="red" stop-opacity="0" />
+</linearGradient>
+</defs>
+<rect x="-0.75" y="-0.5" width="1.5" height="1" fill="#ddd" />
+<path d="M0.6062177826491071,5.551115123125783e-17 A0.7,0.7,0,0,0,-0.3499999999999998,-0.2562177826491071 L-0.2499999999999999,-0.08301270189221943 A0.5,0.5,0,0,1,0.43301270189221935,0.1 Z" fill="url(#d0)" stroke="black" stroke-width="0.002" />
+<path d="M-0.48209070726490444,-0.22453333233923367 A0.75,0.75,0,0,0,-0.7047694655894312,0.09348489250574832 L0.0,0.35 A0,0,0,0,1,0.0,0.35 Z" fill="url(#d0)" stroke="red" stroke-width="0.002" />
+<rect x="0.1" y="0.14999999999999997" width="0.6" height="0.2" stroke="black" stroke-width="0.002" fill="url(#d1)" />
+</svg>

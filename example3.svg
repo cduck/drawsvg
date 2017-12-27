@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="400" height="400.0" viewBox="-0.7 -0.7 1.4 1.4">
+<defs>
+<clipPath id="d0">
+<rect x="-0.25" y="-0.25" width="1" height="1" />
+</clipPath>
+</defs>
+<circle cx="0" cy="0" r="0.5" stroke-width="0.01" stroke="black" fill-opacity="0.3" clip-path="url(#d0)" id="circle" />
+<g opacity="0.5" clip-path="url(#d0)">
+<use xlink:href="#circle" x="0.25" y="-0.1" />
+</g>
+</svg>
