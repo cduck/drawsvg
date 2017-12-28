@@ -1,5 +1,4 @@
-import subprocess
-from setuptools import setup
+from setuptools import setup, find_packages
 
 try:
     with open('DESCRIPTION.rst', 'r') as f:
@@ -10,7 +9,7 @@ except:
 
 setup(
     name = 'drawSvg',
-    packages = ['drawSvg'],
+    packages = find_packages(),
     version = '1.0.0',
     description = 'This is a Python 3 library for programmatically generating SVG images (vector drawings) and rendering them or displaying them in an iPython notebook.',
     long_description = longDesc,
@@ -25,7 +24,7 @@ setup(
         'Framework :: IPython',
         'Framework :: Jupyter',
     ],
-    requires = [
+    install_requires = [
         'cairoSVG',
     ],
 )
