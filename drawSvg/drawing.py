@@ -16,7 +16,7 @@ class Drawing:
         self.width = width
         self.height = height
         if origin == 'center':
-            self.viewBox = (width/2, height/2, width, height)
+            self.viewBox = (-width/2, -height/2, width, height)
         else:
             origin = tuple(origin)
             assert len(origin) == 2
