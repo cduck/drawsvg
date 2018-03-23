@@ -15,6 +15,8 @@ $ pip3 install drawSvg
 
 ### Basic drawing elements
 ```python
+import drawSvg as draw
+
 d = draw.Drawing(200, 100, origin='center')
 
 d.append(draw.Lines(-80, -45,
@@ -58,6 +60,8 @@ d  # Display as SVG
 
 ### Gradients
 ```python
+import drawSvg as draw
+
 d = draw.Drawing(1.5, 0.8, origin='center')
 
 d.draw(draw.Rectangle(-0.75,-0.5,1.5,1, fill='#ddd'))
@@ -98,6 +102,8 @@ d
 
 ### Duplicate geometry and clip paths
 ```python
+import drawSvg as draw
+
 d = draw.Drawing(1.4, 1.4, origin='center')
 
 # Define clip path
@@ -124,6 +130,8 @@ d.rasterize()
 
 ### Implementing other SVG tags
 ```python
+import drawSvg as draw
+
 # Subclass DrawingBasicElement if it cannot have child nodes
 # Subclass DrawingParentElement otherwise
 # Subclass DrawingDef if it must go between <def></def> tags in an SVG
