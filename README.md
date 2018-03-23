@@ -15,6 +15,8 @@ $ pip3 install drawSvg
 
 ### Basic drawing elements
 ```python
+import drawSvg as draw
+
 d = draw.Drawing(200, 100, origin='center')
 
 d.append(draw.Lines(-80, -45,
