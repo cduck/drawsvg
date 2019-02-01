@@ -17,6 +17,8 @@ def writeXmlNodeArgs(args, outputFile):
         if v is None: continue
         k = k.replace('__', ':')
         k = k.replace('_', '-')
+        if k[-1]=='-':
+            k = k[:-1]
         if isinstance(v, defs.DrawingDef):
             v = 'url(#{})'.format(v.id)
         outputFile.write(' {}="{}"'.format(k,v))
