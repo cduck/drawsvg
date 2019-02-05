@@ -3,10 +3,10 @@ import io
 
 try:
     import cairosvg
-except ImportError:
+except (ImportError, OSError):
     import warnings
     from .missing import MissingModule
-    msg = 'CairoSVG will need to be install to rasterize images: Install with `pip3 install cairosvg`'
+    msg = 'CairoSVG will need to be installed to rasterize images: Install with `pip3 install cairosvg`'
     cairosvg = MissingModule(msg)
     warnings.warn(msg, RuntimeWarning)
 
