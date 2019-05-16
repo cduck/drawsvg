@@ -48,6 +48,16 @@ from .defs import *
 from .raster import Raster
 from .drawing import Drawing
 from .elements import *
+from .video import (
+    render_svg_frames,
+    save_video,
+)
+from .animation import (
+    Animation,
+    animate_video,
+    animate_jupyter,
+)
+
 
 # Make all elements available in the elements module
 from . import defs
