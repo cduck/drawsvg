@@ -160,7 +160,7 @@ d.setRenderSize(200)
 d
 ```
 
-![Example output image](https://github.com/cduck/drawSvg/blob/master/examples/example4.svg)
+![Example output image](https://raw.githubusercontent.com/cduck/drawSvg/master/examples/example4.png)
 
 ### Interactive Widget
 ```python
