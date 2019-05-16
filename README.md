@@ -1,8 +1,10 @@
 # drawSvg
 
-This is a Python 3 library for programmatically generating SVG images (vector drawings) and rendering them or displaying them in an iPython notebook.
+A Python 3 library for programmatically generating SVG images (vector drawings) and rendering them or displaying them in an iPython notebook.
 
 Most common SVG tags are supported and others can easily be added by writing a small subclass of `DrawableBasicElement` or `DrawableParentElement`.
+
+An interactive Jupyter widget, `drawSvg.widgets.DrawingWidget`, is included that can update drawings based on mouse events.
 
 # Install
 drawSvg is available on PyPI:
@@ -56,7 +58,7 @@ d.rasterize()  # Display as PNG
 d  # Display as SVG
 ```
 
-![Example output image](https://github.com/cduck/drawSvg/raw/master/example1.png)
+![Example output image](https://raw.githubusercontent.com/cduck/drawSvg/master/examples/example1.png)
 
 ### Gradients
 ```python
@@ -98,7 +100,7 @@ d.setRenderSize(w=600)
 d
 ```
 
-![Example output image](https://github.com/cduck/drawSvg/raw/master/example2.png)
+![Example output image](https://raw.githubusercontent.com/cduck/drawSvg/master/examples/example2.png)
 
 ### Duplicate geometry and clip paths
 ```python
@@ -126,7 +128,7 @@ d.setRenderSize(400)
 d.rasterize()
 ```
 
-![Example output image](https://github.com/cduck/drawSvg/raw/master/example3.png)
+![Example output image](https://raw.githubusercontent.com/cduck/drawSvg/master/examples/example3.png)
 
 ### Implementing other SVG tags
 ```python
@@ -158,5 +160,84 @@ d.setRenderSize(200)
 d
 ```
 
-![Example output image](https://github.com/cduck/drawSvg/blob/master/example4.svg)
+![Example output image](https://github.com/cduck/drawSvg/blob/master/examples/example4.svg)
+
+### Interactive Widget
+```python
+import drawSvg as draw
+from drawSvg.widgets import DrawingWidget
+import hyperbolic.poincare.shapes as hyper  # pip3 install hyperbolic
+
+# Create drawing
+d = draw.Drawing(2, 2, origin='center')
+d.setRenderSize(500)
+d.append(draw.Circle(0, 0, 1, fill='orange'))
+group = draw.Group()
+d.append(group)
+
+# Update the drawing based on user input
+click_list = []
+def redraw(points):
+    group.children.clear()
+    for x1, y1 in points:
+        for x2, y2 in points:
+            if (x1, y1) == (x2, y2): continue
+            p1 = hyper.Point.fromEuclid(x1, y1)
+            p2 = hyper.Point.fromEuclid(x2, y2)
+            if p1.distanceTo(p2) <= 2:
+                line = hyper.Line.fromPoints(*p1, *p2, segment=True)
+                group.draw(line, hwidth=0.2, fill='white')
+    for x, y in points:
+        p = hyper.Point.fromEuclid(x, y)
+        group.draw(hyper.Circle.fromCenterRadius(p, 0.1),
+                   fill='green')
+redraw(click_list)
+
+# Create interactive widget and register mouse events
+widget = DrawingWidget(d)
+@widget.mousedown
+def mousedown(widget, x, y, info):
+    if (x**2 + y**2) ** 0.5 + 1e-5 < 1:
+        click_list.append((x, y))
+    redraw(click_list)
+    widget.refresh()
+@widget.mousemove
+def mousemove(widget, x, y, info):
+    if (x**2 + y**2) ** 0.5 + 1e-5 < 1:
+        redraw(click_list + [(x, y)])
+    widget.refresh()
+widget
+```
+
+![Example output image](https://raw.githubusercontent.com/cduck/drawSvg/master/examples/example5.gif)
+
+### Animation
+```python
+import drawSvg as draw
+
+# Draw a frame of the animation
+def draw_frame(t):
+    d = draw.Drawing(2, 6.05, origin=(-1,-1.05))
+    d.setRenderSize(h=300)
+    d.append(draw.Rectangle(-2, -2, 4, 8, fill='white'))
+    d.append(draw.Rectangle(-1, -1.05, 2, 0.05, fill='brown'))
+    t = (t + 1) % 2 - 1
+    y = 4 - t**2 * 4
+    d.append(draw.Circle(0, y, 1, fill='lime'))
+    return d
+
+with draw.animate_jupyter(draw_frame, delay=0.05) as anim:
+# Or:
+#with draw.animate_video('example6.gif', draw_frame, duration=0.05
+#                       ) as anim:
+    # Add each frame to the animation
+    for i in range(20):
+        anim.draw_frame(i/10)
+    for i in range(20):
+        anim.draw_frame(i/10)
+    for i in range(20):
+        anim.draw_frame(i/10)
+```
+
+![Example output image](https://raw.githubusercontent.com/cduck/drawSvg/master/examples/example6.gif)
 
