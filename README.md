@@ -4,7 +4,7 @@ A Python 3 library for programmatically generating SVG images (vector drawings) 
 
 Most common SVG tags are supported and others can easily be added by writing a small subclass of `DrawableBasicElement` or `DrawableParentElement`.
 
-An interactive Jupyter widget, `drawSvg.widgets.DrawingWidget`, is included that can update drawings based on mouse events.
+An interactive [Jupyter notebook](https://jupyter.org) widget, `drawSvg.widgets.DrawingWidget`, is included that can update drawings based on mouse events.
 
 # Install
 drawSvg is available on PyPI:
