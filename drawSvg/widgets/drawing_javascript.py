@@ -1,7 +1,7 @@
 javascript = '''
 require.undef('drawingview');
 
-define('drawingview', ["@jupyter-widgets/base"], function(widgets) {
+define('drawingview', ['@jupyter-widgets/base'], function(widgets) {
     var DrawingView = widgets.DOMWidgetView.extend({
         render: function() {
             this.container = document.createElement('a');
@@ -9,6 +9,8 @@ define('drawingview', ["@jupyter-widgets/base"], function(widgets) {
             this.container.appendChild(this.svg_view);
             this.el.appendChild(this.container);
             this.model.on('change:_image', this.image_changed, this);
+            this.model.on('change:_mousemove_blocked', this.block_changed,
+                          this);
         },
         image_changed: function() {
             this.container.innerHTML = this.model.get('_image');
@@ -16,7 +18,17 @@ define('drawingview', ["@jupyter-widgets/base"], function(widgets) {
             this.cursor_point = this.svg_view.createSVGPoint();
             this.register_events();
         },
+        last_move: null,
+        block_changed: function() {
+            var widget = this;
+            window.setTimeout(function() {
+                if (!widget.model.get('_mousemove_blocked') && widget.last_move) {
+                    widget.send_mouse_event('mousemove', widget.last_move);
+                }
+            }, 0);
+        },
         send_mouse_event: function(name, e) {
+            this.last_move = null;
             if (this.model.get('disable')) {
                 return;
             }
@@ -59,7 +71,9 @@ define('drawingview', ["@jupyter-widgets/base"], function(widgets) {
             });
             this.svg_view.addEventListener('mousemove', function(e) {
                 e.preventDefault();
-                if (!widget.model.get('_mousemove_blocked')) {
+                if (widget.model.get('_mousemove_blocked')) {
+                    widget.last_move = e;
+                } else {
                     widget.send_mouse_event('mousemove', e);
                 }
             });
