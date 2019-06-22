@@ -291,7 +291,7 @@ class Path(DrawingBasicElement):
     def m(self, dx, dy): self.append('m', dx, -dy)
     def L(self, x, y): self.append('L', x, -y)
     def l(self, dx, dy): self.append('l', dx, -dy)
-    def H(self, x, y): self.append('H', x)
+    def H(self, x): self.append('H', x)
     def h(self, dx): self.append('h', dx)
     def V(self, y): self.append('V', -y)
     def v(self, dy): self.append('v', -dy)
