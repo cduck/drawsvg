@@ -1,12 +1,25 @@
 
 import io
+import warnings
+from .missing import MissingModule
+
 
 try:
     import cairosvg
-except (ImportError, OSError):
-    import warnings
-    from .missing import MissingModule
-    msg = 'CairoSVG will need to be installed to rasterize images: Install with `pip3 install cairosvg`'
+except OSError as e:
+    msg = (
+        'Failed to import CairoSVG. '
+        'drawSvg will be unable to output PNG or other raster image formats. '
+        'See https://github.com/cduck/drawSvg#prerequisites for more details.\n'
+        'Original OSError: {}'.format(e)
+    )
+    cairosvg = MissingModule(msg)
+    warnings.warn(msg, RuntimeWarning)
+except ImportError as e:
+    msg = (
+        'CairoSVG will need to be installed to rasterize images: Install with `pip3 install cairosvg`\n'
+        'Original ImportError: {}'.format(e)
+    )
     cairosvg = MissingModule(msg)
     warnings.warn(msg, RuntimeWarning)
 
