@@ -16,7 +16,7 @@ $ pip3 install drawSvg
 
 ## Prerequisites
 
-Cairo needs to be installed separately. When Cairo is installed, drawSvg can output PNG or other image formats in addition to SVG. See platform-specific [instructions for Linux, Windows, and macOS from Cairo.](https://www.cairographics.org/download/) Below are some examples for installing Cairo on Linux distributions and macOS.
+Cairo needs to be installed separately. When Cairo is installed, drawSvg can output PNG or other image formats in addition to SVG. See platform-specific [instructions for Linux, Windows, and macOS from Cairo](https://www.cairographics.org/download/). Below are some examples for installing Cairo on Linux distributions and macOS.
 
 **Ubuntu**
 
