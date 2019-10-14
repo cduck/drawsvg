@@ -6,28 +6,30 @@ Most common SVG tags are supported and others can easily be added by writing a s
 
 An interactive [Jupyter notebook](https://jupyter.org) widget, `drawSvg.widgets.DrawingWidget`, is included that can update drawings based on mouse events.
 
-# Prerequisites
-Cairo needs to be installed separately. See platform-specific [instructions for Linux, Windows, and macOS from Cairo.](https://www.cairographics.org/download/) Below are some examples for installing Cairo on Linux distributions and macOS.
+# Install
 
+drawSvg is available on PyPI:
 
+```
+$ pip3 install drawSvg
+```
+
+## Prerequisites
+
+Cairo needs to be installed separately. When Cairo is installed, drawSvg can output PNG or other image formats in addition to SVG. See platform-specific [instructions for Linux, Windows, and macOS from Cairo.](https://www.cairographics.org/download/) Below are some examples for installing Cairo on Linux distributions and macOS.
 
 **Ubuntu**
+
 ```
-sudo apt-get install libcairo2
+$ sudo apt-get install libcairo2
 ```
 
 **macOS**
 
 Using [homebrew](https://brew.sh/):
-```
-brew install cairo
-```
-
-# Install
-drawSvg is available on PyPI:
 
 ```
-$ pip3 install drawSvg
+$ brew install cairo
 ```
 
 # Examples

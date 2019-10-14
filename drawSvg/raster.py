@@ -6,8 +6,10 @@ from .missing import MissingModule
 
 try:
     import cairosvg
-except OSError:
-    msg = 'Cairo will need to be installed to rasterize images: See prerequisites section in `README`'
+except OSError as e:
+    msg = e.args[0]
+    if msg.startswith("no library called \"cairo\" was found"):
+        msg = 'Cairo will need to be installed to rasterize images: See prerequisites section in `README` at https://github.com/cduck/drawSvg#prerequisites'
     cairosvg = MissingModule(msg)
     warnings.warn(msg, RuntimeWarning)
 except ImportError:
