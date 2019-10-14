@@ -11,12 +11,15 @@ except OSError as e:
         'Failed to import CairoSVG. '
         'drawSvg will be unable to output PNG or other raster image formats. '
         'See https://github.com/cduck/drawSvg#prerequisites for more details.\n'
-        f'Original OSError: {e}'
+        'Original OSError: {}'.format(e)
     )
     cairosvg = MissingModule(msg)
     warnings.warn(msg, RuntimeWarning)
-except ImportError:
-    msg = 'CairoSVG will need to be installed to rasterize images: Install with `pip3 install cairosvg`'
+except ImportError as e:
+    msg = (
+        'CairoSVG will need to be installed to rasterize images: Install with `pip3 install cairosvg`\n'
+        'Original ImportError: {}'.format(e)
+    )
     cairosvg = MissingModule(msg)
     warnings.warn(msg, RuntimeWarning)
 
