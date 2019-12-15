@@ -65,3 +65,14 @@ class ClipPath(DrawingDef):
         Has regular drawing elements as children. '''
     TAG_NAME = 'clipPath'
 
+class Filter(DrawingDef):
+    ''' A filter to apply to geometry
+
+        For example a blur filter. '''
+    TAG_NAME = 'filter'
+
+class FilterItem(DrawingDefSub):
+    ''' A child of Filter with any tag name'''
+    def __init__(self, tag_name, **args):
+        super().__init__(**args)
+        self.TAG_NAME = tag_name
