@@ -77,10 +77,10 @@ def animate_video(out_file, draw_func=None, jupyter=False, **video_args):
 
     Example:
     ```
-    with animate_video('video.mp4') as draw_frame:
+    with animate_video('video.mp4') as anim:
         while True:
             ...
-            draw_frame(...)
+            anim.draw_frame(...)
     ```
     '''
     return AnimationContext(draw_func=draw_func, out_file=out_file,
@@ -94,10 +94,10 @@ def animate_jupyter(draw_func=None, pause=False, clear=True, delay=0.1,
 
     Example:
     ```
-    with animate_jupyter(delay=0.5) as draw_frame:
+    with animate_jupyter(delay=0.5) as anim:
         while True:
             ...
-            draw_frame(...)
+            anim.draw_frame(...)
     ```
     '''
     return AnimationContext(draw_func=draw_func, jupyter=True, pause=pause,
