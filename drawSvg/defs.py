@@ -6,8 +6,6 @@ class DrawingDef(DrawingParentElement):
     ''' Parent class of SVG nodes that must be direct children of <defs> '''
     def getSvgDefs(self):
         return (self,)
-    def writeSvgDefs(self, idGen, isDuplicate, outputFile):
-        DrawingElement.writeSvgDefs(idGen, isDuplicate, outputFile)
 
 class DrawingDefSub(DrawingParentElement):
     ''' Parent class of SVG nodes that are meant to be descendants of a Def '''

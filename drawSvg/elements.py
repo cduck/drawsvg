@@ -19,8 +19,11 @@ def writeXmlNodeArgs(args, outputFile):
         k = k.replace('_', '-')
         if k[-1]=='-':
             k = k[:-1]
-        if isinstance(v, defs.DrawingDef):
-            v = 'url(#{})'.format(v.id)
+        if isinstance(v, defs.DrawingElement):
+            if k == 'xlink:href':
+                v = '#{}'.format(v.id)
+            else:
+                v = 'url(#{})'.format(v.id)
         outputFile.write(' {}="{}"'.format(k,v))
 
 
@@ -35,6 +38,7 @@ class DrawingElement:
     def writeSvgDefs(self, idGen, isDuplicate, outputFile):
         for defn in self.getSvgDefs():
             if isDuplicate(defn): continue
+            defn.writeSvgDefs(idGen, isDuplicate, outputFile)
             defn.id = idGen()
             defn.writeSvgElement(outputFile)
             outputFile.write('\n')
@@ -71,7 +75,8 @@ class DrawingBasicElement(DrawingElement):
             tags.  This will not be called if hasContent is False. '''
         raise RuntimeError('This element has no content')
     def getSvgDefs(self):
-        return [v for v in self.args.values() if isinstance(v, defs.DrawingDef)]
+        return [v for v in self.args.values()
+                if isinstance(v, defs.DrawingElement)]
     def __eq__(self, other):
         if isinstance(other, type(self)):
             return (self.TAG_NAME == other.TAG_NAME and
@@ -132,18 +137,14 @@ class Group(DrawingParentElement):
 class Use(DrawingBasicElement):
     ''' A copy of another element
 
-        Specify the other element by its id: href='#otherElemId'. '''
+        The other element becomes an SVG def shared between all Use elements
+        that reference it. '''
     TAG_NAME = 'use'
     def __init__(self, otherElem, x, y, **kwargs):
         y = -y
-        if isinstance(otherElem, str):
-            otherElemId = otherElem
-        else:
-            if otherElem.id is None:
-                raise ValueError('otherElem must have an id')
-            otherElemId = otherElem.id
-        href = '#{}'.format(otherElemId)
-        super().__init__(xlink__href=href, x=x, y=y, **kwargs)
+        if isinstance(otherElem, str) and not otherElem.startswith('#'):
+            otherElem = '#' + otherElem
+        super().__init__(xlink__href=otherElem, x=x, y=y, **kwargs)
 
 class Image(DrawingBasicElement):
     ''' A linked or embedded raster image '''
