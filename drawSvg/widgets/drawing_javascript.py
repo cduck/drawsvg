@@ -11,6 +11,13 @@ define('drawingview', ['@jupyter-widgets/base'], function(widgets) {
             this.model.on('change:_image', this.image_changed, this);
             this.model.on('change:_mousemove_blocked', this.block_changed,
                           this);
+            this.model.on('change:frame_delay', this.delay_changed,
+                          this);
+            this.model.on('change:_frame_blocked', this.delay_changed,
+                          this);
+            this.model.on('change:disable', this.delay_changed,
+                          this);
+            this.delay_changed();
         },
         image_changed: function() {
             this.container.innerHTML = this.model.get('_image');
@@ -19,10 +26,13 @@ define('drawingview', ['@jupyter-widgets/base'], function(widgets) {
             this.register_events();
         },
         last_move: null,
+        last_mousemove_blocked: null,
+        last_timer: null,
         block_changed: function() {
             var widget = this;
             window.setTimeout(function() {
-                if (!widget.model.get('_mousemove_blocked') && widget.last_move) {
+                if (widget.model.get('_mousemove_blocked')
+                        != widget.last_mousemove_blocked && widget.last_move) {
                     widget.send_mouse_event('mousemove', widget.last_move);
                 }
             }, 0);
@@ -31,10 +41,6 @@ define('drawingview', ['@jupyter-widgets/base'], function(widgets) {
             this.last_move = null;
             if (this.model.get('disable')) {
                 return;
-            }
-            if (this.model.get('throttle')) {
-                this.model.set('_mousemove_blocked', true);
-                this.model.save_changes();
             }
 
             this.cursor_point.x = e.clientX;
@@ -63,6 +69,28 @@ define('drawingview', ['@jupyter-widgets/base'], function(widgets) {
                 relatedTargetId: e.relatedTarget ? e.relatedTarget.id : null,
             });
         },
+        delay_changed: function() {
+            var widget = this;
+            window.clearTimeout(widget.last_timer);
+            if (widget.model.get('disable')) {
+                return;
+            }
+            var delay = widget.model.get('frame_delay');
+            if (delay > 0) {
+                widget.last_timer = window.setTimeout(function() {
+                    widget.send_timed_event('timed');
+                }, delay);
+            }
+        },
+        send_timed_event: function(name) {
+            if (this.model.get('disable')) {
+                return;
+            }
+
+            this.send({
+                name: name,
+            });
+        },
         register_events: function() {
             var widget = this;
             this.svg_view.addEventListener('mousedown', function(e) {
@@ -71,7 +99,8 @@ define('drawingview', ['@jupyter-widgets/base'], function(widgets) {
             });
             this.svg_view.addEventListener('mousemove', function(e) {
                 e.preventDefault();
-                if (widget.model.get('_mousemove_blocked')) {
+                if (widget.model.get('_mousemove_blocked')
+                        == widget.last_mousemove_blocked) {
                     widget.last_move = e;
                 } else {
                     widget.send_mouse_event('mousemove', e);
