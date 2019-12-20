@@ -46,6 +46,7 @@ class DrawingWidget(widgets.DOMWidget):
         self.mousemove_callbacks = []
         self.mouseup_callbacks = []
         self.timed_callbacks = []
+        self.exception_callbacks = []
 
         self.on_msg(self._receive_msg)
 
@@ -81,6 +82,13 @@ class DrawingWidget(widgets.DOMWidget):
                 else:
                     self._call_handlers(callbacks, content.get('x'),
                                         content.get('y'), content)
+        except BaseException as e:
+            suppress = any(
+                handler(self, e)
+                for handler in self.exception_callbacks
+            )
+            if not suppress:
+                raise
         finally:
             if name == 'timed':
                 self._frame_blocked += 1
@@ -128,6 +136,18 @@ class DrawingWidget(widgets.DOMWidget):
         '''
         self._register_handler(
             self.timed_callbacks, handler, remove=remove)
+
+    def on_exception(self, handler, remove=False):
+        '''
+        Register (or unregister) a handler for exceptions in other handlers.
+
+        If any handler returns True, the exception is suppressed.
+
+        Arguments:
+            remove: If True, unregister, otherwise register.
+        '''
+        self._register_handler(
+            self.exception_callbacks, handler, remove=remove)
 
     def _register_handler(self, callback_list, handler, remove=False):
         if remove:

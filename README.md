@@ -260,3 +260,23 @@ with draw.animate_jupyter(draw_frame, delay=0.05) as anim:
 
 ![Example output image](https://raw.githubusercontent.com/cduck/drawSvg/master/examples/example6.gif)
 
+### Asynchronous Animation in Jupyter
+```python
+# Jupyter cell 1:
+widget = AsyncAnimation(fps=10)
+widget
+# [Animation is displayed here (click to pause)]
+
+# Jupyter cell 2:
+global_variable = 'a'
+@widget.set_draw_frame  # Animation above is automatically updated
+def draw_frame(secs=0):
+    # Draw something...
+    d = draw.Drawing(300, 40)
+    d.append(draw.Text(global_variable, 20, 0, 10))
+    d.append(draw.Text(str(secs), 20, 30, 10))
+    return d
+
+# Jupyter cell 3:
+global_variable = 'b'  # Animation above now displays 'b'
+```
