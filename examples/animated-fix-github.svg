@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="200" height="200" viewBox="-100.0 -100.0 200 200">
+<defs>
+<path d="M-90,0 A90,40,360,1,1,90,0 A90,40,360,1,1,-90,0 Z" id="d0" />
+</defs>
+<g>
+<circle cx="0" cy="0" r="19" fill="red">
+<animateTransform type="scale" repeatCount="indefinite" attributeName="transform" dur="6s" values="1;1;1;1;1;1;0;0;0;0;0;0" />
+</circle>
+<animateTransform type="translate" repeatCount="indefinite" attributeName="transform" dur="6s" values="0,-80;80,0;0,80;-80,0;0,-80" />
+</g>
+<g>
+<circle cx="0" cy="0" r="19.25" fill="green" transform="scale(0)">
+<animateTransform type="scale" repeatCount="indefinite" attributeName="transform" dur="6s" begin="1.5s" values="1;1;1;1;1;1;0;0;0;0;0;0" />
+</circle>
+<animateTransform type="translate" repeatCount="indefinite" attributeName="transform" dur="6s" values="0,-80;80,0;0,80;-80,0;0,-80" />
+</g>
+<g>
+<circle cx="0" cy="0" r="19.5" fill="blue" transform="scale(0)">
+<animateTransform type="scale" repeatCount="indefinite" attributeName="transform" dur="6s" begin="3s" values="1;1;1;1;1;0;0;0;0;0;0;0" />
+</circle>
+<animateTransform type="translate" repeatCount="indefinite" attributeName="transform" dur="6s" values="0,-80;80,0;0,80;-80,0;0,-80" />
+</g>
+<g>
+<circle cx="0" cy="0" r="20.1" fill="yellow" transform="scale(0)">
+<animateTransform type="scale" repeatCount="indefinite" attributeName="transform" dur="6s" begin="4.5s" values="1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;" />
+</circle>
+<animateTransform type="translate" repeatCount="indefinite" attributeName="transform" dur="6s" values="0,-80;80,0;0,80;-80,0;0,-80" />
+</g>
+<circle cx="0" cy="0" r="10">
+<animateMotion repeatCount="indefinite" dur="3s">
+<mpath xlink:href="#d0" />
+</animateMotion>
+<animateTransform type="scale" repeatCount="indefinite" attributeName="transform" dur="3s" values="1,2;2,1;1,2;2,1;1,2" />
+</circle>
+</svg>

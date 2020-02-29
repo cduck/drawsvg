@@ -1,6 +1,6 @@
 # drawSvg
 
-A Python 3 library for programmatically generating SVG images (vector drawings) and rendering them or displaying them in an iPython notebook.
+A Python 3 library for programmatically generating SVG images (vector drawings) and rendering them or displaying them in a Jupyter notebook.
 
 Most common SVG tags are supported and others can easily be added by writing a small subclass of `DrawableBasicElement` or `DrawableParentElement`.
 
@@ -72,12 +72,12 @@ d.setPixelScale(2)  # Set number of pixels per geometry unit
 d.saveSvg('example.svg')
 d.savePng('example.png')
 
-# Display in iPython notebook
+# Display in Jupyter notebook
 d.rasterize()  # Display as PNG
 d  # Display as SVG
 ```
 
-![Example output image](https://raw.githubusercontent.com/cduck/drawSvg/master/examples/example1.png)
+[![Example output image](https://raw.githubusercontent.com/cduck/drawSvg/master/examples/example1.png)](https://github.com/cduck/drawSvg/blob/master/examples/example1.svg)
 
 ### Gradients
 ```python
@@ -119,7 +119,7 @@ d.setRenderSize(w=600)
 d
 ```
 
-![Example output image](https://raw.githubusercontent.com/cduck/drawSvg/master/examples/example2.png)
+[![Example output image](https://raw.githubusercontent.com/cduck/drawSvg/master/examples/example2.png)](https://github.com/cduck/drawSvg/blob/master/examples/example2.svg)
 
 ### Duplicate geometry and clip paths
 ```python
@@ -147,7 +147,7 @@ d.setRenderSize(400)
 d.rasterize()
 ```
 
-![Example output image](https://raw.githubusercontent.com/cduck/drawSvg/master/examples/example3.png)
+[![Example output image](https://raw.githubusercontent.com/cduck/drawSvg/master/examples/example3.png)](https://github.com/cduck/drawSvg/blob/master/examples/example3.svg)
 
 ### Implementing other SVG tags
 ```python
@@ -179,7 +179,7 @@ d.setRenderSize(200)
 d
 ```
 
-![Example output image](https://raw.githubusercontent.com/cduck/drawSvg/master/examples/example4.png)
+[![Example output image](https://raw.githubusercontent.com/cduck/drawSvg/master/examples/example4.png)](https://github.com/cduck/drawSvg/blob/master/examples/example4.svg)
 
 ### Interactive Widget
 ```python
@@ -272,11 +272,55 @@ global_variable = 'a'
 @widget.set_draw_frame  # Animation above is automatically updated
 def draw_frame(secs=0):
     # Draw something...
-    d = draw.Drawing(300, 40)
+    d = draw.Drawing(100, 40)
     d.append(draw.Text(global_variable, 20, 0, 10))
-    d.append(draw.Text(str(secs), 20, 30, 10))
+    d.append(draw.Text('{:0.1f}'.format(secs), 20, 30, 10))
     return d
 
 # Jupyter cell 3:
 global_variable = 'b'  # Animation above now displays 'b'
 ```
+
+![Example output image](https://raw.githubusercontent.com/cduck/drawSvg/master/examples/example7.gif)
+
+### SVG-Native Animation
+```python
+import drawSvg as draw
+
+d = draw.Drawing(200, 200, origin='center')
+
+# Animate the position and color of circle
+c = draw.Circle(0, 0, 20, fill='red')
+# See for supported attributes:
+# https://developer.mozilla.org/en-US/docs/Web/SVG/Element/animate
+c.appendAnim(draw.Animate('cy', '6s', '-80;80;-80',
+                          repeatCount='indefinite'))
+c.appendAnim(draw.Animate('cx', '6s', '0;80;0;-80;0',
+                          repeatCount='indefinite'))
+c.appendAnim(draw.Animate('fill', '6s', 'red;green;blue;yellow',
+                          calcMode='discrete',
+                          repeatCount='indefinite'))
+d.append(c)
+
+# Animate a black circle around an ellipse
+ellipse = draw.Path()
+ellipse.M(-90, 0)
+ellipse.A(90, 40, 360, True, True, 90, 0)  # Ellipse path
+ellipse.A(90, 40, 360, True, True, -90, 0)
+ellipse.Z()
+c2 = draw.Circle(0, 0, 10)
+# See for supported attributes:
+# https://developer.mozilla.org/en-US/docs/Web/SVG/Element/animateMotion
+c2.appendAnim(draw.AnimateMotion(ellipse, '3s',
+                                 repeatCount='indefinite'))
+# See for supported attributes:
+# https://developer.mozilla.org/en-US/docs/Web/SVG/Element/animateTransform
+c2.appendAnim(draw.AnimateTransform('scale', '3s', '1,2;2,1;1,2;2,1;1,2',
+                                    repeatCount='indefinite'))
+d.append(c2)
+
+d.saveSvg('/Users/cduck/Downloads/animated.svg')  # Save to file
+d  # Display in Jupyter notebook
+```
+
+[![Example output image](https://raw.githubusercontent.com/cduck/drawSvg/master/examples/animated-fix-github.svg?sanitize=true)](https://github.com/cduck/drawSvg/blob/master/examples/animated.svg)

@@ -1,5 +1,6 @@
 
 from io import StringIO
+import base64
 
 from . import Raster
 from . import elements as elementsModule
@@ -10,7 +11,8 @@ class Drawing:
 
         Supports iPython: If a Drawing is the last line of a cell, it will be
         displayed as an SVG below. '''
-    def __init__(self, width, height, origin=(0,0), **svgArgs):
+    def __init__(self, width, height, origin=(0,0), idPrefix='d',
+                 displayInline=True, **svgArgs):
         assert float(width) == width
         assert float(height) == height
         self.width = width
@@ -28,7 +30,15 @@ class Drawing:
         self.pixelScale = 1
         self.renderWidth = None
         self.renderHeight = None
-        self.svgArgs = svgArgs
+        self.idPrefix = str(idPrefix)
+        self.displayInline = displayInline
+        self.svgArgs = {}
+        for k, v in svgArgs.items():
+            k = k.replace('__', ':')
+            k = k.replace('_', '-')
+            if k[-1] == '-':
+                k = k[:-1]
+            self.svgArgs[k] = v
     def setRenderSize(self, w=None, h=None):
         self.renderWidth = w
         self.renderHeight = h
@@ -97,9 +107,9 @@ class Drawing:
         outputFile.write('>\n<defs>\n')
         # Write definition elements
         idIndex = 0
-        def idGen(base='d'):
+        def idGen(base=''):
             nonlocal idIndex
-            idStr = base + str(idIndex)
+            idStr = self.idPrefix + base + str(idIndex)
             idIndex += 1
             return idStr
         prevSet = set((id(defn) for defn in self.otherDefs))
@@ -110,20 +120,28 @@ class Drawing:
             return dup
         for element in self.otherDefs:
             try:
-                element.writeSvgElement(outputFile)
+                element.writeSvgElement(idGen, isDuplicate, outputFile, False)
                 outputFile.write('\n')
             except AttributeError:
                 pass
         for element in self.elements:
             try:
-                element.writeSvgDefs(idGen, isDuplicate, outputFile)
+                element.writeSvgDefs(idGen, isDuplicate, outputFile, False)
             except AttributeError:
                 pass
         outputFile.write('</defs>\n')
+        # Generate ids for normal elements
+        prevDefSet = set(prevSet)
+        for element in self.elements:
+            try:
+                element.writeSvgElement(idGen, isDuplicate, outputFile, True)
+            except AttributeError:
+                pass
+        prevSet = prevDefSet
         # Write normal elements
         for element in self.elements:
             try:
-                element.writeSvgElement(outputFile)
+                element.writeSvgElement(idGen, isDuplicate, outputFile, False)
                 outputFile.write('\n')
             except AttributeError:
                 pass
@@ -142,5 +160,14 @@ class Drawing:
             return Raster.fromSvg(self.asSvg())
     def _repr_svg_(self):
         ''' Display in Jupyter notebook '''
+        if not self.displayInline:
+            return None
         return self.asSvg()
-
+    def _repr_html_(self):
+        ''' Display in Jupyter notebook '''
+        if self.displayInline:
+            return None
+        prefix = b'data:image/svg+xml;base64,'
+        data = base64.b64encode(self.asSvg().encode())
+        src = (prefix+data).decode()
+        return '<img src="{}">'.format(src)

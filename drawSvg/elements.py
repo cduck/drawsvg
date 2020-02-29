@@ -15,11 +15,9 @@ elementsModule = sys.modules[__name__]
 def writeXmlNodeArgs(args, outputFile):
     for k, v in args.items():
         if v is None: continue
-        k = k.replace('__', ':')
-        k = k.replace('_', '-')
-        if k[-1]=='-':
-            k = k[:-1]
-        if isinstance(v, defs.DrawingElement):
+        if isinstance(v, DrawingElement):
+            if v.id is None:
+                continue
             if k == 'xlink:href':
                 v = '#{}'.format(v.id)
             else:
@@ -31,17 +29,23 @@ class DrawingElement:
     ''' Base class for drawing elements
 
         Subclasses must implement writeSvgElement '''
-    def writeSvgElement(self, outputFile):
+    def writeSvgElement(self, idGen, isDuplicate, outputFile, dryRun,
+                        forceDup=False):
         raise NotImplementedError('Abstract base class')
     def getSvgDefs(self):
         return ()
-    def writeSvgDefs(self, idGen, isDuplicate, outputFile):
+    def getLinkedElems(self):
+        return ()
+    def writeSvgDefs(self, idGen, isDuplicate, outputFile, dryRun):
         for defn in self.getSvgDefs():
             if isDuplicate(defn): continue
-            defn.writeSvgDefs(idGen, isDuplicate, outputFile)
-            defn.id = idGen()
-            defn.writeSvgElement(outputFile)
-            outputFile.write('\n')
+            defn.writeSvgDefs(idGen, isDuplicate, outputFile, dryRun)
+            if defn.id is None:
+                defn.id = idGen()
+            defn.writeSvgElement(idGen, isDuplicate, outputFile, dryRun,
+                                 forceDup=True)
+            if not dryRun:
+                outputFile.write('\n')
     def __eq__(self, other):
         return self is other
 
@@ -51,37 +55,88 @@ class DrawingBasicElement(DrawingElement):
     TAG_NAME = '_'
     hasContent = False
     def __init__(self, **args):
-        self.args = args
+        self.args = {}
+        for k, v in args.items():
+            k = k.replace('__', ':')
+            k = k.replace('_', '-')
+            if k[-1] == '-':
+                k = k[:-1]
+            self.args[k] = v
+        self.children = []
+    def checkChildrenAllowed(self):
+        if not self.hasContent:
+            raise RuntimeError(
+                '{} does not support children'.format(type(self)))
     @property
     def id(self):
         return self.args.get('id', None)
     @id.setter
     def id(self, newId):
         self.args['id'] = newId
-    def writeSvgElement(self, outputFile):
+    def writeSvgElement(self, idGen, isDuplicate, outputFile, dryRun,
+                        forceDup=False):
+        if dryRun:
+            if isDuplicate(self) and self.id is None:
+                self.id = idGen()
+            for elem in self.getLinkedElems():
+                if elem.id is None:
+                    elem.id = idGen()
+            if self.hasContent:
+                self.writeContent(idGen, isDuplicate, outputFile, dryRun)
+            if self.children:
+                self.writeChildrenContent(idGen, isDuplicate, outputFile,
+                                          dryRun)
+            return
+        if isDuplicate(self) and not forceDup:
+            outputFile.write('<use xlink:href="#{}" />'.format(self.id))
+            return
         outputFile.write('<')
         outputFile.write(self.TAG_NAME)
         writeXmlNodeArgs(self.args, outputFile)
-        if not self.hasContent:
+        if not self.hasContent and not self.children:
             outputFile.write(' />')
         else:
             outputFile.write('>')
-            self.writeContent(outputFile)
+            if self.hasContent:
+                self.writeContent(idGen, isDuplicate, outputFile, dryRun)
+            if self.children:
+                self.writeChildrenContent(idGen, isDuplicate, outputFile,
+                                          dryRun)
             outputFile.write('</')
             outputFile.write(self.TAG_NAME)
             outputFile.write('>')
-    def writeContent(self, outputFile):
+    def writeContent(self, idGen, isDuplicate, outputFile, dryRun):
         ''' Override in a subclass to add data between the start and end
             tags.  This will not be called if hasContent is False. '''
         raise RuntimeError('This element has no content')
+    def writeChildrenContent(self, idGen, isDuplicate, outputFile, dryRun):
+        ''' Override in a subclass to add data between the start and end
+            tags.  This will not be called if hasContent is False. '''
+        if dryRun:
+            for child in self.children:
+                child.writeSvgElement(idGen, isDuplicate, outputFile, dryRun)
+            return
+        outputFile.write('\n')
+        for child in self.children:
+            child.writeSvgElement(idGen, isDuplicate, outputFile, dryRun)
+            outputFile.write('\n')
     def getSvgDefs(self):
         return [v for v in self.args.values()
-                if isinstance(v, defs.DrawingElement)]
+                if isinstance(v, DrawingElement)]
+    def writeSvgDefs(self, idGen, isDuplicate, outputFile, dryRun):
+        super().writeSvgDefs(idGen, isDuplicate, outputFile, dryRun)
+        for child in self.children:
+            child.writeSvgDefs(idGen, isDuplicate, outputFile, dryRun)
     def __eq__(self, other):
         if isinstance(other, type(self)):
             return (self.TAG_NAME == other.TAG_NAME and
-                    self.args == other.args)
+                    self.args == other.args and
+                    self.children == other.children)
         return False
+    def appendAnim(self, animateElement):
+        self.children.append(animateElement)
+    def extendAnim(self, animateIterable):
+        self.children.extend(animateIterable)
 
 class DrawingParentElement(DrawingBasicElement):
     ''' Base class for SVG elements that can have child nodes '''
@@ -91,9 +146,6 @@ class DrawingParentElement(DrawingBasicElement):
         self.children = list(children)
         if len(self.children) > 0:
             self.checkChildrenAllowed()
-    def checkChildrenAllowed(self):
-        if not self.hasContent:
-            raise RuntimeError('{} does not support children'.format(type(self)))
     def draw(self, obj, **kwargs):
         if not hasattr(obj, 'writeSvgElement'):
             elements = obj.toDrawables(elements=elementsModule, **kwargs)
@@ -107,20 +159,14 @@ class DrawingParentElement(DrawingBasicElement):
     def extend(self, iterable):
         self.checkChildrenAllowed()
         self.children.extend(iterable)
-    def writeContent(self, outputFile):
-        outputFile.write('\n')
-        for child in self.children:
-            child.writeSvgElement(outputFile)
-            outputFile.write('\n')
-    def writeSvgDefs(self, idGen, isDuplicate, outputFile):
-        super().writeSvgDefs(idGen, isDuplicate, outputFile)
-        for child in self.children:
-            child.writeSvgDefs(idGen, isDuplicate, outputFile)
+    def writeContent(self, idGen, isDuplicate, outputFile, dryRun):
+        pass
 
 class NoElement(DrawingElement):
     ''' A drawing element that has no effect '''
     def __init__(self): pass
-    def writeSvgElement(self, outputFile):
+    def writeSvgElement(self, idGen, isDuplicate, outputFile, dryRun,
+                        forceDup=False):
         pass
     def __eq__(self, other):
         if isinstance(other, type(self)):
@@ -145,6 +191,103 @@ class Use(DrawingBasicElement):
         if isinstance(otherElem, str) and not otherElem.startswith('#'):
             otherElem = '#' + otherElem
         super().__init__(xlink__href=otherElem, x=x, y=y, **kwargs)
+
+class Animate(DrawingBasicElement):
+    ''' Animation for a specific property of another element
+
+        This should be added as a child of the element to animate.  Otherwise
+        the other element and this element must both be added to the drawing.
+    '''
+    TAG_NAME = 'animate'
+    def __init__(self, attributeName, dur, from_or_values=None, to=None,
+                 begin=None, otherElem=None, **kwargs):
+        if to is None:
+            values = from_or_values
+            from_ = None
+        else:
+            values = None
+            from_ = from_or_values
+        if isinstance(otherElem, str) and not otherElem.startswith('#'):
+            otherElem = '#' + otherElem
+        kwargs.update(attributeName=attributeName, to=to, dur=dur, begin=begin)
+        kwargs.setdefault('values', values)
+        kwargs.setdefault('from_', from_)
+        super().__init__(xlink__href=otherElem, **kwargs)
+
+    def getSvgDefs(self):
+        return [v for k, v in self.args.items()
+                if isinstance(v, DrawingElement)
+                if k != 'xlink:href']
+
+    def getLinkedElems(self):
+        return (self.args['xlink:href'],)
+
+class _Mpath(DrawingBasicElement):
+    ''' Used by AnimateMotion '''
+    TAG_NAME = 'mpath'
+    def __init__(self, otherPath, **kwargs):
+        super().__init__(xlink__href=otherPath, **kwargs)
+
+class AnimateMotion(Animate):
+    ''' Animation for the motion another element along a path
+
+        This should be added as a child of the element to animate.  Otherwise
+        the other element and this element must both be added to the drawing.
+    '''
+    TAG_NAME = 'animateMotion'
+    def __init__(self, path, dur, from_or_values=None, to=None, begin=None,
+                 otherElem=None, **kwargs):
+        useMpath = False
+        if isinstance(path, DrawingElement):
+            useMpath = True
+            pathElem = path
+            path = None
+        kwargs.setdefault('attributeName', None)
+        super().__init__(dur=dur, from_or_values=from_or_values, to=to,
+                         begin=begin, path=path, otherElem=otherElem, **kwargs)
+        if useMpath:
+            self.children.append(_Mpath(pathElem))
+
+class AnimateTransform(Animate):
+    ''' Animation for the transform property of another element
+
+        This should be added as a child of the element to animate.  Otherwise
+        the other element and this element must both be added to the drawing.
+    '''
+    TAG_NAME = 'animateTransform'
+    def __init__(self, type, dur, from_or_values, to=None, begin=None,
+                 attributeName='transform', otherElem=None, **kwargs):
+        super().__init__(attributeName, dur=dur, from_or_values=from_or_values,
+                         to=to, begin=begin, type=type, otherElem=otherElem,
+                         **kwargs)
+
+class Set(Animate):
+    ''' Animation for a specific property of another element that sets the new
+        value without a transition.
+
+        This should be added as a child of the element to animate.  Otherwise
+        the other element and this element must both be added to the drawing.
+    '''
+    TAG_NAME = 'set'
+    def __init__(self, attributeName, dur, to=None, begin=None,
+                 otherElem=None, **kwargs):
+        super().__init__(attributeName, dur=dur, from_or_values=None,
+                         to=to, begin=begin, otherElem=otherElem, **kwargs)
+
+class Discard(Animate):
+    ''' Animation configuration specifying when it is safe to discard another
+        element.  E.g. when it will no longer be visible after an animation.
+
+        This should be added as a child of the element to animate.  Otherwise
+        the other element and this element must both be added to the drawing.
+    '''
+    TAG_NAME = 'discard'
+    def __init__(self, attributeName, begin=None, **kwargs):
+        kwargs.setdefault('attributeName', None)
+        kwargs.setdefault('to', None)
+        kwargs.setdefault('dur', None)
+        super().__init__(from_or_values=None, begin=begin, otherElem=None,
+                         **kwargs)
 
 class Image(DrawingBasicElement):
     ''' A linked or embedded raster image '''
@@ -174,10 +317,12 @@ class Image(DrawingBasicElement):
                     mimeType = self.MIME_MAP[ext]
                 else:
                     mimeType = self.MIME_DEFAULT
-                    warnings.warn('Unknown image file type "{}"'.format(ext), Warning)
+                    warnings.warn('Unknown image file type "{}"'.format(ext),
+                                  Warning)
         if mimeType is None:
             mimeType = self.MIME_DEFAULT
-            warnings.warn('Unspecified image type; assuming png'.format(ext), Warning)
+            warnings.warn('Unspecified image type; assuming png'.format(ext),
+                          Warning)
         if data is not None:
             embed = True
         if embed and data is None:
@@ -213,7 +358,9 @@ class Text(DrawingBasicElement):
                 pass
         super().__init__(x=x, y=-y, font_size=fontSize, **kwargs)
         self.escapedText = xml.escape(text)
-    def writeContent(self, outputFile):
+    def writeContent(self, idGen, isDuplicate, outputFile, dryRun):
+        if dryRun:
+            return
         outputFile.write(self.escapedText)
 
 class Rectangle(DrawingBasicElement):
@@ -317,10 +464,13 @@ class Path(DrawingBasicElement):
     def T(self, ex, ey): self.append('T', ex, -ey)
     def t(self, ex, ey): self.append('t', ex, -ey)
     def A(self, rx, ry, rot, largeArc, sweep, ex, ey):
-        self.append('A', rx, ry, rot, int(bool(largeArc)), int(bool(sweep)), ex, -ey)
+        self.append('A', rx, ry, rot, int(bool(largeArc)), int(bool(sweep)), ex,
+                    -ey)
     def a(self, rx, ry, rot, largeArc, sweep, ex, ey):
-        self.append('a', rx, ry, rot, int(bool(largeArc)), int(bool(sweep)), ex, -ey)
-    def arc(self, cx, cy, r, startDeg, endDeg, cw=False, includeM=True, includeL=False):
+        self.append('a', rx, ry, rot, int(bool(largeArc)), int(bool(sweep)), ex,
+                    -ey)
+    def arc(self, cx, cy, r, startDeg, endDeg, cw=False, includeM=True,
+            includeL=False):
         ''' Uses A() to draw a circular arc '''
         largeArc = (endDeg - startDeg) % 360 > 180
         startRad, endRad = startDeg*math.pi/180, endDeg*math.pi/180
