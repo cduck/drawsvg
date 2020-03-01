@@ -181,6 +181,48 @@ d
 
 [![Example output image](https://raw.githubusercontent.com/cduck/drawSvg/master/examples/example4.png)](https://github.com/cduck/drawSvg/blob/master/examples/example4.svg)
 
+### Animation with the SVG Animate Tag
+```python
+import drawSvg as draw
+
+d = draw.Drawing(200, 200, origin='center')
+
+# Animate the position and color of circle
+c = draw.Circle(0, 0, 20, fill='red')
+# See for supported attributes:
+# https://developer.mozilla.org/en-US/docs/Web/SVG/Element/animate
+c.appendAnim(draw.Animate('cy', '6s', '-80;80;-80',
+                          repeatCount='indefinite'))
+c.appendAnim(draw.Animate('cx', '6s', '0;80;0;-80;0',
+                          repeatCount='indefinite'))
+c.appendAnim(draw.Animate('fill', '6s', 'red;green;blue;yellow',
+                          calcMode='discrete',
+                          repeatCount='indefinite'))
+d.append(c)
+
+# Animate a black circle around an ellipse
+ellipse = draw.Path()
+ellipse.M(-90, 0)
+ellipse.A(90, 40, 360, True, True, 90, 0)  # Ellipse path
+ellipse.A(90, 40, 360, True, True, -90, 0)
+ellipse.Z()
+c2 = draw.Circle(0, 0, 10)
+# See for supported attributes:
+# https://developer.mozilla.org/en-US/docs/Web/SVG/Element/animateMotion
+c2.appendAnim(draw.AnimateMotion(ellipse, '3s',
+                                 repeatCount='indefinite'))
+# See for supported attributes:
+# https://developer.mozilla.org/en-US/docs/Web/SVG/Element/animateTransform
+c2.appendAnim(draw.AnimateTransform('scale', '3s', '1,2;2,1;1,2;2,1;1,2',
+                                    repeatCount='indefinite'))
+d.append(c2)
+
+d.saveSvg('animated.svg')  # Save to file
+d  # Display in Jupyter notebook
+```
+
+[![Example output image](https://raw.githubusercontent.com/cduck/drawSvg/master/examples/animated-fix-github.svg?sanitize=true)](https://github.com/cduck/drawSvg/blob/master/examples/animated.svg)
+
 ### Interactive Widget
 ```python
 import drawSvg as draw
@@ -230,7 +272,7 @@ widget
 
 ![Example output image](https://raw.githubusercontent.com/cduck/drawSvg/master/examples/example5.gif)
 
-### Animation
+### Animation with Python
 ```python
 import drawSvg as draw
 
@@ -282,45 +324,3 @@ global_variable = 'b'  # Animation above now displays 'b'
 ```
 
 ![Example output image](https://raw.githubusercontent.com/cduck/drawSvg/master/examples/example7.gif)
-
-### SVG-Native Animation
-```python
-import drawSvg as draw
-
-d = draw.Drawing(200, 200, origin='center')
-
-# Animate the position and color of circle
-c = draw.Circle(0, 0, 20, fill='red')
-# See for supported attributes:
-# https://developer.mozilla.org/en-US/docs/Web/SVG/Element/animate
-c.appendAnim(draw.Animate('cy', '6s', '-80;80;-80',
-                          repeatCount='indefinite'))
-c.appendAnim(draw.Animate('cx', '6s', '0;80;0;-80;0',
-                          repeatCount='indefinite'))
-c.appendAnim(draw.Animate('fill', '6s', 'red;green;blue;yellow',
-                          calcMode='discrete',
-                          repeatCount='indefinite'))
-d.append(c)
-
-# Animate a black circle around an ellipse
-ellipse = draw.Path()
-ellipse.M(-90, 0)
-ellipse.A(90, 40, 360, True, True, 90, 0)  # Ellipse path
-ellipse.A(90, 40, 360, True, True, -90, 0)
-ellipse.Z()
-c2 = draw.Circle(0, 0, 10)
-# See for supported attributes:
-# https://developer.mozilla.org/en-US/docs/Web/SVG/Element/animateMotion
-c2.appendAnim(draw.AnimateMotion(ellipse, '3s',
-                                 repeatCount='indefinite'))
-# See for supported attributes:
-# https://developer.mozilla.org/en-US/docs/Web/SVG/Element/animateTransform
-c2.appendAnim(draw.AnimateTransform('scale', '3s', '1,2;2,1;1,2;2,1;1,2',
-                                    repeatCount='indefinite'))
-d.append(c2)
-
-d.saveSvg('/Users/cduck/Downloads/animated.svg')  # Save to file
-d  # Display in Jupyter notebook
-```
-
-[![Example output image](https://raw.githubusercontent.com/cduck/drawSvg/master/examples/animated-fix-github.svg?sanitize=true)](https://github.com/cduck/drawSvg/blob/master/examples/animated.svg)
