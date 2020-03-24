@@ -370,7 +370,11 @@ class Rectangle(DrawingBasicElement):
         SVG node e.g. fill="red", stroke="#ff4477", stroke_width=2. '''
     TAG_NAME = 'rect'
     def __init__(self, x, y, width, height, **kwargs):
-        super().__init__(x=x, y=-y-height, width=width, height=height,
+        try:
+            y = -y-height
+        except TypeError:
+            pass
+        super().__init__(x=x, y=y, width=width, height=height,
             **kwargs)
 
 class Circle(DrawingBasicElement):
@@ -380,7 +384,11 @@ class Circle(DrawingBasicElement):
         SVG node e.g. fill="red", stroke="#ff4477", stroke_width=2. '''
     TAG_NAME = 'circle'
     def __init__(self, cx, cy, r, **kwargs):
-        super().__init__(cx=cx, cy=-cy, r=r, **kwargs)
+        try:
+            cy = -cy
+        except TypeError:
+            pass
+        super().__init__(cx=cx, cy=cy, r=r, **kwargs)
 
 class Ellipse(DrawingBasicElement):
     ''' An ellipse
@@ -389,7 +397,11 @@ class Ellipse(DrawingBasicElement):
         SVG node e.g. fill="red", stroke="#ff4477", stroke_width=2. '''
     TAG_NAME = 'ellipse'
     def __init__(self, cx, cy, rx, ry, **kwargs):
-        super().__init__(cx=cx, cy=-cy, rx=rx, ry=ry, **kwargs)
+        try:
+            cy = -cy
+        except TypeError:
+            pass
+        super().__init__(cx=cx, cy=cy, rx=rx, ry=ry, **kwargs)
 
 class ArcLine(Circle):
     ''' An arc
