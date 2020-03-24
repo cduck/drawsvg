@@ -1,4 +1,5 @@
 
+import base64
 import io
 import warnings
 from .missing import MissingModule
@@ -53,4 +54,15 @@ class Raster:
                 return self.pngFile.read()
             except io.UnsupportedOperation:
                 pass
-
+    def asDataUri(self):
+        if self.pngData:
+            data = self.pngData
+        else:
+            try:
+                with open(self.pngFile, 'rb') as f:
+                    data = f.read()
+            except TypeError:
+                self.pngFile.seek(0)
+                data = self.pngFile.read()
+        b64 = base64.b64encode(data)
+        return 'data:image/png;base64,' + b64.decode(encoding='ascii')

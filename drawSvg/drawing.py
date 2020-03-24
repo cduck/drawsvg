@@ -1,9 +1,15 @@
 
 from io import StringIO
 import base64
+import urllib.parse
+import re
 
 from . import Raster
 from . import elements as elementsModule
+
+
+STRIP_CHARS = ('\x00\x01\x02\x03\x04\x05\x06\x07\x08\x0b\x0c\x0e\x0f\x10\x11'
+               '\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f')
 
 
 class Drawing:
@@ -171,3 +177,30 @@ class Drawing:
         data = base64.b64encode(self.asSvg().encode())
         src = (prefix+data).decode()
         return '<img src="{}">'.format(src)
+    def asDataUri(self, strip_chars=STRIP_CHARS):
+        ''' Returns a data URI with base64 encoding. '''
+        data = self.asSvg()
+        search = re.compile('|'.join(strip_chars))
+        data_safe = search.sub(lambda m: '', data)
+        b64 = base64.b64encode(data_safe.encode())
+        return 'data:image/svg+xml;base64,' + b64.decode(encoding='ascii')
+    def asUtf8DataUri(self, unsafe_chars='"', strip_chars=STRIP_CHARS):
+        ''' Returns a data URI without base64 encoding.
+
+            The characters '#&%' are always escaped.  '#' and '&' break parsing
+            of the data URI.  If '%' is not escaped, plain text like '%50' will
+            be incorrectly decoded to 'P'.  The characters in `strip_chars`
+            cause the SVG not to render even if they are escaped. '''
+        data = self.asSvg()
+        unsafe_chars = (unsafe_chars or '') + '#&%'
+        replacements = {
+            char: urllib.parse.quote(char, safe='')
+            for char in unsafe_chars
+        }
+        replacements.update({
+            char: ''
+            for char in strip_chars
+        })
+        search = re.compile('|'.join(map(re.escape, replacements.keys())))
+        data_safe = search.sub(lambda m: replacements[m.group(0)], data)
+        return 'data:image/svg+xml;utf8,' + data_safe
