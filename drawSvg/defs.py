@@ -74,3 +74,23 @@ class FilterItem(DrawingDefSub):
     def __init__(self, tag_name, **args):
         super().__init__(**args)
         self.TAG_NAME = tag_name
+
+class Marker(DrawingDef):
+    ''' A small drawing that can be placed at the ends of (or along) a path.
+
+        This can be used for arrow heads or points on a graph for example.
+
+        By default, units are multiples of stroke width.'''
+    TAG_NAME = 'marker'
+    def __init__(self, minx, miny, maxx, maxy, scale=1, orient='auto',
+                 **kwargs):
+        width = maxx - minx
+        height = maxy - miny
+        kwargs = {
+            'markerWidth': width if scale == 1 else float(width) * scale,
+            'markerHeight': height if scale == 1 else float(height) * scale,
+            'viewBox': '{} {} {} {}'.format(minx, -maxy, width, height),
+            'orient': orient,
+            **kwargs,
+        }
+        super().__init__(**kwargs)
