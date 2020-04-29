@@ -180,6 +180,19 @@ class Group(DrawingParentElement):
         inherited by its children. '''
     TAG_NAME = 'g'
 
+class Raw(Group):
+    ''' Any any SVG code to insert into the output. '''
+    def __init__(self, content, defs=(), **kwargs):
+        super().__init__(**kwargs)
+        self.content = content
+        self.defs = defs
+    def writeContent(self, idGen, isDuplicate, outputFile, dryRun):
+        if dryRun:
+            return
+        outputFile.write(self.content)
+    def getSvgDefs(self):
+        return self.defs
+
 class Use(DrawingBasicElement):
     ''' A copy of another element
 
