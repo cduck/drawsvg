@@ -324,7 +324,8 @@ class Image(DrawingBasicElement):
             embed is True, the image file is embedded in a data URI. '''
         if path is None and data is None:
             raise ValueError('Either path or data arguments must be given')
-        if mimeType is None and path is not None:
+        if embed:
+            if mimeType is None and path is not None:
                 ext = os.path.splitext(path)[1].lower()
                 if ext in self.MIME_MAP:
                     mimeType = self.MIME_MAP[ext]
@@ -332,10 +333,10 @@ class Image(DrawingBasicElement):
                     mimeType = self.MIME_DEFAULT
                     warnings.warn('Unknown image file type "{}"'.format(ext),
                                   Warning)
-        if mimeType is None:
-            mimeType = self.MIME_DEFAULT
-            warnings.warn('Unspecified image type; assuming png'.format(ext),
-                          Warning)
+            if mimeType is None:
+                mimeType = self.MIME_DEFAULT
+                warnings.warn('Unspecified image type; assuming png'.format(ext),
+                              Warning)
         if data is not None:
             embed = True
         if embed and data is None:
