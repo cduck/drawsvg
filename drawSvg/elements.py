@@ -350,20 +350,32 @@ class Image(DrawingBasicElement):
         super().__init__(x=x, y=-y-height, width=width, height=height,
                          xlink__href=uri, **kwargs)
 
-class Text(DrawingBasicElement):
+class Text(DrawingParentElement):
     ''' Text
 
         Additional keyword arguments are output as additional arguments to the
         SVG node e.g. fill="red", font_size=20, text_anchor="middle". '''
     TAG_NAME = 'text'
     hasContent = True
-    def __init__(self, text, fontSize, x, y, center=False, **kwargs):
+    def __init__(self, text, fontSize, x, y, center=False, lineHeight=1,
+                 **kwargs):
+        singleLine = isinstance(text, str)
+        if not singleLine:
+            text = tuple(text)
+            numLines = len(text)
+        centerOffset = 0
+        emOffset = 0
         if center:
             if 'text_anchor' not in kwargs:
                 kwargs['text_anchor'] = 'middle'
+            if singleLine:
+                centerOffset = fontSize*0.5*center
+            else:
+                emOffset = 0.4 - lineHeight * (numLines - 1) / 2
+        if centerOffset:
             try:
                 fontSize = float(fontSize)
-                translate = 'translate(0,{})'.format(fontSize*0.5*center)
+                translate = 'translate(0,{})'.format(centerOffset)
                 if 'transform' in kwargs:
                     kwargs['transform'] = translate + ' ' + kwargs['transform']
                 else:
@@ -371,6 +383,36 @@ class Text(DrawingBasicElement):
             except TypeError:
                 pass
         super().__init__(x=x, y=-y, font_size=fontSize, **kwargs)
+        if singleLine:
+            self.escapedText = xml.escape(text)
+        else:
+            self.escapedText = ''
+            # Text is an iterable
+            for i, line in enumerate(text):
+                dy = '{}em'.format(emOffset if i == 0 else lineHeight)
+                self.appendLine(line, x=x, dy=dy)
+    def writeContent(self, idGen, isDuplicate, outputFile, dryRun):
+        if dryRun:
+            return
+        outputFile.write(self.escapedText)
+    def writeChildrenContent(self, idGen, isDuplicate, outputFile, dryRun):
+        ''' Override in a subclass to add data between the start and end
+            tags.  This will not be called if hasContent is False. '''
+        if dryRun:
+            for child in self.children:
+                child.writeSvgElement(idGen, isDuplicate, outputFile, dryRun)
+            return
+        for child in self.children:
+            child.writeSvgElement(idGen, isDuplicate, outputFile, dryRun)
+    def appendLine(self, line, **kwargs):
+        self.append(TSpan(line, **kwargs))
+
+class TSpan(DrawingBasicElement):
+    ''' A line of text within the Text element. '''
+    TAG_NAME = 'tspan'
+    hasContent = True
+    def __init__(self, text, **kwargs):
+        super().__init__(**kwargs)
         self.escapedText = xml.escape(text)
     def writeContent(self, idGen, isDuplicate, outputFile, dryRun):
         if dryRun:
