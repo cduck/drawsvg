@@ -63,6 +63,13 @@ class ClipPath(DrawingDef):
         Has regular drawing elements as children. '''
     TAG_NAME = 'clipPath'
 
+class Mask(DrawingDef):
+    ''' A drawing where the gray value and transparency are used to control the
+        transparency of another shape.
+
+        Has regular drawing elements as children. '''
+    TAG_NAME = 'mask'
+
 class Filter(DrawingDef):
     ''' A filter to apply to geometry
 
