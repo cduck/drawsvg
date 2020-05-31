@@ -3,6 +3,7 @@ from io import StringIO
 import base64
 import urllib.parse
 import re
+from collections import defaultdict
 
 from . import Raster
 from . import elements as elementsModule
@@ -32,6 +33,7 @@ class Drawing:
         self.viewBox = (self.viewBox[0], -self.viewBox[1]-self.viewBox[3],
                         self.viewBox[2], self.viewBox[3])
         self.elements = []
+        self.orderedElements = defaultdict(list)
         self.otherDefs = []
         self.pixelScale = 1
         self.renderWidth = None
@@ -67,7 +69,7 @@ class Drawing:
             return self.renderWidth, self.height * s
         else:
             return self.renderWidth, self.renderHeight
-    def draw(self, obj, **kwargs):
+    def draw(self, obj, *, z=None, **kwargs):
         if obj is None:
             return
         if not hasattr(obj, 'writeSvgElement'):
@@ -75,11 +77,17 @@ class Drawing:
         else:
             assert len(kwargs) == 0
             elements = (obj,)
-        self.extend(elements)
-    def append(self, element):
-        self.elements.append(element)
-    def extend(self, iterable):
-        self.elements.extend(iterable)
+        self.extend(elements, z=z)
+    def append(self, element, *, z=None):
+        if z is not None:
+            self.orderedElements[z].append(element)
+        else:
+            self.elements.append(element)
+    def extend(self, iterable, *, z=None):
+        if z is not None:
+            self.orderedElements[z].extend(iterable)
+        else:
+            self.elements.extend(iterable)
     def insert(self, i, element):
         self.elements.insert(i, element)
     def remove(self, element):
@@ -101,6 +109,12 @@ class Drawing:
         self.otherDefs.extend(elements)
     def appendDef(self, element):
         self.otherDefs.append(element)
+    def allElements(self):
+        ''' Returns self.elements and self.orderedElements as a single list. '''
+        output = list(self.elements)
+        for z in sorted(self.orderedElements):
+            output.extend(self.orderedElements[z])
+        return output
     def asSvg(self, outputFile=None):
         returnString = outputFile is None
         if returnString:
@@ -131,7 +145,8 @@ class Drawing:
                 outputFile.write('\n')
             except AttributeError:
                 pass
-        for element in self.elements:
+        allElements = self.allElements()
+        for element in allElements:
             try:
                 element.writeSvgDefs(idGen, isDuplicate, outputFile, False)
             except AttributeError:
@@ -139,14 +154,14 @@ class Drawing:
         outputFile.write('</defs>\n')
         # Generate ids for normal elements
         prevDefSet = set(prevSet)
-        for element in self.elements:
+        for element in allElements:
             try:
                 element.writeSvgElement(idGen, isDuplicate, outputFile, True)
             except AttributeError:
                 pass
         prevSet = prevDefSet
         # Write normal elements
-        for element in self.elements:
+        for element in allElements:
             try:
                 element.writeSvgElement(idGen, isDuplicate, outputFile, False)
                 outputFile.write('\n')
