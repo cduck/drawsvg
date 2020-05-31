@@ -312,6 +312,7 @@ class Image(DrawingBasicElement):
         '.jpeg':'image/jpeg',
         '.jpg': 'image/jpeg',
         '.png': 'image/png',
+        '.svg': 'image/svg+xml',
         '.tif': 'image/tiff',
         '.tiff':'image/tiff',
         '.pdf': 'application/pdf',
@@ -335,8 +336,7 @@ class Image(DrawingBasicElement):
                                   Warning)
             if mimeType is None:
                 mimeType = self.MIME_DEFAULT
-                warnings.warn('Unspecified image type; assuming png'.format(ext),
-                              Warning)
+                warnings.warn('Unspecified image type; assuming png', Warning)
         if data is not None:
             embed = True
         if embed and data is None:

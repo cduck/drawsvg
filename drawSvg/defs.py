@@ -71,6 +71,7 @@ class Filter(DrawingDef):
 
 class FilterItem(DrawingDefSub):
     ''' A child of Filter with any tag name'''
+    hasContent = False
     def __init__(self, tag_name, **args):
         super().__init__(**args)
         self.TAG_NAME = tag_name

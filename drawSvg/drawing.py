@@ -45,6 +45,7 @@ class Drawing:
             if k[-1] == '-':
                 k = k[:-1]
             self.svgArgs[k] = v
+        self.idIndex = 0
     def setRenderSize(self, w=None, h=None):
         self.renderWidth = w
         self.renderHeight = h
@@ -67,6 +68,8 @@ class Drawing:
         else:
             return self.renderWidth, self.renderHeight
     def draw(self, obj, **kwargs):
+        if obj is None:
+            return
         if not hasattr(obj, 'writeSvgElement'):
             elements = obj.toDrawables(elements=elementsModule, **kwargs)
         else:
@@ -112,11 +115,9 @@ class Drawing:
         elementsModule.writeXmlNodeArgs(self.svgArgs, outputFile)
         outputFile.write('>\n<defs>\n')
         # Write definition elements
-        idIndex = 0
         def idGen(base=''):
-            nonlocal idIndex
-            idStr = self.idPrefix + base + str(idIndex)
-            idIndex += 1
+            idStr = self.idPrefix + base + str(self.idIndex)
+            self.idIndex += 1
             return idStr
         prevSet = set((id(defn) for defn in self.otherDefs))
         def isDuplicate(obj):
