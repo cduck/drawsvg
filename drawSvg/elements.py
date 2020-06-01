@@ -379,31 +379,45 @@ class Text(DrawingParentElement):
         SVG node e.g. fill="red", font_size=20, text_anchor="middle". '''
     TAG_NAME = 'text'
     hasContent = True
-    def __init__(self, text, fontSize, x, y, center=False, lineHeight=1,
-                 **kwargs):
+    def __init__(self, text, fontSize, x, y, center=False, valign=None,
+                 lineHeight=1, **kwargs):
         singleLine = isinstance(text, str)
+        if '\n' in text:
+            text = text.splitlines()
+            singleLine = False
         if not singleLine:
             text = tuple(text)
             numLines = len(text)
+        else:
+            numLines = 1
         centerOffset = 0
         emOffset = 0
         if center:
             if 'text_anchor' not in kwargs:
                 kwargs['text_anchor'] = 'middle'
-            if singleLine:
-                centerOffset = fontSize*0.5*center
-            else:
-                emOffset = 0.4 - lineHeight * (numLines - 1) / 2
+            if valign is None:
+                if singleLine:
+                    # Backwards compatible centering
+                    centerOffset = fontSize*0.5*center
+                else:
+                    emOffset = 0.4 - lineHeight * (numLines - 1) / 2
+        if valign == 'middle':
+            emOffset = 0.4 - lineHeight * (numLines - 1) / 2
+        elif valign == 'top':
+            emOffset = 1
+        elif valign == 'bottom':
+            emOffset = -lineHeight * (numLines - 1)
         if centerOffset:
             try:
                 fontSize = float(fontSize)
-                translate = 'translate(0,{})'.format(centerOffset)
-                if 'transform' in kwargs:
-                    kwargs['transform'] = translate + ' ' + kwargs['transform']
-                else:
-                    kwargs['transform'] = translate
             except TypeError:
                 pass
+            else:
+                translate = 'translate(0,{})'.format(centerOffset)
+                if 'transform' in kwargs:
+                    kwargs['transform'] += ' ' + translate
+                else:
+                    kwargs['transform'] = translate
         super().__init__(x=x, y=-y, font_size=fontSize, **kwargs)
         if singleLine:
             self.escapedText = xml.escape(text)
