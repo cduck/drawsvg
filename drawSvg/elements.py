@@ -5,6 +5,7 @@ import os.path
 import base64
 import warnings
 import xml.sax.saxutils as xml
+from collections import defaultdict
 
 from . import defs
 
@@ -63,10 +64,17 @@ class DrawingBasicElement(DrawingElement):
                 k = k[:-1]
             self.args[k] = v
         self.children = []
+        self.orderedChildren = defaultdict(list)
     def checkChildrenAllowed(self):
         if not self.hasContent:
             raise RuntimeError(
                 '{} does not support children'.format(type(self)))
+    def allChildren(self):
+        ''' Returns self.children and self.orderedChildren as a single list. '''
+        output = list(self.children)
+        for z in sorted(self.orderedChildren):
+            output.extend(self.orderedChildren[z])
+        return output
     @property
     def id(self):
         return self.args.get('id', None)
@@ -75,6 +83,7 @@ class DrawingBasicElement(DrawingElement):
         self.args['id'] = newId
     def writeSvgElement(self, idGen, isDuplicate, outputFile, dryRun,
                         forceDup=False):
+        children = self.allChildren()
         if dryRun:
             if isDuplicate(self) and self.id is None:
                 self.id = idGen()
@@ -83,7 +92,7 @@ class DrawingBasicElement(DrawingElement):
                     elem.id = idGen()
             if self.hasContent:
                 self.writeContent(idGen, isDuplicate, outputFile, dryRun)
-            if self.children:
+            if children:
                 self.writeChildrenContent(idGen, isDuplicate, outputFile,
                                           dryRun)
             return
@@ -93,13 +102,13 @@ class DrawingBasicElement(DrawingElement):
         outputFile.write('<')
         outputFile.write(self.TAG_NAME)
         writeXmlNodeArgs(self.args, outputFile)
-        if not self.hasContent and not self.children:
+        if not self.hasContent and not children:
             outputFile.write(' />')
         else:
             outputFile.write('>')
             if self.hasContent:
                 self.writeContent(idGen, isDuplicate, outputFile, dryRun)
-            if self.children:
+            if children:
                 self.writeChildrenContent(idGen, isDuplicate, outputFile,
                                           dryRun)
             outputFile.write('</')
@@ -112,12 +121,13 @@ class DrawingBasicElement(DrawingElement):
     def writeChildrenContent(self, idGen, isDuplicate, outputFile, dryRun):
         ''' Override in a subclass to add data between the start and end
             tags.  This will not be called if hasContent is False. '''
+        children = self.allChildren()
         if dryRun:
-            for child in self.children:
+            for child in children:
                 child.writeSvgElement(idGen, isDuplicate, outputFile, dryRun)
             return
         outputFile.write('\n')
-        for child in self.children:
+        for child in children:
             child.writeSvgElement(idGen, isDuplicate, outputFile, dryRun)
             outputFile.write('\n')
     def getSvgDefs(self):
@@ -125,13 +135,14 @@ class DrawingBasicElement(DrawingElement):
                 if isinstance(v, DrawingElement)]
     def writeSvgDefs(self, idGen, isDuplicate, outputFile, dryRun):
         super().writeSvgDefs(idGen, isDuplicate, outputFile, dryRun)
-        for child in self.children:
+        for child in self.allChildren():
             child.writeSvgDefs(idGen, isDuplicate, outputFile, dryRun)
     def __eq__(self, other):
         if isinstance(other, type(self)):
             return (self.TAG_NAME == other.TAG_NAME and
                     self.args == other.args and
-                    self.children == other.children)
+                    self.children == other.children and
+                    self.orderedChildren == other.orderedChildren)
         return False
     def appendAnim(self, animateElement):
         self.children.append(animateElement)
@@ -141,24 +152,35 @@ class DrawingBasicElement(DrawingElement):
 class DrawingParentElement(DrawingBasicElement):
     ''' Base class for SVG elements that can have child nodes '''
     hasContent = True
-    def __init__(self, children=(), **args):
+    def __init__(self, children=(), orderedChildren=None, **args):
         super().__init__(**args)
         self.children = list(children)
-        if len(self.children) > 0:
+        if orderedChildren:
+            self.orderedChildren.update(
+                (z, list(v)) for z, v in orderedChildren.items())
+        if self.children or self.orderedChildren:
             self.checkChildrenAllowed()
-    def draw(self, obj, **kwargs):
+    def draw(self, obj, *, z=None, **kwargs):
+        if obj is None:
+            return
         if not hasattr(obj, 'writeSvgElement'):
             elements = obj.toDrawables(elements=elementsModule, **kwargs)
-            self.extend(elements)
         else:
             assert len(kwargs) == 0
-            self.append(obj)
-    def append(self, element):
+            elements = (obj,)
+        self.extend(elements, z=z)
+    def append(self, element, *, z=None):
         self.checkChildrenAllowed()
-        self.children.append(element)
-    def extend(self, iterable):
+        if z is not None:
+            self.orderedChildren[z].append(element)
+        else:
+            self.children.append(element)
+    def extend(self, iterable, *, z=None):
         self.checkChildrenAllowed()
-        self.children.extend(iterable)
+        if z is not None:
+            self.orderedChildren[z].extend(iterable)
+        else:
+            self.children.extend(iterable)
     def writeContent(self, idGen, isDuplicate, outputFile, dryRun):
         pass
 
@@ -398,11 +420,12 @@ class Text(DrawingParentElement):
     def writeChildrenContent(self, idGen, isDuplicate, outputFile, dryRun):
         ''' Override in a subclass to add data between the start and end
             tags.  This will not be called if hasContent is False. '''
+        children = self.allChildren()
         if dryRun:
-            for child in self.children:
+            for child in children:
                 child.writeSvgElement(idGen, isDuplicate, outputFile, dryRun)
             return
-        for child in self.children:
+        for child in children:
             child.writeSvgElement(idGen, isDuplicate, outputFile, dryRun)
     def appendLine(self, line, **kwargs):
         self.append(TSpan(line, **kwargs))
