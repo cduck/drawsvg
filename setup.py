@@ -15,7 +15,7 @@ setup(
     name = 'drawSvg',
     packages = find_packages(),
     version = version,
-    description = 'A Python 3 library for programmatically generating SVG images (vector drawings) and rendering them or displaying them in a Jupyter notebook.',
+    description = 'A Python 3 library for programmatically generating SVG images (vector drawings) and rendering them or displaying them in a Jupyter notebook',
     long_description = long_desc,
     long_description_content_type = 'text/markdown',
     author = 'Casey Duckering',
