@@ -78,9 +78,7 @@ arrow = draw.Marker(-0.1, -0.5, 0.9, 0.5, scale=4, orient='auto')
 arrow.append(draw.Lines(-0.1, -0.5, -0.1, 0.5, 0.9, 0, fill='red', close=True))
 p = draw.Path(stroke='red', stroke_width=2, fill='none',
               marker_end=arrow)  # Add an arrow to the end of a path
-p.M(20, -40)
-p.L(20, -27)
-p.L(0, -20)
+p.M(20, -40).L(20, -27).L(0, -20) # Chain multiple path operations
 d.append(p)
 d.append(draw.Line(30, -20, 0, -10,
             stroke='red', stroke_width=2, fill='none',

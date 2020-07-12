@@ -549,31 +549,32 @@ class Path(DrawingBasicElement):
         if len(args) > 0:
             commandStr = commandStr + ','.join(map(str, args))
         self.args['d'] += commandStr
-    def M(self, x, y): self.append('M', x, -y)
-    def m(self, dx, dy): self.append('m', dx, -dy)
-    def L(self, x, y): self.append('L', x, -y)
-    def l(self, dx, dy): self.append('l', dx, -dy)
-    def H(self, x): self.append('H', x)
-    def h(self, dx): self.append('h', dx)
-    def V(self, y): self.append('V', -y)
-    def v(self, dy): self.append('v', -dy)
-    def Z(self): self.append('Z')
+        return self
+    def M(self, x, y): return self.append('M', x, -y)
+    def m(self, dx, dy): return self.append('m', dx, -dy)
+    def L(self, x, y): return self.append('L', x, -y)
+    def l(self, dx, dy): return self.append('l', dx, -dy)
+    def H(self, x): return self.append('H', x)
+    def h(self, dx): return self.append('h', dx)
+    def V(self, y): return self.append('V', -y)
+    def v(self, dy): return self.append('v', -dy)
+    def Z(self): return self.append('Z')
     def C(self, cx1, cy1, cx2, cy2, ex, ey):
-        self.append('C', cx1, -cy1, cx2, -cy2, ex, -ey)
+        return self.append('C', cx1, -cy1, cx2, -cy2, ex, -ey)
     def c(self, cx1, cy1, cx2, cy2, ex, ey):
-        self.append('c', cx1, -cy1, cx2, -cy2, ex, -ey)
-    def S(self, cx2, cy2, ex, ey): self.append('S', cx2, -cy2, ex, -ey)
-    def s(self, cx2, cy2, ex, ey): self.append('s', cx2, -cy2, ex, -ey)
-    def Q(self, cx, cy, ex, ey): self.append('Q', cx, -cy, ex, -ey)
-    def q(self, cx, cy, ex, ey): self.append('q', cx, -cy, ex, -ey)
-    def T(self, ex, ey): self.append('T', ex, -ey)
-    def t(self, ex, ey): self.append('t', ex, -ey)
+        return self.append('c', cx1, -cy1, cx2, -cy2, ex, -ey)
+    def S(self, cx2, cy2, ex, ey): return self.append('S', cx2, -cy2, ex, -ey)
+    def s(self, cx2, cy2, ex, ey): return self.append('s', cx2, -cy2, ex, -ey)
+    def Q(self, cx, cy, ex, ey): return self.append('Q', cx, -cy, ex, -ey)
+    def q(self, cx, cy, ex, ey): return self.append('q', cx, -cy, ex, -ey)
+    def T(self, ex, ey): return self.append('T', ex, -ey)
+    def t(self, ex, ey): return self.append('t', ex, -ey)
     def A(self, rx, ry, rot, largeArc, sweep, ex, ey):
-        self.append('A', rx, ry, rot, int(bool(largeArc)), int(bool(sweep)), ex,
-                    -ey)
+        return self.append('A', rx, ry, rot, int(bool(largeArc)),
+                    int(bool(sweep)), ex, -ey)
     def a(self, rx, ry, rot, largeArc, sweep, ex, ey):
-        self.append('a', rx, ry, rot, int(bool(largeArc)), int(bool(sweep)), ex,
-                    -ey)
+        return self.append('a', rx, ry, rot, int(bool(largeArc)),
+                    int(bool(sweep)), ex, -ey)
     def arc(self, cx, cy, r, startDeg, endDeg, cw=False, includeM=True,
             includeL=False):
         ''' Uses A() to draw a circular arc '''
@@ -585,7 +586,7 @@ class Path(DrawingBasicElement):
             self.L(cx+sx, cy+sy)
         elif includeM:
             self.M(cx+sx, cy+sy)
-        self.A(r, r, 0, largeArc ^ cw, cw, cx+ex, cy+ey)
+        return self.A(r, r, 0, largeArc ^ cw, cw, cx+ex, cy+ey)
 
 class Lines(Path):
     ''' A sequence of connected lines (or a polygon)
