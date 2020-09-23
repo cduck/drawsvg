@@ -444,6 +444,20 @@ class Text(DrawingParentElement):
     def appendLine(self, line, **kwargs):
         self.append(TSpan(line, **kwargs))
 
+class TextOnPath(DrawingParentElement):
+    ''' TextPath
+
+        Additional keyword arguments are output as additional arguments to the
+        SVG node e.g. fill="red", font_size=20, text_anchor="middle". '''
+    TAG_NAME = 'textPath'
+    hasContent = True
+    def __init__(self, text, fontSize, path, **kwargs):
+        super().__init__(xlink__href=path, **kwargs)
+        self.escapedText = xml.escape(text)
+    def writeContent(self, idGen, isDuplicate, outputFile, dryRun):
+        if dryRun: return
+        outputFile.write(self.escapedText)
+
 class TSpan(DrawingBasicElement):
     ''' A line of text within the Text element. '''
     TAG_NAME = 'tspan'
@@ -618,4 +632,3 @@ class Arc(Path):
     def __init__(self, cx, cy, r, startDeg, endDeg, cw=False, **kwargs):
         super().__init__(d='', **kwargs)
         self.arc(cx, cy, r, startDeg, endDeg, cw=cw, includeM=True)
-

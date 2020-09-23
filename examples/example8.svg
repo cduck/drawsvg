@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="400" height="133.33333333333331" viewBox="0 -100 300 100">
+<defs>
+<path d="M50,-50 C100,-100,200,0,250,-50" stroke="lightblue" fill="none" id="d0" />
+</defs>
+<use xlink:href="#d0" />
+<use xlink:href="#d0" />
+<textPath xlink:href="#d0">Text on a path.</textPath>
+</svg>

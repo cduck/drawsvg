@@ -166,6 +166,29 @@ d.rasterize()
 
 [![Example output image](https://raw.githubusercontent.com/cduck/drawSvg/master/examples/example3.png)](https://github.com/cduck/drawSvg/blob/master/examples/example3.svg)
 
+### Text following a path
+
+```python
+import drawSvg as draw
+
+d = draw.Drawing(300, 100, origin=(0, 0), displayInline=False)
+
+path = draw.Path(stroke='lightblue', fill='none')
+path.M(50, 100-50).C(100, 100-0, 200, 100-100, 250, 100-50)
+d.append(path)
+
+d.append(path)
+
+text = draw.TextOnPath('Text on a path.', 24, path)
+d.append(text)
+
+# Display
+d.setRenderSize(400)
+d.rasterize()
+```
+
+[![Example output image](https://raw.githubusercontent.com/cduck/drawSvg/master/examples/example8.png)](https://github.com/cduck/drawSvg/blob/master/examples/example8.svg)
+
 ### Implementing other SVG tags
 ```python
 import drawSvg as draw
