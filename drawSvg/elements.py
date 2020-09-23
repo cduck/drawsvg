@@ -445,7 +445,7 @@ class Text(DrawingParentElement):
         self.append(TSpan(line, **kwargs))
 
 class TextOnPath(DrawingParentElement):
-    ''' TextPath
+    ''' TextOnPath
 
         Additional keyword arguments are output as additional arguments to the
         SVG node e.g. fill="red", font_size=20, text_anchor="middle". '''
