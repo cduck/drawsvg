@@ -452,7 +452,7 @@ class TextOnPath(DrawingParentElement):
     TAG_NAME = 'textPath'
     hasContent = True
     def __init__(self, text, fontSize, path, **kwargs):
-        super().__init__(xlink__href=path, **kwargs)
+        super().__init__(xlink__href=path, font_size=fontSize, **kwargs)
         self.escapedText = xml.escape(text)
     def writeContent(self, idGen, isDuplicate, outputFile, dryRun):
         if dryRun: return
