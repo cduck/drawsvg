@@ -379,8 +379,9 @@ class Text(DrawingParentElement):
         SVG node e.g. fill="red", font_size=20, text_anchor="middle". '''
     TAG_NAME = 'text'
     hasContent = True
-    def __init__(self, text, fontSize, x, y, center=False, valign=None,
-                 lineHeight=1, **kwargs):
+    def __init__(self, text, fontSize, x=None, y=None, center=False, valign=None,
+                 lineHeight=1, path=None, **kwargs):
+        self.path = path
         singleLine = isinstance(text, str)
         if '\n' in text:
             text = text.splitlines()
@@ -418,6 +419,12 @@ class Text(DrawingParentElement):
                     kwargs['transform'] += ' ' + translate
                 else:
                     kwargs['transform'] = translate
+        if all(v is None for v in [x, y]):
+            if self.path is not None:
+                x = 0
+                y = 0
+            else:
+                raise ValueError('Either path or x, y arguments must be given')
         super().__init__(x=x, y=-y, font_size=fontSize, **kwargs)
         if singleLine:
             self.escapedText = xml.escape(text)
@@ -427,10 +434,13 @@ class Text(DrawingParentElement):
             for i, line in enumerate(text):
                 dy = '{}em'.format(emOffset if i == 0 else lineHeight)
                 self.appendLine(line, x=x, dy=dy)
+        if self.path is not None:
+            self.append(_TextPathNode(self.escapedText, path))
     def writeContent(self, idGen, isDuplicate, outputFile, dryRun):
         if dryRun:
             return
-        outputFile.write(self.escapedText)
+        if self.path is None:
+            outputFile.write(self.escapedText)
     def writeChildrenContent(self, idGen, isDuplicate, outputFile, dryRun):
         ''' Override in a subclass to add data between the start and end
             tags.  This will not be called if hasContent is False. '''
@@ -453,16 +463,6 @@ class _TextPathNode(DrawingBasicElement):
     def writeContent(self, idGen, isDuplicate, outputFile, dryRun):
         if dryRun: return
         outputFile.write(self.escapedText)
-
-class TextOnPath(DrawingParentElement):
-    ''' TextOnPath
-
-        Additional keyword arguments are output as additional arguments to the
-        SVG node e.g. fill="red", font_size=20, text_anchor="middle". '''
-    TAG_NAME = 'text'
-    def __init__(self, text, fontSize, path, **kwargs):
-        super().__init__(font_size=fontSize, **kwargs)
-        self.append(_TextPathNode(text, path))
 
 class TSpan(DrawingBasicElement):
     ''' A line of text within the Text element. '''
