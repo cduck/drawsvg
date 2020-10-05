@@ -456,6 +456,10 @@ class TSpan(DrawingBasicElement):
             return
         outputFile.write(self.escapedText)
 
+class Title(TSpan):
+    ''' A title element. '''
+    TAG_NAME = 'title'
+
 class Rectangle(DrawingBasicElement):
     ''' A rectangle
 
