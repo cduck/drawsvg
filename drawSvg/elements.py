@@ -447,7 +447,8 @@ class Text(DrawingParentElement):
         self.append(TSpan(line, **kwargs))
 
 class _TextContainingElement(DrawingBasicElement):
-    ''' A private parent class used for elements that only have plain text content. '''
+    ''' A private parent class used for elements that only have plain text
+        content. '''
     hasContent = True
     def __init__(self, text, **kwargs):
         super().__init__(**kwargs)
