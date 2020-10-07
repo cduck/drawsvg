@@ -148,6 +148,8 @@ class DrawingBasicElement(DrawingElement):
         self.children.append(animateElement)
     def extendAnim(self, animateIterable):
         self.children.extend(animateIterable)
+    def appendTitle(self, text, **kwargs):
+        self.children.append(Title(text, **kwargs))
 
 class DrawingParentElement(DrawingBasicElement):
     ''' Base class for SVG elements that can have child nodes '''
@@ -444,9 +446,9 @@ class Text(DrawingParentElement):
     def appendLine(self, line, **kwargs):
         self.append(TSpan(line, **kwargs))
 
-class TSpan(DrawingBasicElement):
-    ''' A line of text within the Text element. '''
-    TAG_NAME = 'tspan'
+class _TextContainingElement(DrawingBasicElement):
+    ''' A private parent class used for elements that only have plain text
+        content. '''
     hasContent = True
     def __init__(self, text, **kwargs):
         super().__init__(**kwargs)
@@ -455,6 +457,20 @@ class TSpan(DrawingBasicElement):
         if dryRun:
             return
         outputFile.write(self.escapedText)
+
+
+class TSpan(_TextContainingElement):
+    ''' A line of text within the Text element. '''
+    TAG_NAME = 'tspan'
+
+class Title(_TextContainingElement):
+    ''' A title element.
+
+        This element can be appended with shape.appendTitle("Your title!"),
+        which can be useful for adding a tooltip or on-hover text display
+        to an element.
+    '''
+    TAG_NAME = 'title'
 
 class Rectangle(DrawingBasicElement):
     ''' A rectangle
