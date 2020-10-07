@@ -51,7 +51,7 @@ d.append(draw.Lines(-80, -45,
 
 # Draw a rectangle
 r = draw.Rectangle(0,0,40,50, fill='#1248ff')
-r.appendTitle("Our first rectangle")
+r.appendTitle("Our first rectangle")  # Add a tooltip
 d.append(r)
 
 # Draw a circle

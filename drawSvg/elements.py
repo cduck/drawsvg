@@ -446,8 +446,8 @@ class Text(DrawingParentElement):
     def appendLine(self, line, **kwargs):
         self.append(TSpan(line, **kwargs))
 
-class TextContainingElement(DrawingBasicElement):
-    ''' A private class used for elements that have content to be written. '''
+class _TextContainingElement(DrawingBasicElement):
+    ''' A private parent class used for elements that only have plain text content. '''
     hasContent = True
     def __init__(self, text, **kwargs):
         super().__init__(**kwargs)
@@ -458,11 +458,11 @@ class TextContainingElement(DrawingBasicElement):
         outputFile.write(self.escapedText)
 
 
-class TSpan(TextContainingElement):
+class TSpan(_TextContainingElement):
     ''' A line of text within the Text element. '''
     TAG_NAME = 'tspan'
 
-class Title(TextContainingElement):
+class Title(_TextContainingElement):
     ''' A title element.
 
         This element can be appended with shape.appendTitle("Your title!"),
