@@ -50,7 +50,9 @@ d.append(draw.Lines(-80, -45,
             stroke='black'))
 
 # Draw a rectangle
-d.append(draw.Rectangle(0,0,40,50, fill='#1248ff'))
+r = draw.Rectangle(0,0,40,50, fill='#1248ff')
+r.appendTitle("Our first rectangle")
+d.append(r)
 
 # Draw a circle
 d.append(draw.Circle(-40, -10, 30,
