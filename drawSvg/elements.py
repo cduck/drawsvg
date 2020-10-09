@@ -380,8 +380,16 @@ class Text(DrawingParentElement):
     TAG_NAME = 'text'
     hasContent = True
     def __init__(self, text, fontSize, x=None, y=None, center=False, valign=None,
-                 lineHeight=1, path=None, **kwargs):
+                 lineHeight=1, path=None, startOffset=0, side='left', method='align', spacing='exact', **kwargs):
         self.path = path
+        if self.path is None and startOffset is not None:
+            raise ValueError('startOffset argument can only be used when path is specified')
+        if self.path is None and side is not None:
+            raise ValueError('side argument can only be used when path is specified')
+        if self.path is None and method is not None:
+            raise ValueError('method argument can only be used when path is specified')
+        if self.path is None and spacing is not None:
+            raise ValueError('spacing argument can only be used when path is specified')
         singleLine = isinstance(text, str)
         if '\n' in text:
             text = text.splitlines()
@@ -435,7 +443,7 @@ class Text(DrawingParentElement):
                 dy = '{}em'.format(emOffset if i == 0 else lineHeight)
                 self.appendLine(line, x=x, dy=dy)
         if self.path is not None:
-            self.append(_TextPathNode(self.escapedText, path))
+            self.append(_TextPathNode(self.escapedText, path, startOffset=startOffset, side=side, method=method, spacing=spacing))
     def writeContent(self, idGen, isDuplicate, outputFile, dryRun):
         if dryRun:
             return
@@ -457,9 +465,13 @@ class Text(DrawingParentElement):
 class _TextPathNode(DrawingBasicElement):
     TAG_NAME = 'textPath'
     hasContent = True
-    def __init__(self, text, path, **kwargs):
+    def __init__(self, text, path, startOffset=0, side='left', method='align', spacing='exact', **kwargs):
         super().__init__(xlink__href=path, **kwargs)
         self.escapedText = xml.escape(text)
+        self.args['startOffset'] = startOffset
+        self.args['side'] = side
+        self.args['method'] = method
+        self.args['spacing'] = spacing
     def writeContent(self, idGen, isDuplicate, outputFile, dryRun):
         if dryRun: return
         outputFile.write(self.escapedText)
