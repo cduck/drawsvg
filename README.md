@@ -170,20 +170,97 @@ d.rasterize()
 
 ```python
 import drawSvg as draw
+import math
 
-d = draw.Drawing(300, 100, origin=(0, 0), displayInline=False)
+len_x = 300
+len_y = 300
+
+d = draw.Drawing(len_x, len_y, origin='center')
+
+# radii of the circles
+R = 85
+r = 65
+
+# x, y are None when path argument provided for Text node
+x = None
+y = None
+
+# centering circles around the whole canvas
+ox = 0
+oy = (len_y - (R*math.sin(math.pi/6) + R + 2*r))/2
+
+# top right circle
+cx = ox + R*math.cos(math.pi/6)
+cy = oy + R*math.sin(math.pi/6)
+
+ix = cx-r
+iy = cy
+
+fx = cx+r
+fy = cy
 
 path = draw.Path(stroke='lightblue', fill='none')
-path.M(50, 100-50).C(100, 100-0, 200, 100-100, 250, 100-50)
+path.M(ix, iy)
+path.A(r, r, 90, 1, 1, fx, fy)
+path.A(r, r, 90, 1, 1, ix, iy)
 d.append(path)
 
-d.append(path)
-
-text = draw.TextOnPath('Text on a path.', 24, path)
+d.append(draw.Circle(ix, iy, 1, stroke='blue'))
+text = draw.Text('text on a closed path with 10% offset', 10, x=x, y=y, path=path, startOffset='10%')
 d.append(text)
 
-# Display
-d.setRenderSize(400)
+# top left circle
+cx = ox + R*math.cos(5*math.pi/6)
+cy = oy + R*math.sin(5*math.pi/6)
+
+ix = cx-r
+iy = cy
+
+fx = cx+r
+fy = cy
+
+path = draw.Path(stroke='lightblue', fill='none')
+path.M(ix, iy)
+path.A(r, r, 90, 1, 1, fx, fy)
+path.A(r, r, 90, 1, 1, ix, iy)
+d.append(path)
+
+d.append(draw.Circle(ix, iy, 1, stroke='blue'))
+text = draw.Text('just some text on a closed path', 10, x=x, y=y, path=path)
+d.append(text)
+
+# bottom circle
+cx = ox + R*math.cos(3*math.pi/2)
+cy = oy + R*math.sin(3*math.pi/2)
+
+ix = cx-r
+iy = cy
+
+fx = cx+r
+fy = cy
+
+path = draw.Path(stroke='lightblue', fill='none')
+path.M(ix, iy)
+path.A(r, r, 90, 1, 1, fx, fy)
+path.A(r, r, 90, 1, 1, ix, iy)
+d.append(path)
+
+d.append(draw.Circle(ix, iy, 1, stroke='blue'))
+text = draw.Text('just some centered text around 50% offset', 10, x=x, y=y, path=path, text_anchor='middle', startOffset='50%')
+d.append(text)
+
+# text on an arbitrary path
+ix = -len_x/3
+iy = -len_y/4
+
+path = draw.Path(stroke='red', fill='none')
+path.M(ix, iy).C(-len_x/3, len_y, len_x/3, -len_y, len_x-len_x/6, len_y/2)
+d.append(path)
+d.append(draw.Circle(ix, iy, 1, stroke='blue'))
+
+text = draw.Text('it can be used for any path element, including paths that are not closed', 10, x=x, y=y, path=path)
+d.append(text)
+
 d.rasterize()
 ```
 
