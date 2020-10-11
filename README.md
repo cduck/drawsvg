@@ -206,7 +206,7 @@ path.A(r, r, 90, 1, 1, ix, iy)
 d.append(path)
 
 d.append(draw.Circle(ix, iy, 1, stroke='blue'))
-text = draw.Text('text on a closed path with 10% offset', 10, x=x, y=y, path=path, startOffset='10%')
+text = draw.Text('text on a closed path with 10% offset and increased letter spacing', 10, x=x, y=y, path=path, startOffset='10%', letter_spacing=1.5)
 d.append(text)
 
 # top left circle
@@ -246,7 +246,7 @@ path.A(r, r, 90, 1, 1, ix, iy)
 d.append(path)
 
 d.append(draw.Circle(ix, iy, 1, stroke='blue'))
-text = draw.Text('just some centered text around 50% offset', 10, x=x, y=y, path=path, text_anchor='middle', startOffset='50%')
+text = draw.Text('just some centered text around 75% offset', 10, x=x, y=y, path=path, text_anchor='middle', startOffset='75%', dy=7)
 d.append(text)
 
 # text on an arbitrary path
@@ -258,7 +258,13 @@ path.M(ix, iy).C(-len_x/3, len_y, len_x/3, -len_y, len_x-len_x/6, len_y/2)
 d.append(path)
 d.append(draw.Circle(ix, iy, 1, stroke='blue'))
 
-text = draw.Text('it can be used for any path element, including paths that are not closed', 10, x=x, y=y, path=path)
+text = draw.Text('it can be used for any path element, including paths that are not closed', 10, x=x, y=y, path=path, dy=7)
+d.append(text)
+
+text = draw.Text('this is just a regular text without any path', 10, x=0, y=len_y/2-10, text_anchor='middle')
+d.append(text)
+
+text = draw.Text('regular text with increased letter spacing', 10, x=0, y=-len_y/2+7, text_anchor='middle', letter_spacing=1.25)
 d.append(text)
 
 d.rasterize()
