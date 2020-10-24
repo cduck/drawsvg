@@ -324,6 +324,7 @@ with draw.animate_jupyter(draw_frame, delay=0.05) as anim:
 ### Asynchronous Animation in Jupyter
 ```python
 # Jupyter cell 1:
+import drawSvg as draw
 from drawSvg.widgets import AsyncAnimation
 widget = AsyncAnimation(fps=10)
 widget
