@@ -379,8 +379,9 @@ class Text(DrawingParentElement):
         SVG node e.g. fill="red", font_size=20, text_anchor="middle". '''
     TAG_NAME = 'text'
     hasContent = True
-    def __init__(self, text, fontSize, x=None, y=None, center=False, valign=None,
-                 lineHeight=1, path=None, startOffset=0, letter_spacing=None, **kwargs):
+    def __init__(self, text, fontSize, x=None, y=None, center=False,
+                 valign=None, lineHeight=1, path=None, startOffset=0,
+                 letter_spacing=None, **kwargs):
         self.path = path
         singleLine = isinstance(text, str)
         if '\n' in text:
@@ -425,7 +426,8 @@ class Text(DrawingParentElement):
                 y = 0
             else:
                 raise ValueError('Either path or x, y arguments must be given')
-        super().__init__(x=x, y=-y, font_size=fontSize, letter_spacing=letter_spacing, **kwargs)
+        super().__init__(x=x, y=-y, font_size=fontSize,
+            letter_spacing=letter_spacing, **kwargs)
         if singleLine:
             self.escapedText = xml.escape(text)
         else:
@@ -435,7 +437,9 @@ class Text(DrawingParentElement):
                 dy = '{}em'.format(emOffset if i == 0 else lineHeight)
                 self.appendLine(line, x=x, dy=dy)
         if self.path is not None:
-            self.append(_TextPathNode(self.escapedText, path, letter_spacing=letter_spacing, startOffset=startOffset, **kwargs))
+            self.append(_TextPathNode(self.escapedText, path,
+                letter_spacing=letter_spacing, startOffset=startOffset,
+                **kwargs))
     def writeContent(self, idGen, isDuplicate, outputFile, dryRun):
         if dryRun:
             return
@@ -457,14 +461,16 @@ class Text(DrawingParentElement):
 class _TextPathNode(DrawingParentElement):
     TAG_NAME = 'textPath'
     hasContent = True
-    def __init__(self, text, path, startOffset=0, dy=None, letter_spacing=None, **kwargs):
+    def __init__(self, text, path, startOffset=0, dy=None, letter_spacing=None,
+            **kwargs):
         super().__init__(xlink__href=path, startOffset=startOffset, **kwargs)
         self.letter_spacing = letter_spacing
         self.dy = dy
         self.escapedText = xml.escape(text)
         self.args['startOffset'] = startOffset
         if any(elem is not None for elem in [self.dy, self.letter_spacing]):
-            self.append(TSpan(self.escapedText, dy=self.dy, letter_spacing=self.letter_spacing, **kwargs))
+            self.append(TSpan(self.escapedText, dy=self.dy,
+            letter_spacing=self.letter_spacing, **kwargs))
     def writeContent(self, idGen, isDuplicate, outputFile, dryRun):
         if dryRun: return
         if self.dy is not None: return
