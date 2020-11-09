@@ -423,6 +423,10 @@ class Text(DrawingParentElement):
             # Enforce both x and y, or only the path argument
             if (x is None) + (y is None) != 2*(self.path is not None):
                 raise ValueError('Either path or x, y arguments must be given')
+        try:
+            y = -y
+        except TypeError:
+            pass
         super().__init__(x=x, y=-y, font_size=fontSize,
             letter_spacing=letter_spacing, **kwargs)
         if singleLine:
