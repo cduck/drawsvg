@@ -420,11 +420,8 @@ class Text(DrawingParentElement):
                     kwargs['transform'] += ' ' + translate
                 else:
                     kwargs['transform'] = translate
-        if all(v is None for v in [x, y]):
-            if self.path is not None:
-                x = 0
-                y = 0
-            else:
+            # Enforce both x and y, or only the path argument
+            if (x is None) + (y is None) != 2*(self.path is not None):
                 raise ValueError('Either path or x, y arguments must be given')
         super().__init__(x=x, y=-y, font_size=fontSize,
             letter_spacing=letter_spacing, **kwargs)
