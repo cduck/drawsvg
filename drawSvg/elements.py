@@ -465,9 +465,6 @@ class _TextPathNode(DrawingParentElement):
     def __init__(self, text, path, startOffset=0, dy=None, letter_spacing=None,
             **kwargs):
         super().__init__(xlink__href=path, startOffset=startOffset, **kwargs)
-        self.letter_spacing = letter_spacing
-        self.dy = dy
-        self.escapedText = xml.escape(text)
         self.args['startOffset'] = startOffset
         if any(elem is not None for elem in [self.dy, self.letter_spacing]):
             self.append(TSpan(self.escapedText, dy=self.dy,
