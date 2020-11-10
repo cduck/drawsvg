@@ -467,7 +467,7 @@ class _TextPathNode(DrawingParentElement):
         super().__init__(xlink__href=path, startOffset=startOffset, **kwargs)
         self.args['startOffset'] = startOffset
         if any(elem is not None for elem in [self.dy, self.letter_spacing]):
-            self.append(TSpan(self.escapedText, dy=self.dy,
+            self.append(TSpan(text, dy=self.dy,
             letter_spacing=self.letter_spacing, **kwargs))
     def writeContent(self, idGen, isDuplicate, outputFile, dryRun):
         if dryRun: return
