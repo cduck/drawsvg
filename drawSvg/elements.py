@@ -438,9 +438,7 @@ class Text(DrawingParentElement):
                 dy = '{}em'.format(emOffset if i == 0 else lineHeight)
                 self.appendLine(line, x=x, dy=dy)
         if self.path is not None:
-            self.append(_TextPathNode(self.escapedText, path,
-                letter_spacing=letter_spacing, startOffset=startOffset,
-                **kwargs))
+            self.append(_TextPathNode(self.escapedText, path, **kwargs))
     def writeContent(self, idGen, isDuplicate, outputFile, dryRun):
         if dryRun:
             return
