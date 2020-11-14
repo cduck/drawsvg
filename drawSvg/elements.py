@@ -6,6 +6,7 @@ import base64
 import warnings
 import xml.sax.saxutils as xml
 from collections import defaultdict
+from collections.abc import Iterable
 
 from . import defs
 
@@ -433,17 +434,28 @@ class Text(DrawingParentElement):
         else:
             super().__init__(x=x, y=-y, font_size=fontSize,
                 letter_spacing=letter_spacing, **kwargs)
-        if singleLine:
-            self.escapedText = xml.escape(text)
-        else:
-            self.escapedText = ''
-            # Text is an iterable
-            for i, line in enumerate(text):
-                dy = '{}em'.format(emOffset if i == 0 else lineHeight)
-                self.appendLine(line, x=x, dy=dy)
-        if self.path is not None:
+        if not singleLine:
+            if self.path is None:
+                # there is no defined path
+                for i, line in enumerate(text):
+                    dy = '{}em'.format(emOffset if i == 0 else lineHeight)
+                    self.appendLine(line, x=x, dy=dy)
+            elif isinstance(self.path, Iterable):
+                # path is an iterable
+                for i, (line, line_path) in enumerate(zip(text, self.path)):
+                    self.append(_TextPathNode(line, line_path, **kwargs))
+            else:
+                # there is just single path
+                dy = kwargs['dy']
+                dtot = dy
+                for i, line in enumerate(text):
+                    self.appendLineOnPath(line, dy=dtot)
+                    dtot += fontSize
+        elif self.path is not None:
+            # text is single line and there is path
             self.append(_TextPathNode(text, path, **kwargs))
         else:
+            # text is single line and no path
             self.append(TSpan(text, **kwargs))
     def writeContent(self, idGen, isDuplicate, outputFile, dryRun):
         if dryRun:
@@ -461,13 +473,19 @@ class Text(DrawingParentElement):
             child.writeSvgElement(idGen, isDuplicate, outputFile, dryRun)
     def appendLine(self, line, **kwargs):
         self.append(TSpan(line, **kwargs))
+    def appendLineOnPath(self, line, **kwargs):
+        translate = 'translate(0,{})'.format(kwargs['dy'])
+        if 'transform' in kwargs:
+            kwargs['transform'] += ' ' + translate
+        else:
+            kwargs['transform'] = translate
+        self.append(_TextPathNode(line, self.path, **kwargs))
 
 class _TextPathNode(DrawingParentElement):
     TAG_NAME = 'textPath'
     hasContent = True
     def __init__(self, text, path, startOffset=0, **kwargs):
         super().__init__(xlink__href=path, **kwargs)
-        print(startOffset)
         self.args['startOffset'] = startOffset
         self.append(TSpan(text, **kwargs))
 
