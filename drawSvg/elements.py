@@ -380,7 +380,7 @@ class Text(DrawingParentElement):
     TAG_NAME = 'text'
     hasContent = True
     def __init__(self, text, fontSize, x=None, y=None, center=False,
-                 valign=None, lineHeight=1, path=None, startOffset=0,
+                 valign=None, lineHeight=1, path=None,
                  letter_spacing=None, **kwargs):
         self.path = path
         singleLine = isinstance(text, str)
@@ -420,15 +420,19 @@ class Text(DrawingParentElement):
                     kwargs['transform'] += ' ' + translate
                 else:
                     kwargs['transform'] = translate
-            # Enforce both x and y, or only the path argument
-            if (x is None) + (y is None) != 2*(self.path is not None):
-                raise ValueError('Either path or x, y arguments must be given')
+        # Enforce both x and y, or only the path argument
+        if (x is None) + (y is None) != 2*(self.path is not None):
+            raise ValueError('Either path or x, y arguments must be given')
         try:
             y = -y
         except TypeError:
-            pass
-        super().__init__(x=x, y=-y, font_size=fontSize,
-            letter_spacing=letter_spacing, **kwargs)
+            # x, y cannot be None but in case of the
+            # textOnPath their values do not matter
+            super().__init__(x=0, y=0, font_size=fontSize,
+                letter_spacing=letter_spacing, **kwargs)
+        else:
+            super().__init__(x=x, y=-y, font_size=fontSize,
+                letter_spacing=letter_spacing, **kwargs)
         if singleLine:
             self.escapedText = xml.escape(text)
         else:
@@ -439,11 +443,12 @@ class Text(DrawingParentElement):
                 self.appendLine(line, x=x, dy=dy)
         if self.path is not None:
             self.append(_TextPathNode(text, path, **kwargs))
+        else:
+            self.append(TSpan(text, **kwargs))
     def writeContent(self, idGen, isDuplicate, outputFile, dryRun):
         if dryRun:
             return
-        if self.path is None:
-            outputFile.write(self.escapedText)
+        # outputFile.write(self.escapedText)
     def writeChildrenContent(self, idGen, isDuplicate, outputFile, dryRun):
         ''' Override in a subclass to add data between the start and end
             tags.  This will not be called if hasContent is False. '''
@@ -460,17 +465,11 @@ class Text(DrawingParentElement):
 class _TextPathNode(DrawingParentElement):
     TAG_NAME = 'textPath'
     hasContent = True
-    def __init__(self, text, path, startOffset=0, dy=None, letter_spacing=None,
-            **kwargs):
-        super().__init__(xlink__href=path, startOffset=startOffset, **kwargs)
+    def __init__(self, text, path, startOffset=0, **kwargs):
+        super().__init__(xlink__href=path, **kwargs)
+        print(startOffset)
         self.args['startOffset'] = startOffset
-        if any(elem is not None for elem in [self.dy, self.letter_spacing]):
-            self.append(TSpan(text, **kwargs))
-    def writeContent(self, idGen, isDuplicate, outputFile, dryRun):
-        if dryRun: return
-        if self.dy is not None: return
-        if self.letter_spacing is not None: return
-        outputFile.write(self.escapedText)
+        self.append(TSpan(text, **kwargs))
 
 class TSpan(DrawingBasicElement):
     ''' A line of text within the Text element. '''
