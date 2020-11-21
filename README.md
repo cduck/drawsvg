@@ -180,6 +180,7 @@ d = draw.Drawing(len_x, len_y, origin='center')
 # radii of the circles
 R = 85
 r = 65
+rr = r - 10 # nested circle radius
 
 # x, y are None when path argument provided for Text node
 x = None
@@ -206,7 +207,7 @@ path.A(r, r, 90, 1, 1, ix, iy)
 d.append(path)
 
 d.append(draw.Circle(ix, iy, 1, stroke='blue'))
-text = draw.Text('text on a closed path with 10% offset and increased letter spacing', 10, x=x, y=y, path=path, startOffset='10%', letter_spacing=1.5)
+text = draw.Text('text on a closed path with 10% offset and increased letter spacing', 10, path=path, startOffset='10%', letter_spacing=1.5)
 d.append(text)
 
 # top left circle
@@ -224,9 +225,13 @@ path.M(ix, iy)
 path.A(r, r, 90, 1, 1, fx, fy)
 path.A(r, r, 90, 1, 1, ix, iy)
 d.append(path)
-
 d.append(draw.Circle(ix, iy, 1, stroke='blue'))
-text = draw.Text('just some text on a closed path', 10, x=x, y=y, path=path)
+
+text = draw.Text(
+    [
+        'just some text on a closed path',
+        'with multiple lines'],
+    10, path=path)
 d.append(text)
 
 # bottom circle
@@ -246,19 +251,19 @@ path.A(r, r, 90, 1, 1, ix, iy)
 d.append(path)
 
 d.append(draw.Circle(ix, iy, 1, stroke='blue'))
-text = draw.Text('just some centered text around 75% offset', 10, x=x, y=y, path=path, text_anchor='middle', startOffset='75%', dy=7)
+text = draw.Text('just some centered text around 75% offset', 10, path=path, text_anchor='middle', startOffset='75%', dy=7)
 d.append(text)
 
 # text on an arbitrary path
-ix = -len_x/3
+ix = -len_x/2
 iy = -len_y/4
 
 path = draw.Path(stroke='red', fill='none')
-path.M(ix, iy).C(-len_x/3, len_y, len_x/3, -len_y, len_x-len_x/6, len_y/2)
+path.M(ix, iy).C(-len_x/4, len_y, len_x/3, -len_y, len_x-len_x/6, len_y/2)
 d.append(path)
 d.append(draw.Circle(ix, iy, 1, stroke='blue'))
 
-text = draw.Text('it can be used for any path element, including paths that are not closed', 10, x=x, y=y, path=path, dy=7)
+text = draw.Text('it can be used for any path element, including paths that are not closed\nand automatically shifts the path for consecutive lines', 10, path=path, dy=1)
 d.append(text)
 
 text = draw.Text('this is just a regular text without any path', 10, x=0, y=len_y/2-10, text_anchor='middle')
