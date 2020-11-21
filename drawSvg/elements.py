@@ -446,11 +446,9 @@ class Text(DrawingParentElement):
                     self.append(_TextPathNode(line, line_path, **kwargs))
             else:
                 # there is just single path
-                dy = kwargs['dy']
-                dtot = dy
                 for i, line in enumerate(text):
-                    self.appendLineOnPath(line, dy=dtot)
-                    dtot += fontSize
+                    dy = '{}em'.format(emOffset if i == 0 else lineHeight)
+                    self.appendLineOnPath(line, dy=dy)
         elif self.path is not None:
             # text is single line and there is path
             self.append(_TextPathNode(text, path, **kwargs))
