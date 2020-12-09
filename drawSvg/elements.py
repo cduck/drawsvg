@@ -472,7 +472,7 @@ class Text(_Text):
             self.TAG_NAME = 'g'
             DrawingParentElement.__init__(self)
             for i, line in enumerate(text):
-                shifted_dy = '{}em'.format(i*lineHeight+dy)
+                shifted_dy = '{}em'.format(i*lineHeight)
                 element = _Text([line], fontSize, 1,
                     path=path, lineHeight=lineHeight, dy=shifted_dy, **kwargs)
                 self.append(element)
