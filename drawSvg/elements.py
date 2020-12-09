@@ -403,11 +403,12 @@ class _Text(DrawingParentElement):
             except TypeError:
                 pass
             else:
-                translate = 'translate(0,{})'.format(centerOffset)
-                if 'transform' in kwargs:
-                    kwargs['transform'] += ' ' + translate
-                else:
-                    kwargs['transform'] = translate
+                if self.path is None:
+                    translate = 'translate(0,{})'.format(centerOffset)
+                    if 'transform' in kwargs:
+                        kwargs['transform'] += ' ' + translate
+                    else:
+                        kwargs['transform'] = translate
         # Enforce both x and y, or only the path argument
         if (x is None) + (y is None) != 2*(self.path is not None):
             raise ValueError('Either path or x, y arguments must be given')
@@ -429,7 +430,7 @@ class _Text(DrawingParentElement):
                 self.appendLine(line, x=x, dy=dy)
         elif self.path is not None:
             # text is single line and there is path
-            self.append(_TextPathNode(text[0], path, **kwargs))
+            self.append(_TextPathNode(text[0], path, center=center, **kwargs))
         else:
             # text is single line and no path
             self.append(TSpan(text[0], **kwargs))
@@ -483,9 +484,11 @@ class Text(_Text):
 class _TextPathNode(DrawingParentElement):
     TAG_NAME = 'textPath'
     hasContent = True
-    def __init__(self, text, path, startOffset=0, **kwargs):
+    def __init__(self, text, path, startOffset=0, center=False, **kwargs):
         super().__init__(xlink__href=path, **kwargs)
         self.args['startOffset'] = startOffset
+        if center:
+            self.args['startOffset'] = '50%'
         self.append(TSpan(text, **kwargs))
 
 class TSpan(DrawingBasicElement):
