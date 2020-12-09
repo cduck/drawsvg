@@ -386,7 +386,7 @@ class _Text(DrawingParentElement):
             if 'text_anchor' not in kwargs:
                 kwargs['text_anchor'] = 'middle'
             if valign is None:
-                if numLines == 1:
+                if numLines:
                     # Backwards compatible centering
                     centerOffset = fontSize*0.5*center
                 else:
@@ -419,7 +419,7 @@ class _Text(DrawingParentElement):
             super().__init__(x=0, y=0, font_size=fontSize,
                 letter_spacing=letter_spacing, **kwargs)
         else:
-            super().__init__(x=x, y=-y, font_size=fontSize,
+            super().__init__(x=x, y=y, font_size=fontSize,
                 letter_spacing=letter_spacing, **kwargs)
         if numLines > 1:
             # the case if path is defined has already
@@ -469,7 +469,7 @@ class Text(_Text):
         # tags under same group
         if path is not None and numLines > 1:
             self.TAG_NAME = 'g'
-            super(DrawingParentElement, self).__init__()
+            DrawingParentElement.__init__(self)
             for i, line in enumerate(text):
                 shifted_dy = '{}em'.format(i*lineHeight+dy)
                 element = _Text([line], fontSize, 1,
