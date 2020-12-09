@@ -458,7 +458,7 @@ class Text(_Text):
         SVG node e.g. fill="red", font_size=20, text_anchor="middle". '''
     TAG_NAME = 'text'
     hasContent = True
-    def __init__(self, text, fontSize, path=None, lineHeight=1, dy=0, **kwargs):
+    def __init__(self, text, fontSize, x, y, path=None, lineHeight=1, dy=0, **kwargs):
         if '\n' in text:
             text = text.splitlines()
         if not isinstance(text, str):
@@ -479,7 +479,7 @@ class Text(_Text):
         # a general case in which current tag is just a text
         else:
             super().__init__(text, fontSize, numLines,
-                path=path, lineHeight=lineHeight, dy=dy, **kwargs)
+                x=x, y=y, path=path, lineHeight=lineHeight, dy=dy, **kwargs)
 
 class _TextPathNode(DrawingParentElement):
     TAG_NAME = 'textPath'
