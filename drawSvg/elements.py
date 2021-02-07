@@ -378,57 +378,129 @@ class Text(DrawingParentElement):
     ''' Text
 
         Additional keyword arguments are output as additional arguments to the
-        SVG node e.g. fill="red", font_size=20, text_anchor="middle". '''
+        SVG node e.g. fill='red', font_size=20, text_anchor='middle',
+        letter_spacing=1.5.
+
+        CairoSVG bug with letter spacing text on a path: The first two letters
+        are always spaced as if letter_spacing=1. '''
     TAG_NAME = 'text'
     hasContent = True
-    def __init__(self, text, fontSize, x, y, center=False, valign=None,
-                 lineHeight=1, **kwargs):
-        singleLine = isinstance(text, str)
-        if '\n' in text:
-            text = text.splitlines()
-            singleLine = False
-        if not singleLine:
-            text = tuple(text)
-            numLines = len(text)
-        else:
-            numLines = 1
-        centerOffset = 0
-        emOffset = 0
-        if center:
-            if 'text_anchor' not in kwargs:
-                kwargs['text_anchor'] = 'middle'
-            if valign is None:
-                if singleLine:
-                    # Backwards compatible centering
-                    centerOffset = fontSize*0.5*center
-                else:
-                    emOffset = 0.4 - lineHeight * (numLines - 1) / 2
-        if valign == 'middle':
-            emOffset = 0.4 - lineHeight * (numLines - 1) / 2
-        elif valign == 'top':
-            emOffset = 1
-        elif valign == 'bottom':
-            emOffset = -lineHeight * (numLines - 1)
-        if centerOffset:
+    def __new__(cls, text, *args, path=None, id=None, _skipCheck=False,
+                **kwargs):
+        # Check for the special case of multi-line text on a path
+        # This is inconsistently implemented by renderers so we return a group
+        # of single-line text on paths instead.
+        if path is not None and not _skipCheck:
+            text, _ = cls._handleTextArgument(text, True)
+            if len(text) > 1:
+                # Special case
+                g = Group(id=id)
+                for i, line in enumerate(text):
+                    subtext = [None] * len(text)
+                    subtext[i] = line
+                    g.append(Text(subtext, *args, path=path, _skipCheck=True,
+                                  **kwargs))
+                return g
+        return super().__new__(cls)
+    def __init__(self, text, fontSize, x=None, y=None, *, center=False,
+                 valign=None, lineHeight=1, lineOffset=0, path=None,
+                 startOffset=None, pathArgs=None, tspanArgs=None,
+                 cairoFix=True, _skipCheck=False, **kwargs):
+        # Check argument requirements
+        if path is None:
+            if x is None or y is None:
+                raise TypeError(
+                        "__init__() missing required arguments: 'x' and 'y' "
+                        "are required unless 'path' is specified")
             try:
-                fontSize = float(fontSize)
+                y = -y
             except TypeError:
                 pass
-            else:
-                translate = 'translate(0,{})'.format(centerOffset)
-                if 'transform' in kwargs:
-                    kwargs['transform'] += ' ' + translate
-                else:
-                    kwargs['transform'] = translate
-        super().__init__(x=x, y=-y, font_size=fontSize, **kwargs)
-        if singleLine:
-            self.escapedText = xml.escape(text)
         else:
+            if x is not None or y is not None:
+                raise TypeError(
+                        "__init__() conflicting arguments: 'x' and 'y' "
+                        "should not be used when 'path' is specified")
+        if pathArgs is None:
+            pathArgs = {}
+        if startOffset is not None:
+            pathArgs.setdefault('startOffset', startOffset)
+        if tspanArgs is None:
+            tspanArgs = {}
+        onPath = path is not None
+
+        text, singleLine = self._handleTextArgument(text, forceMulti=onPath)
+        numLines = len(text)
+
+        # Text alignment
+        centerCompat = False
+        if center and valign is None:
+            valign = 'middle'
+            centerCompat = singleLine and not onPath
+        if center and kwargs.get('text_anchor') is None:
+            kwargs['text_anchor'] = 'middle'
+        if valign == 'middle':
+            if centerCompat:  # Backwards compatible centering
+                lineOffset += 0.5 * center
+            else:
+                lineOffset += 0.4 - lineHeight * (numLines - 1) / 2
+        elif valign == 'top':
+            lineOffset += 1
+        elif valign == 'bottom':
+            lineOffset += -lineHeight * (numLines - 1)
+        if singleLine:
+            dy = '{}em'.format(lineOffset)
+            kwargs.setdefault('dy', dy)
+        # Text alignment on a path
+        if onPath:
+            if kwargs.get('text_anchor') == 'start':
+                pathArgs.setdefault('startOffset', '0')
+            elif kwargs.get('text_anchor') == 'middle':
+                pathArgs.setdefault('startOffset', '50%')
+            elif kwargs.get('text_anchor') == 'end':
+                if cairoFix and 'startOffset' not in pathArgs:
+                    # Fix CairoSVG not drawing the last character with aligned
+                    # right
+                    tspanArgs.setdefault('dx', -1)
+                pathArgs.setdefault('startOffset', '100%')
+
+        super().__init__(x=x, y=y, font_size=fontSize, **kwargs)
+        self._textPath = None
+        if singleLine:
+            self.escapedText = xml.escape(text[0])
+        else:
+            # Add elements for each line of text
             self.escapedText = ''
-            # Text is an iterable
-            for i, line in enumerate(text):
-                dy = '{}em'.format(emOffset if i == 0 else lineHeight)
-                self.appendLine(line, x=x, dy=dy)
+            if path is None:
+                # Text is an iterable
+                for i, line in enumerate(text):
+                    dy = '{}em'.format(lineOffset if i == 0 else lineHeight)
+                    self.appendLine(line, x=x, dy=dy, **tspanArgs)
+            else:
+                self._textPath = _TextPath(path, **pathArgs)
+                assert sum(bool(line) for line in text) <= 1, (
+                        'Logic error, __new__ should handle multi-line paths')
+                for i, line in enumerate(text):
+                    if not line: continue
+                    dy = '{}em'.format(lineOffset + i*lineHeight)
+                    tspan = TSpan(line, dy=dy, **tspanArgs)
+                    self._textPath.append(tspan)
+                self.append(self._textPath)
+    @staticmethod
+    def _handleTextArgument(text, forceMulti=False):
+        # Handle multi-line text (contains '\n' or is a list of strings)
+        singleLine = isinstance(text, str)
+        if isinstance(text, str):
+            singleLine = '\n' not in text and not forceMulti
+            if singleLine:
+                text = (text,)
+            else:
+                text = tuple(text.splitlines())
+                singleLine = False
+        else:
+            singleLine = False
+            text = tuple(text)
+        return text, singleLine
     def writeContent(self, idGen, isDuplicate, outputFile, dryRun):
         if dryRun:
             return
@@ -444,7 +516,15 @@ class Text(DrawingParentElement):
         for child in children:
             child.writeSvgElement(idGen, isDuplicate, outputFile, dryRun)
     def appendLine(self, line, **kwargs):
+        if self._textPath is not None:
+            raise ValueError('appendLine is not supported for text on a path')
         self.append(TSpan(line, **kwargs))
+
+class _TextPath(DrawingParentElement):
+    TAG_NAME = 'textPath'
+    hasContent = True
+    def __init__(self, path, **kwargs):
+        super().__init__(xlink__href=path, **kwargs)
 
 class _TextContainingElement(DrawingBasicElement):
     ''' A private parent class used for elements that only have plain text
@@ -457,7 +537,6 @@ class _TextContainingElement(DrawingBasicElement):
         if dryRun:
             return
         outputFile.write(self.escapedText)
-
 
 class TSpan(_TextContainingElement):
     ''' A line of text within the Text element. '''

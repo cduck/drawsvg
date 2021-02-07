@@ -50,7 +50,7 @@ d.append(draw.Lines(-80, -45,
             stroke='black'))
 
 # Draw a rectangle
-r = draw.Rectangle(0,0,40,50, fill='#1248ff')
+r = draw.Rectangle(-80,0,40,50, fill='#1248ff')
 r.appendTitle("Our first rectangle")  # Add a tooltip
 d.append(r)
 
@@ -59,13 +59,16 @@ d.append(draw.Circle(-40, -10, 30,
             fill='red', stroke_width=2, stroke='black'))
 
 # Draw an arbitrary path (a triangle in this case)
-p = draw.Path(stroke_width=2, stroke='green',
-              fill='black', fill_opacity=0.5)
-p.M(-30,5)  # Start path at point (-30, 5)
-p.l(60,30)  # Draw line to (60, 30)
-p.h(-70)    # Draw horizontal line to x=-70
-p.Z()       # Draw line to start
+p = draw.Path(stroke_width=2, stroke='lime',
+              fill='black', fill_opacity=0.2)
+p.M(-10, 20)  # Start path at point (-10, 20)
+p.C(30, -10, 30, 50, 70, 20)  # Draw a curve to (70, 20)
 d.append(p)
+
+# Draw text
+d.append(draw.Text('Basic text', 8, -10, 35, fill='blue'))  # Text with font size 8
+d.append(draw.Text('Path text', 8, path=p, text_anchor='start', valign='middle'))
+d.append(draw.Text(['Multi-line', 'text'], 8, path=p, text_anchor='end'))
 
 # Draw multiple circular arcs
 d.append(draw.ArcLine(60,-20,20,60,270,
@@ -167,117 +170,6 @@ d.rasterize()
 ```
 
 [![Example output image](https://raw.githubusercontent.com/cduck/drawSvg/master/examples/example3.png)](https://github.com/cduck/drawSvg/blob/master/examples/example3.svg)
-
-### Text following a path
-
-```python
-import drawSvg as draw
-import math
-
-len_x = 300
-len_y = 300
-
-d = draw.Drawing(len_x, len_y, origin='center')
-
-# radii of the circles
-R = 85
-r = 65
-rr = r - 10 # nested circle radius
-
-# x, y are None when path argument provided for Text node
-x = None
-y = None
-
-# centering circles around the whole canvas
-ox = 0
-oy = (len_y - (R*math.sin(math.pi/6) + R + 2*r))/2
-
-# top right circle
-cx = ox + R*math.cos(math.pi/6)
-cy = oy + R*math.sin(math.pi/6)
-
-ix = cx-r
-iy = cy
-
-fx = cx+r
-fy = cy
-
-path = draw.Path(stroke='lightblue', fill='none')
-path.M(ix, iy)
-path.A(r, r, 90, 1, 1, fx, fy)
-path.A(r, r, 90, 1, 1, ix, iy)
-d.append(path)
-
-d.append(draw.Circle(ix, iy, 1, stroke='blue'))
-text = draw.Text('text on a closed path with 10% offset and increased letter spacing', 10, path=path, startOffset='10%', letter_spacing=1.5)
-d.append(text)
-
-# top left circle
-cx = ox + R*math.cos(5*math.pi/6)
-cy = oy + R*math.sin(5*math.pi/6)
-
-ix = cx-r
-iy = cy
-
-fx = cx+r
-fy = cy
-
-path = draw.Path(stroke='lightblue', fill='none')
-path.M(ix, iy)
-path.A(r, r, 90, 1, 1, fx, fy)
-path.A(r, r, 90, 1, 1, ix, iy)
-d.append(path)
-d.append(draw.Circle(ix, iy, 1, stroke='blue'))
-
-text = draw.Text(
-    [
-        'just some text on a closed path',
-        'with multiple lines'],
-    10, path=path)
-d.append(text)
-
-# bottom circle
-cx = ox + R*math.cos(3*math.pi/2)
-cy = oy + R*math.sin(3*math.pi/2)
-
-ix = cx-r
-iy = cy
-
-fx = cx+r
-fy = cy
-
-path = draw.Path(stroke='lightblue', fill='none')
-path.M(ix, iy)
-path.A(r, r, 90, 1, 1, fx, fy)
-path.A(r, r, 90, 1, 1, ix, iy)
-d.append(path)
-
-d.append(draw.Circle(ix, iy, 1, stroke='blue'))
-text = draw.Text('just some centered text around 75% offset', 10, path=path, text_anchor='middle', startOffset='75%', dy=7)
-d.append(text)
-
-# text on an arbitrary path
-ix = -len_x/2
-iy = -len_y/4
-
-path = draw.Path(stroke='red', fill='none')
-path.M(ix, iy).C(-len_x/4, len_y, len_x/3, -len_y, len_x-len_x/6, len_y/2)
-d.append(path)
-d.append(draw.Circle(ix, iy, 1, stroke='blue'))
-
-text = draw.Text('it can be used for any path element, including paths that are not closed\nand automatically shifts the path for consecutive lines', 10, path=path, dy=1)
-d.append(text)
-
-text = draw.Text('this is just a regular text without any path', 10, x=0, y=len_y/2-10, text_anchor='middle')
-d.append(text)
-
-text = draw.Text('regular text with increased letter spacing', 10, x=0, y=-len_y/2+7, text_anchor='middle', letter_spacing=1.25)
-d.append(text)
-
-d.rasterize()
-```
-
-[![Example output image](https://raw.githubusercontent.com/cduck/drawSvg/master/examples/example8.png)](https://github.com/cduck/drawSvg/blob/master/examples/example8.svg)
 
 ### Implementing other SVG tags
 ```python
