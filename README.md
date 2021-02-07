@@ -50,7 +50,9 @@ d.append(draw.Lines(-80, -45,
             stroke='black'))
 
 # Draw a rectangle
-d.append(draw.Rectangle(0,0,40,50, fill='#1248ff'))
+r = draw.Rectangle(0,0,40,50, fill='#1248ff')
+r.appendTitle("Our first rectangle")  # Add a tooltip
+d.append(r)
 
 # Draw a circle
 d.append(draw.Circle(-40, -10, 30,
@@ -433,6 +435,7 @@ with draw.animate_jupyter(draw_frame, delay=0.05) as anim:
 ### Asynchronous Animation in Jupyter
 ```python
 # Jupyter cell 1:
+import drawSvg as draw
 from drawSvg.widgets import AsyncAnimation
 widget = AsyncAnimation(fps=10)
 widget

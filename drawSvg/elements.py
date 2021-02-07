@@ -6,7 +6,6 @@ import base64
 import warnings
 import xml.sax.saxutils as xml
 from collections import defaultdict
-from collections.abc import Iterable
 
 from . import defs
 
@@ -149,6 +148,8 @@ class DrawingBasicElement(DrawingElement):
         self.children.append(animateElement)
     def extendAnim(self, animateIterable):
         self.children.extend(animateIterable)
+    def appendTitle(self, text, **kwargs):
+        self.children.append(Title(text, **kwargs))
 
 class DrawingParentElement(DrawingBasicElement):
     ''' Base class for SVG elements that can have child nodes '''
@@ -373,20 +374,31 @@ class Image(DrawingBasicElement):
         super().__init__(x=x, y=-y-height, width=width, height=height,
                          xlink__href=uri, **kwargs)
 
-class _Text(DrawingParentElement):
+class Text(DrawingParentElement):
+    ''' Text
+
+        Additional keyword arguments are output as additional arguments to the
+        SVG node e.g. fill="red", font_size=20, text_anchor="middle". '''
     TAG_NAME = 'text'
     hasContent = True
-    def __init__(self, text, fontSize, numLines, x=None, y=None, center=False,
-                 valign=None, lineHeight=1, path=None,
-                 letter_spacing=None, **kwargs):
-        self.path = path
+    def __init__(self, text, fontSize, x, y, center=False, valign=None,
+                 lineHeight=1, **kwargs):
+        singleLine = isinstance(text, str)
+        if '\n' in text:
+            text = text.splitlines()
+            singleLine = False
+        if not singleLine:
+            text = tuple(text)
+            numLines = len(text)
+        else:
+            numLines = 1
         centerOffset = 0
         emOffset = 0
         if center:
             if 'text_anchor' not in kwargs:
                 kwargs['text_anchor'] = 'middle'
             if valign is None:
-                if numLines:
+                if singleLine:
                     # Backwards compatible centering
                     centerOffset = fontSize*0.5*center
                 else:
@@ -403,41 +415,24 @@ class _Text(DrawingParentElement):
             except TypeError:
                 pass
             else:
-                if self.path is None:
-                    translate = 'translate(0,{})'.format(centerOffset)
-                    if 'transform' in kwargs:
-                        kwargs['transform'] += ' ' + translate
-                    else:
-                        kwargs['transform'] = translate
-        # Enforce both x and y, or only the path argument
-        if (x is None) + (y is None) != 2*(self.path is not None):
-            raise ValueError('Either path or x, y arguments must be given')
-        try:
-            y = -y
-        except TypeError:
-            # x, y cannot be None but in case of the
-            # textOnPath their values do not matter
-            super().__init__(x=0, y=0, font_size=fontSize,
-                letter_spacing=letter_spacing, **kwargs)
+                translate = 'translate(0,{})'.format(centerOffset)
+                if 'transform' in kwargs:
+                    kwargs['transform'] += ' ' + translate
+                else:
+                    kwargs['transform'] = translate
+        super().__init__(x=x, y=-y, font_size=fontSize, **kwargs)
+        if singleLine:
+            self.escapedText = xml.escape(text)
         else:
-            super().__init__(x=x, y=y, font_size=fontSize,
-                letter_spacing=letter_spacing, **kwargs)
-        if numLines > 1:
-            # the case if path is defined has already
-            # been covered
+            self.escapedText = ''
+            # Text is an iterable
             for i, line in enumerate(text):
                 dy = '{}em'.format(emOffset if i == 0 else lineHeight)
                 self.appendLine(line, x=x, dy=dy)
-        elif self.path is not None:
-            # text is single line and there is path
-            self.append(_TextPathNode(text[0], path, center=center, **kwargs))
-        else:
-            # text is single line and no path
-            self.append(TSpan(text[0], **kwargs))
     def writeContent(self, idGen, isDuplicate, outputFile, dryRun):
         if dryRun:
             return
-        # outputFile.write(self.escapedText)
+        outputFile.write(self.escapedText)
     def writeChildrenContent(self, idGen, isDuplicate, outputFile, dryRun):
         ''' Override in a subclass to add data between the start and end
             tags.  This will not be called if hasContent is False. '''
@@ -451,49 +446,9 @@ class _Text(DrawingParentElement):
     def appendLine(self, line, **kwargs):
         self.append(TSpan(line, **kwargs))
 
-class Text(_Text):
-    ''' Text
-
-        Additional keyword arguments are output as additional arguments to the
-        SVG node e.g. fill="red", font_size=20, text_anchor="middle". '''
-    TAG_NAME = 'text'
-    hasContent = True
-    def __init__(self, text, fontSize, x, y, path=None, lineHeight=1, dy=0, **kwargs):
-        if '\n' in text:
-            text = text.splitlines()
-        if not isinstance(text, str):
-            numLines = len(text)
-        else:
-            numLines = 1
-            text = [text]
-        # special case that requires mutliple text
-        # tags under same group
-        if path is not None and numLines > 1:
-            self.TAG_NAME = 'g'
-            DrawingParentElement.__init__(self)
-            for i, line in enumerate(text):
-                shifted_dy = '{}em'.format(i*lineHeight)
-                element = _Text([line], fontSize, 1,
-                    path=path, lineHeight=lineHeight, dy=shifted_dy, **kwargs)
-                self.append(element)
-        # a general case in which current tag is just a text
-        else:
-            super().__init__(text, fontSize, numLines,
-                x=x, y=y, path=path, lineHeight=lineHeight, dy=dy, **kwargs)
-
-class _TextPathNode(DrawingParentElement):
-    TAG_NAME = 'textPath'
-    hasContent = True
-    def __init__(self, text, path, startOffset=0, center=False, **kwargs):
-        super().__init__(xlink__href=path, **kwargs)
-        self.args['startOffset'] = startOffset
-        if center:
-            self.args['startOffset'] = '50%'
-        self.append(TSpan(text, **kwargs))
-
-class TSpan(DrawingBasicElement):
-    ''' A line of text within the Text element. '''
-    TAG_NAME = 'tspan'
+class _TextContainingElement(DrawingBasicElement):
+    ''' A private parent class used for elements that only have plain text
+        content. '''
     hasContent = True
     def __init__(self, text, **kwargs):
         super().__init__(**kwargs)
@@ -502,6 +457,20 @@ class TSpan(DrawingBasicElement):
         if dryRun:
             return
         outputFile.write(self.escapedText)
+
+
+class TSpan(_TextContainingElement):
+    ''' A line of text within the Text element. '''
+    TAG_NAME = 'tspan'
+
+class Title(_TextContainingElement):
+    ''' A title element.
+
+        This element can be appended with shape.appendTitle("Your title!"),
+        which can be useful for adding a tooltip or on-hover text display
+        to an element.
+    '''
+    TAG_NAME = 'title'
 
 class Rectangle(DrawingBasicElement):
     ''' A rectangle
@@ -665,3 +634,4 @@ class Arc(Path):
     def __init__(self, cx, cy, r, startDeg, endDeg, cw=False, **kwargs):
         super().__init__(d='', **kwargs)
         self.arc(cx, cy, r, startDeg, endDeg, cw=cw, includeM=True)
+
