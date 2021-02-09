@@ -50,7 +50,7 @@ d.append(draw.Lines(-80, -45,
             stroke='black'))
 
 # Draw a rectangle
-r = draw.Rectangle(0,0,40,50, fill='#1248ff')
+r = draw.Rectangle(-80,0,40,50, fill='#1248ff')
 r.appendTitle("Our first rectangle")  # Add a tooltip
 d.append(r)
 
@@ -59,13 +59,16 @@ d.append(draw.Circle(-40, -10, 30,
             fill='red', stroke_width=2, stroke='black'))
 
 # Draw an arbitrary path (a triangle in this case)
-p = draw.Path(stroke_width=2, stroke='green',
-              fill='black', fill_opacity=0.5)
-p.M(-30,5)  # Start path at point (-30, 5)
-p.l(60,30)  # Draw line to (60, 30)
-p.h(-70)    # Draw horizontal line to x=-70
-p.Z()       # Draw line to start
+p = draw.Path(stroke_width=2, stroke='lime',
+              fill='black', fill_opacity=0.2)
+p.M(-10, 20)  # Start path at point (-10, 20)
+p.C(30, -10, 30, 50, 70, 20)  # Draw a curve to (70, 20)
 d.append(p)
+
+# Draw text
+d.append(draw.Text('Basic text', 8, -10, 35, fill='blue'))  # Text with font size 8
+d.append(draw.Text('Path text', 8, path=p, text_anchor='start', valign='middle'))
+d.append(draw.Text(['Multi-line', 'text'], 8, path=p, text_anchor='end'))
 
 # Draw multiple circular arcs
 d.append(draw.ArcLine(60,-20,20,60,270,
