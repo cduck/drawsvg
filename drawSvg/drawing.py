@@ -95,9 +95,9 @@ class Drawing:
     def clear(self):
         self.elements.clear()
     def index(self, *args, **kwargs):
-        self.elements.index(*args, **kwargs)
+        return self.elements.index(*args, **kwargs)
     def count(self, element):
-        self.elements.count(element)
+        return self.elements.count(element)
     def reverse(self):
         self.elements.reverse()
     def drawDef(self, obj, **kwargs):
