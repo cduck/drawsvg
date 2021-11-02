@@ -369,7 +369,7 @@ class Image(DrawingBasicElement):
         if not embed:
             uri = path
         else:
-            encData = base64.b64encode(data).decode()
+            encData = base64.b64encode(data).decode(encoding='ascii')
             uri = 'data:{};base64,{}'.format(mimeType, encData)
         super().__init__(x=x, y=-y-height, width=width, height=height,
                          xlink__href=uri, **kwargs)

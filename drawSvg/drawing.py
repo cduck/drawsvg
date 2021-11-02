@@ -170,8 +170,8 @@ class Drawing:
         outputFile.write(endStr)
         if returnString:
             return outputFile.getvalue()
-    def saveSvg(self, fname):
-        with open(fname, 'w') as f:
+    def saveSvg(self, fname, encoding='utf-8'):
+        with open(fname, 'w', encoding=encoding) as f:
             self.asSvg(outputFile=f)
     def savePng(self, fname):
         self.rasterize(toFile=fname)
@@ -190,8 +190,8 @@ class Drawing:
         if self.displayInline:
             return None
         prefix = b'data:image/svg+xml;base64,'
-        data = base64.b64encode(self.asSvg().encode())
-        src = (prefix+data).decode()
+        data = base64.b64encode(self.asSvg().encode(encoding='utf-8'))
+        src = (prefix+data).decode(encoding='ascii')
         return '<img src="{}">'.format(src)
     def asDataUri(self, strip_chars=STRIP_CHARS):
         ''' Returns a data URI with base64 encoding. '''
