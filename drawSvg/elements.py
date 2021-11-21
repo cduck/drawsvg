@@ -224,7 +224,6 @@ class Use(DrawingBasicElement):
         that reference it. '''
     TAG_NAME = 'use'
     def __init__(self, otherElem, x, y, **kwargs):
-        y = -y
         if isinstance(otherElem, str) and not otherElem.startswith('#'):
             otherElem = '#' + otherElem
         super().__init__(xlink__href=otherElem, x=x, y=y, **kwargs)
@@ -412,10 +411,6 @@ class Text(DrawingParentElement):
                 raise TypeError(
                         "__init__() missing required arguments: 'x' and 'y' "
                         "are required unless 'path' is specified")
-            try:
-                y = -y
-            except TypeError:
-                pass
         else:
             if x is not None or y is not None:
                 raise TypeError(
@@ -558,10 +553,6 @@ class Rectangle(DrawingBasicElement):
         SVG node e.g. fill="red", stroke="#ff4477", stroke_width=2. '''
     TAG_NAME = 'rect'
     def __init__(self, x, y, width, height, **kwargs):
-        try:
-            y = -y-height
-        except TypeError:
-            pass
         super().__init__(x=x, y=y, width=width, height=height,
             **kwargs)
 
