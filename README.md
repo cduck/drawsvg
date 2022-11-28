@@ -294,6 +294,8 @@ widget
 
 ![Example output image](https://raw.githubusercontent.com/cduck/drawSvg/master/examples/example5.gif)
 
+Note: If the above example does not work in Jupyter Lab, try `Help > Launch Classic Notebook`.
+
 ### Animation with Python
 ```python
 import drawSvg as draw
@@ -348,3 +350,5 @@ global_variable = 'b'  # Animation above now displays 'b'
 ```
 
 ![Example output image](https://raw.githubusercontent.com/cduck/drawSvg/master/examples/example7.gif)
+
+Note: If the above example does not work in Jupyter Lab, try `Help > Launch Classic Notebook`.
