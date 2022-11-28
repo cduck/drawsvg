@@ -2,8 +2,31 @@ javascript = '''
 require.undef('drawingview');
 
 define('drawingview', ['@jupyter-widgets/base'], function(widgets) {
-    var DrawingView = widgets.DOMWidgetView.extend({
-        render: function() {
+    class DrawingModel extends widgets.DOMWidgetModel {
+        defaults() {
+            return {
+                ...super.defaults(),
+                _model_name: DrawingModel.model_name,
+                _model_module: DrawingModel.model_module,
+                _model_module_version: DrawingModel.model_module_version,
+                _view_name: DrawingModel.view_name,
+                _view_module: DrawingModel.view_module,
+                _view_module_version: DrawingModel.view_module_version,
+            };
+        }
+        static serializers = {
+            ...widgets.DOMWidgetModel.serializers,
+        };
+        static model_name = 'DrawingModel';
+        static model_module = 'drawingview';
+        static model_module_version = '0.1.0';
+        static view_name = 'DrawingView';
+        static view_module = 'drawingview';
+        static view_module_version = '0.1.0';
+    }
+
+    class DrawingView extends widgets.DOMWidgetView {
+        render() {
             this.container = document.createElement('a');
             this.image_changed();
             this.container.appendChild(this.svg_view);
@@ -18,17 +41,17 @@ define('drawingview', ['@jupyter-widgets/base'], function(widgets) {
             this.model.on('change:disable', this.delay_changed,
                           this);
             this.delay_changed();
-        },
-        image_changed: function() {
+        }
+        image_changed() {
             this.container.innerHTML = this.model.get('_image');
             this.svg_view = this.container.getElementsByTagName('svg')[0];
             this.cursor_point = this.svg_view.createSVGPoint();
             this.register_events();
-        },
-        last_move: null,
-        last_mousemove_blocked: null,
-        last_timer: null,
-        block_changed: function() {
+        }
+        last_move = null;
+        last_mousemove_blocked = null;
+        last_timer = null;
+        block_changed() {
             var widget = this;
             window.setTimeout(function() {
                 if (widget.model.get('_mousemove_blocked')
@@ -36,8 +59,8 @@ define('drawingview', ['@jupyter-widgets/base'], function(widgets) {
                     widget.send_mouse_event('mousemove', widget.last_move);
                 }
             }, 0);
-        },
-        send_mouse_event: function(name, e) {
+        }
+        send_mouse_event(name, e) {
             this.last_move = null;
             if (this.model.get('disable')) {
                 return;
@@ -68,8 +91,8 @@ define('drawingview', ['@jupyter-widgets/base'], function(widgets) {
                 currentTargetId: e.currentTarget ? e.currentTarget.id : null,
                 relatedTargetId: e.relatedTarget ? e.relatedTarget.id : null,
             });
-        },
-        delay_changed: function() {
+        }
+        delay_changed() {
             var widget = this;
             window.clearTimeout(widget.last_timer);
             if (widget.model.get('disable')) {
@@ -81,8 +104,8 @@ define('drawingview', ['@jupyter-widgets/base'], function(widgets) {
                     widget.send_timed_event('timed');
                 }, delay);
             }
-        },
-        send_timed_event: function(name) {
+        }
+        send_timed_event(name) {
             if (this.model.get('disable')) {
                 return;
             }
@@ -90,8 +113,8 @@ define('drawingview', ['@jupyter-widgets/base'], function(widgets) {
             this.send({
                 name: name,
             });
-        },
-        register_events: function() {
+        }
+        register_events() {
             var widget = this;
             this.svg_view.addEventListener('mousedown', function(e) {
                 e.preventDefault();
@@ -111,9 +134,10 @@ define('drawingview', ['@jupyter-widgets/base'], function(widgets) {
                 widget.send_mouse_event('mouseup', e);
             });
         }
-    });
+    }
 
     return {
+        DrawingModel: DrawingModel,
         DrawingView: DrawingView
     };
 });

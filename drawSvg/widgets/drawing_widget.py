@@ -10,6 +10,9 @@ del drawing_javascript
 
 
 class DrawingWidget(widgets.DOMWidget):
+    _model_name = Unicode('DrawingModel').tag(sync=True)
+    _model_module = Unicode('drawingview').tag(sync=True)
+    _model_module_version = Unicode('0.1.0').tag(sync=True)
     _view_name = Unicode('DrawingView').tag(sync=True)
     _view_module = Unicode('drawingview').tag(sync=True)
     _view_module_version = Unicode('0.1.0').tag(sync=True)
