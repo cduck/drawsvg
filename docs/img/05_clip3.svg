@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="300" height="300" viewBox="0 0 300 300">
+<defs>
+<g id="clip30">
+<rect x="0" y="50" width="90" height="60" fill="#999" />
+<circle cx="25" cy="25" r="25" fill="#666" />
+<path d="M30,0 L80,0 L80,100 Z" fill="#ccc" />
+</g>
+<path d="M5,55 C25,5,45,-25,75,55 C85,85,20,105,40,55 Z" stroke="black" stroke-width="1" stroke-dasharray="3 2" fill="none" id="clip31" />
+<clipPath id="clip32">
+<use xlink:href="#clip31" x="0" y="0" />
+</clipPath>
+<text x="20" y="20" font-size="48" font-weight="bold" transform="rotate(60)" stroke="black" stroke-width="1" stroke-dasharray="3 2" fill="none" id="clip33">CLIP</text>
+<clipPath id="clip34">
+<use xlink:href="#clip33" x="0" y="0" />
+</clipPath>
+</defs>
+<use xlink:href="#clip30" x="0" y="0" clip-path="url(#clip32)" />
+<g transform="translate(100,0)">
+<use xlink:href="#clip30" />
+<use xlink:href="#clip31" x="0" y="0" />
+</g>
+<use xlink:href="#clip30" x="0" y="150" clip-path="url(#clip34)" />
+<g transform="translate(100,150)">
+<use xlink:href="#clip30" />
+<use xlink:href="#clip33" x="0" y="0" />
+</g>
+</svg>

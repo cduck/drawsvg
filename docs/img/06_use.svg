@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="220" height="170" viewBox="0 0 220 170">
+<defs>
+<g id="house" fill="none" stroke="black">
+<rect x="6" y="50" width="60" height="60" />
+<path d="M6,50 L36,9 L66,50" />
+<path d="M36,110 L36,80 L50,80 L50,110" />
+</g>
+</defs>
+<use xlink:href="#house" />
+<use xlink:href="#house" x="100" y="50" />
+<use xlink:href="#house" x="150" y="20" />
+</svg>

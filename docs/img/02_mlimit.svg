@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="300" height="100" viewBox="0 0 300 100">
+<defs>
+</defs>
+<path d="M0,30 L300,30" stroke="gray" />
+<g stroke-width="20" stroke="black" fill="none" stroke-linejoin="miter">
+<path d="M10,90 L40,30 L70,90" />
+<path d="M100,90 L130,30 L160,90" stroke-miterlimit="2.3" />
+<path d="M190,90 L220,30 L250,90" stroke-miterlimit="1" />
+</g>
+</svg>

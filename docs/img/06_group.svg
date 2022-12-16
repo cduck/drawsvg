@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="240" height="120" viewBox="0 0 240 120">
+<defs>
+</defs>
+<g id="house" fill="none" stroke="black">
+<rect x="6" y="50" width="60" height="60" />
+<path d="M6,50 L36,9 L66,50" />
+<path d="M36,110 L36,80 L50,80 L50,110" />
+</g>
+<g id="man" fill="none" stroke="blue">
+<circle cx="85" cy="56" r="10" />
+<path d="M85,66 L85,80" />
+<path d="M76,104 L85,80 L94,104" />
+<path d="M76,70 L85,76 L94,70" />
+</g>
+<g id="woman" fill="none" stroke="red">
+<circle cx="110" cy="56" r="10" />
+<path d="M110,66 L110,80 L100,90 L120,90 L110,80" />
+<path d="M104,104 L108,90" />
+<path d="M112,90 L116,104" />
+<path d="M101,70 L110,76 L119,70" />
+</g>
+</svg>
