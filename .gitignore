@@ -3,4 +3,4 @@ __pycache__
 /MANIFEST
 /dist
 /*.egg-info
-
+*.ipynb_checkpoint
