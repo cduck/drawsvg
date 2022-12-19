@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-     width="200" height="100" viewBox="0 -100 200 100">
-<defs>
-<_ fill="#ffc" stroke="blue" stroke-width="2" stroke-dasharray="5 3" id="d0"></_>
-</defs>
-<use xlink:href="#d0" />
-</svg>
