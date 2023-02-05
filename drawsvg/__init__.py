@@ -70,6 +70,12 @@ Example:
 from .defs import *
 from .raster import Raster
 from .drawing import Drawing
+from .types import (
+    Context,
+    DrawingElement,
+    DrawingBasicElement,
+    DrawingParentElement,
+)
 from .elements import *
 from .video import (
     render_svg_frames,

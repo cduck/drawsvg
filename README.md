@@ -255,10 +255,10 @@ from hyperbolic import euclid
 patch = lambda m: lambda self, **kw: m(self, draw, **kw)
 hyper.Circle.to_drawables = patch(hyper.Circle.toDrawables)
 hyper.Line.to_drawables = patch(hyper.Line.toDrawables)
-euclid.Arc.Arc.drawToPath = lambda self, path, includeM=True, includeL=False: path.arc(self.cx, -self.cy, self.r, self.startDeg, self.endDeg, cw=self.cw, include_m=includeM, include_l=includeL)
+euclid.Arc.Arc.drawToPath = lambda self, path, includeM=True, includeL=False: path.arc(self.cx, self.cy, self.r, self.startDeg, self.endDeg, cw=not self.cw, include_m=includeM, include_l=includeL)
 
 # Create drawing
-d = draw.Drawing(2, 2, origin='center')
+d = draw.Drawing(2, 2, origin='center', context=draw.Context(invert_y=True))
 d.set_render_size(500)
 d.append(draw.Circle(0, 0, 1, fill='orange'))
 group = draw.Group()
@@ -277,7 +277,7 @@ def redraw(points):
                 line = hyper.Line.fromPoints(*p1, *p2, segment=True)
                 group.draw(line, hwidth=0.2, fill='white')
     for x, y in points:
-        p = hyper.Point.fromEuclid(x, -y)
+        p = hyper.Point.fromEuclid(x, y)
         group.draw(hyper.Circle.fromCenterRadius(p, 0.1),
                    fill='green')
 redraw(click_list)
