@@ -24,11 +24,12 @@ class DrawingWidget(widgets.DOMWidget):
     frame_delay = Int(-1).tag(sync=True)
 
     def __init__(self, drawing, throttle=True, disable=False, frame_delay=-1):
-        '''
-        DrawingWidget is an interactive Jupyter notebook widget.  It works
-        similarly to displaying a Drawing as a cell output but DrawingWidget
-        can register callbacks for user mouse events.  Within a callback modify
-        the drawing then call .refresh() to update the output in real time.
+        '''An interactive Jupyter notebook widget.
+
+        This works similarly to displaying a Drawing as a cell output but
+        DrawingWidget can register callbacks for user mouse events.  Within a
+        callback modify the drawing then call .refresh() to update the output in
+        real time.
 
         Arguments:
             drawing: The initial Drawing to display.  Call .refresh() after
@@ -66,7 +67,7 @@ class DrawingWidget(widgets.DOMWidget):
         '''
         Redraw the displayed output with the current value of self.drawing.
         '''
-        self._image = self.drawing.asSvg()
+        self._image = self.drawing.as_svg()
 
     def _receive_msg(self, _, content, buffers):
         if not isinstance(content, dict):

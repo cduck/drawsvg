@@ -1,5 +1,11 @@
-import numpy as np
-import imageio
+try:
+    import numpy as np
+    import imageio
+except ImportError as e:
+    raise ImportError(
+        'Optional dependencies not installed. '
+        'Install with `python3 -m pip install "drawsvg[raster]"'
+    ) from e
 
 from .drawing import Drawing
 

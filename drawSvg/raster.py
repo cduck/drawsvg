@@ -1,68 +1,61 @@
-
 import base64
 import io
 import warnings
-from .missing import MissingModule
 
+from .url_encode import bytes_as_data_uri
 
 try:
     import cairosvg
 except OSError as e:
-    msg = (
-        'Failed to import CairoSVG. '
+    raise ImportError(
+        'Failed to load CairoSVG. '
         'drawSvg will be unable to output PNG or other raster image formats. '
-        'See https://github.com/cduck/drawSvg#prerequisites for more details.\n'
-        'Original OSError: {}'.format(e)
-    )
-    cairosvg = MissingModule(msg)
-    warnings.warn(msg, RuntimeWarning)
+        'See https://github.com/cduck/drawsvg#prerequisites for more details.'
+    ) from e
 except ImportError as e:
-    msg = (
-        'CairoSVG will need to be installed to rasterize images: Install with `pip3 install cairosvg`\n'
-        'Original ImportError: {}'.format(e)
-    )
-    cairosvg = MissingModule(msg)
-    warnings.warn(msg, RuntimeWarning)
+    raise ImportError(
+        'CairoSVG will need to be installed to rasterize images. '
+        'Install with `pip3 install cairosvg`.'
+    ) from e
 
 
 class Raster:
-    def __init__(self, pngData=None, pngFile=None):
-        self.pngData = pngData
-        self.pngFile = pngFile
-    def savePng(self, fname):
+    def __init__(self, png_data=None, png_file=None):
+        self.png_data = png_data
+        self.png_file = png_file
+    def save_png(self, fname):
         with open(fname, 'wb') as f:
-            f.write(self.pngData)
+            f.write(self.png_data)
     @staticmethod
-    def fromSvg(svgData):
-        pngData = cairosvg.svg2png(bytestring=svgData)
-        return Raster(pngData)
+    def from_svg(svg_data):
+        png_data = cairosvg.svg2png(bytestring=svg_data)
+        return Raster(png_data)
     @staticmethod
-    def fromSvgToFile(svgData, outFile):
-        cairosvg.svg2png(bytestring=svgData, write_to=outFile)
-        return Raster(None, pngFile=outFile)
+    def from_svg_to_file(svg_data, out_file):
+        cairosvg.svg2png(bytestring=svg_data, write_to=out_file)
+        return Raster(None, png_file=out_file)
     def _repr_png_(self):
-        if self.pngData:
-            return self.pngData
-        elif self.pngFile:
+        if self.png_data:
+            return self.png_data
+        elif self.png_file:
             try:
-                with open(self.pngFile, 'rb') as f:
+                with open(self.png_file, 'rb') as f:
                     return f.read()
             except TypeError:
                 pass
             try:
-                self.pngFile.seek(0)
-                return self.pngFile.read()
+                self.png_file.seek(0)
+                return self.png_file.read()
             except io.UnsupportedOperation:
                 pass
-    def asDataUri(self):
-        if self.pngData:
-            data = self.pngData
+    def as_data_uri(self):
+        if self.png_data:
+            data = self.png_data
         else:
             try:
-                with open(self.pngFile, 'rb') as f:
+                with open(self.png_file, 'rb') as f:
                     data = f.read()
             except TypeError:
-                self.pngFile.seek(0)
-                data = self.pngFile.read()
-        b64 = base64.b64encode(data)
-        return 'data:image/png;base64,' + b64.decode(encoding='ascii')
+                self.png_file.seek(0)
+                data = self.png_file.read()
+        return bytes_as_data_uri(data, mime='image/png')

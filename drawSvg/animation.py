@@ -3,7 +3,7 @@ import time
 from . import video
 
 
-class Animation:
+class FrameAnimation:
     def __init__(self, draw_func=None, callback=None):
         self.frames = []
         if draw_func is None:
@@ -26,7 +26,7 @@ class Animation:
         video.save_video(self.frames, file, **kwargs)
 
 
-class AnimationContext:
+class FrameAnimationContext:
     def __init__(self, draw_func=None, out_file=None,
                  jupyter=False, pause=False, clear=True, delay=0, disable=False,
                  video_args=None, _patch_delay=0.05):
@@ -39,7 +39,7 @@ class AnimationContext:
             callback = self.draw_jupyter_frame
         else:
             callback = None
-        self.anim = Animation(draw_func, callback=callback)
+        self.anim = FrameAnimation(draw_func, callback=callback)
         self.out_file = out_file
         self.pause = pause
         self.clear = clear
@@ -70,7 +70,7 @@ class AnimationContext:
                 self.anim.save_video(self.out_file, **self.video_args)
 
 
-def animate_video(out_file, draw_func=None, jupyter=False, **video_args):
+def frame_animate_video(out_file, draw_func=None, jupyter=False, **video_args):
     '''
     Returns a context manager that stores frames and saves a video when the
     context exits.
@@ -83,12 +83,12 @@ def animate_video(out_file, draw_func=None, jupyter=False, **video_args):
             anim.draw_frame(...)
     ```
     '''
-    return AnimationContext(draw_func=draw_func, out_file=out_file,
+    return FrameAnimationContext(draw_func=draw_func, out_file=out_file,
                             jupyter=jupyter, video_args=video_args)
 
 
-def animate_jupyter(draw_func=None, pause=False, clear=True, delay=0.1,
-                    **kwargs):
+def frame_animate_jupyter(draw_func=None, pause=False, clear=True, delay=0.1,
+                          **kwargs):
     '''
     Returns a context manager that displays frames in a Jupyter notebook.
 
@@ -100,5 +100,5 @@ def animate_jupyter(draw_func=None, pause=False, clear=True, delay=0.1,
             anim.draw_frame(...)
     ```
     '''
-    return AnimationContext(draw_func=draw_func, jupyter=True, pause=pause,
-                            clear=clear, delay=delay, **kwargs)
+    return FrameAnimationContext(draw_func=draw_func, jupyter=True, pause=pause,
+                                 clear=clear, delay=delay, **kwargs)
