@@ -4,14 +4,13 @@ import random
 import string
 
 from . import Raster
-from . import elements as elements_module
-from . import jupyter
+from . import types, elements as elements_module, jupyter
 
 
 
-SVG_START_FMT = '''<?xml version="1.0" encoding="UTF-8"?>
+SVG_START = '''<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-     width="{}" height="{}" viewBox="{} {} {} {}"'''
+     '''
 SVG_END = '</svg>'
 SVG_CSS_FMT = '<style><![CDATA[{}]]></style>'
 SVG_JS_FMT = '<script><![CDATA[{}]]></script>'
@@ -25,12 +24,15 @@ class Drawing:
     system origin is at the top-left corner with x-values increasing to the
     right and y-values increasing downward.
 
-    Supports iPython: If a Drawing is the last line of a cell, it will be
+    Supports Jupyter: If a Drawing is the last line of a cell, it will be
     displayed as an SVG below.
     '''
-    def __init__(self, width, height, origin=(0,0), id_prefix='d', **svg_args):
+    def __init__(self, width, height, origin=(0,0), context: types.Context=None,
+                 id_prefix='d', **svg_args):
         assert float(width) == width
         assert float(height) == height
+        if context is None:
+            context = types.Context()
         self.width = width
         self.height = height
         if isinstance(origin, str):
@@ -53,6 +55,7 @@ class Drawing:
         self.pixel_scale = 1
         self.render_width = None
         self.render_height = None
+        self.context = context
         self.id_prefix = str(id_prefix)
         self.svg_args = {}
         for k, v in svg_args.items():
@@ -61,6 +64,7 @@ class Drawing:
             if k[-1] == '-':
                 k = k[:-1]
             self.svg_args[k] = v
+        self.context.drawing_creation_hook(self)
     def set_render_size(self, w=None, h=None):
         self.render_width = w
         self.render_height = h
@@ -140,7 +144,7 @@ class Drawing:
     def append_def(self, element):
         self.other_defs.append(element)
     def append_title(self, text, **kwargs):
-        self.append(elements.Title(text, **kwargs))
+        self.append(elements_module.Title(text, **kwargs))
     def append_css(self, css_text):
         self.css_list.append(css_text)
     def append_javascriipt(self, js_text, onload=None):
@@ -162,9 +166,12 @@ class Drawing:
                 self.as_svg(f, randomize_ids=randomize_ids)
                 return f.getvalue()
         img_width, img_height = self.calc_render_size()
-        start_str = SVG_START_FMT.format(img_width, img_height, *self.view_box)
-        output_file.write(start_str)
-        elements_module.write_xml_node_args(self.svg_args, output_file)
+        svg_args = dict(
+                width=img_width, height=img_height,
+                viewBox=' '.join(map(str, self.view_box)))
+        svg_args.update(self.svg_args)
+        output_file.write(SVG_START)
+        self.context.write_svg_document_args(svg_args, output_file)
         output_file.write('>\n')
         if self.css_list:
             output_file.write(SVG_CSS_FMT.format('\n'.join(self.css_list)))
@@ -192,26 +199,26 @@ class Drawing:
         for element in self.other_defs:
             if hasattr(element, 'write_svg_element'):
                 element.write_svg_element(
-                        id_map, is_duplicate, output_file, False)
+                        id_map, is_duplicate, output_file, self.context, False)
                 output_file.write('\n')
         all_elements = self.all_elements()
         for element in all_elements:
             if hasattr(element, 'write_svg_defs'):
                 element.write_svg_defs(
-                        id_map, is_duplicate, output_file, False)
+                        id_map, is_duplicate, output_file, self.context, False)
         output_file.write('</defs>\n')
         # Generate ids for normal elements
         prev_def_set = set(prev_set)
         for element in all_elements:
             if hasattr(element, 'write_svg_element'):
                 element.write_svg_element(
-                        id_map, is_duplicate, output_file, True)
+                        id_map, is_duplicate, output_file, self.context, True)
         prev_set = prev_def_set
         # Write normal elements
         for element in all_elements:
             if hasattr(element, 'write_svg_element'):
                 element.write_svg_element(
-                        id_map, is_duplicate, output_file, False)
+                        id_map, is_duplicate, output_file, self.context, False)
                 output_file.write('\n')
         output_file.write(SVG_END)
     @staticmethod
