@@ -1,91 +1,118 @@
-
 from io import StringIO
-import base64
-import urllib.parse
-import re
 from collections import defaultdict
+import random
+import string
 
 from . import Raster
-from . import elements as elementsModule
+from . import elements as elements_module
+from . import jupyter
 
 
-STRIP_CHARS = ('\x00\x01\x02\x03\x04\x05\x06\x07\x08\x0b\x0c\x0e\x0f\x10\x11'
-               '\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f')
+
+SVG_START_FMT = '''<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="{}" height="{}" viewBox="{} {} {} {}"'''
+SVG_END = '</svg>'
+SVG_CSS_FMT = '<style><![CDATA[{}]]></style>'
+SVG_JS_FMT = '<script><![CDATA[{}]]></script>'
 
 
 class Drawing:
-    ''' A canvas to draw on
+    '''
+    A vector drawing.
 
-        Supports iPython: If a Drawing is the last line of a cell, it will be
-        displayed as an SVG below. '''
-    def __init__(self, width, height, origin=(0,0), idPrefix='d',
-                 displayInline=True, **svgArgs):
+    Append shapes and other elements with `.append()`.  The default coordinate
+    system origin is at the top-left corner with x-values increasing to the
+    right and y-values increasing downward.
+
+    Supports iPython: If a Drawing is the last line of a cell, it will be
+    displayed as an SVG below.
+    '''
+    def __init__(self, width, height, origin=(0,0), id_prefix='d', **svg_args):
         assert float(width) == width
         assert float(height) == height
         self.width = width
         self.height = height
-        if origin == 'center':
-            self.viewBox = (-width/2, -height/2, width, height)
+        if isinstance(origin, str):
+            self.view_box = {
+                'center': (-width/2, -height/2, width, height),
+                'top-left': (0, 0, width, height),
+                'top-right': (-width, 0, width, height),
+                'bottom-left': (0, -height, width, height),
+                'bottom-right': (-width, -height, width, height),
+            }[origin]
         else:
             origin = tuple(origin)
             assert len(origin) == 2
-            self.viewBox = origin + (width, height)
-        self.viewBox = (self.viewBox[0], -self.viewBox[1]-self.viewBox[3],
-                        self.viewBox[2], self.viewBox[3])
+            self.view_box = origin + (width, height)
         self.elements = []
-        self.orderedElements = defaultdict(list)
-        self.otherDefs = []
-        self.pixelScale = 1
-        self.renderWidth = None
-        self.renderHeight = None
-        self.idPrefix = str(idPrefix)
-        self.displayInline = displayInline
-        self.svgArgs = {}
-        for k, v in svgArgs.items():
+        self.ordered_elements = defaultdict(list)
+        self.other_defs = []
+        self.css_list = []
+        self.js_list = []
+        self.pixel_scale = 1
+        self.render_width = None
+        self.render_height = None
+        self.id_prefix = str(id_prefix)
+        self.svg_args = {}
+        for k, v in svg_args.items():
             k = k.replace('__', ':')
             k = k.replace('_', '-')
             if k[-1] == '-':
                 k = k[:-1]
-            self.svgArgs[k] = v
-        self.idIndex = 0
-    def setRenderSize(self, w=None, h=None):
-        self.renderWidth = w
-        self.renderHeight = h
+            self.svg_args[k] = v
+    def set_render_size(self, w=None, h=None):
+        self.render_width = w
+        self.render_height = h
         return self
-    def setPixelScale(self, s=1):
-        self.renderWidth = None
-        self.renderHeight = None
-        self.pixelScale = s
+    def set_pixel_scale(self, s=1):
+        self.render_width = None
+        self.render_height = None
+        self.pixel_scale = s
         return self
-    def calcRenderSize(self):
-        if self.renderWidth is None and self.renderHeight is None:
-            return (self.width * self.pixelScale,
-                    self.height * self.pixelScale)
-        elif self.renderWidth is None:
-            s = self.renderHeight / self.height
-            return self.width * s, self.renderHeight
-        elif self.renderHeight is None:
-            s = self.renderWidth / self.width
-            return self.renderWidth, self.height * s
+    def calc_render_size(self):
+        if self.render_width is None and self.render_height is None:
+            return (self.width * self.pixel_scale,
+                    self.height * self.pixel_scale)
+        elif self.render_width is None:
+            s = self.render_height / self.height
+            return self.width * s, self.render_height
+        elif self.render_height is None:
+            s = self.render_width / self.width
+            return self.render_width, self.height * s
         else:
-            return self.renderWidth, self.renderHeight
+            return self.render_width, self.render_height
     def draw(self, obj, *, z=None, **kwargs):
+        '''Add any object that knows how to draw itself to the drawing.
+
+        This object must implement the `to_drawables(**kwargs)` method
+        that returns a `DrawingElement` or list of elements.
+        '''
         if obj is None:
             return
-        if not hasattr(obj, 'writeSvgElement'):
-            elements = obj.toDrawables(elements=elementsModule, **kwargs)
+        if not hasattr(obj, 'write_svg_element'):
+            elements = obj.to_drawables(**kwargs)
         else:
             assert len(kwargs) == 0
-            elements = (obj,)
-        self.extend(elements, z=z)
+            elements = obj
+        if hasattr(elements, 'write_svg_element'):
+            self.append(elements, z=z)
+        else:
+            self.extend(elements, z=z)
     def append(self, element, *, z=None):
+        '''Add any `DrawingElement` to the drawing.
+
+        Do not append a `DrawingDef` referenced by other elements.  These are
+        included automatically.  Use `.append_def()` for an unreferenced
+        `DrawingDef`.
+        '''
         if z is not None:
-            self.orderedElements[z].append(element)
+            self.ordered_elements[z].append(element)
         else:
             self.elements.append(element)
     def extend(self, iterable, *, z=None):
         if z is not None:
-            self.orderedElements[z].extend(iterable)
+            self.ordered_elements[z].extend(iterable)
         else:
             self.elements.extend(iterable)
     def insert(self, i, element):
@@ -100,123 +127,118 @@ class Drawing:
         return self.elements.count(element)
     def reverse(self):
         self.elements.reverse()
-    def drawDef(self, obj, **kwargs):
-        if not hasattr(obj, 'writeSvgElement'):
-            elements = obj.toDrawables(elements=elementsModule, **kwargs)
+    def draw_def(self, obj, **kwargs):
+        if not hasattr(obj, 'write_svg_element'):
+            elements = obj.to_drawables(**kwargs)
         else:
             assert len(kwargs) == 0
-            elements = (obj,)
-        self.otherDefs.extend(elements)
-    def appendDef(self, element):
-        self.otherDefs.append(element)
-    def allElements(self):
-        ''' Returns self.elements and self.orderedElements as a single list. '''
-        output = list(self.elements)
-        for z in sorted(self.orderedElements):
-            output.extend(self.orderedElements[z])
-        return output
-    def asSvg(self, outputFile=None):
-        returnString = outputFile is None
-        if returnString:
-            outputFile = StringIO()
-        imgWidth, imgHeight = self.calcRenderSize()
-        startStr = '''<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-     width="{}" height="{}" viewBox="{} {} {} {}"'''.format(
-            imgWidth, imgHeight, *self.viewBox)
-        endStr = '</svg>'
-        outputFile.write(startStr)
-        elementsModule.writeXmlNodeArgs(self.svgArgs, outputFile)
-        outputFile.write('>\n<defs>\n')
-        # Write definition elements
-        def idGen(base=''):
-            idStr = self.idPrefix + base + str(self.idIndex)
-            self.idIndex += 1
-            return idStr
-        prevSet = set((id(defn) for defn in self.otherDefs))
-        def isDuplicate(obj):
-            nonlocal prevSet
-            dup = id(obj) in prevSet
-            prevSet.add(id(obj))
-            return dup
-        for element in self.otherDefs:
-            try:
-                element.writeSvgElement(idGen, isDuplicate, outputFile, False)
-                outputFile.write('\n')
-            except AttributeError:
-                pass
-        allElements = self.allElements()
-        for element in allElements:
-            try:
-                element.writeSvgDefs(idGen, isDuplicate, outputFile, False)
-            except AttributeError:
-                pass
-        outputFile.write('</defs>\n')
-        # Generate ids for normal elements
-        prevDefSet = set(prevSet)
-        for element in allElements:
-            try:
-                element.writeSvgElement(idGen, isDuplicate, outputFile, True)
-            except AttributeError:
-                pass
-        prevSet = prevDefSet
-        # Write normal elements
-        for element in allElements:
-            try:
-                element.writeSvgElement(idGen, isDuplicate, outputFile, False)
-                outputFile.write('\n')
-            except AttributeError:
-                pass
-        outputFile.write(endStr)
-        if returnString:
-            return outputFile.getvalue()
-    def saveSvg(self, fname, encoding='utf-8'):
-        with open(fname, 'w', encoding=encoding) as f:
-            self.asSvg(outputFile=f)
-    def savePng(self, fname):
-        self.rasterize(toFile=fname)
-    def rasterize(self, toFile=None):
-        if toFile:
-            return Raster.fromSvgToFile(self.asSvg(), toFile)
+            elements = obj
+        if hasattr(elements, 'write_svg_element'):
+            self.append_def(elements)
         else:
-            return Raster.fromSvg(self.asSvg())
+            self.other_defs.extend(elements)
+    def append_def(self, element):
+        self.other_defs.append(element)
+    def append_title(self, text, **kwargs):
+        self.append(elements.Title(text, **kwargs))
+    def append_css(self, css_text):
+        self.css_list.append(css_text)
+    def append_javascriipt(self, js_text, onload=None):
+        if onload:
+            if self.svg_args.get('onload'):
+                self.svg_args['onload'] = f'{self.svg_args["onload"]};{onload}'
+            else:
+                self.svg_args['onload'] = onload
+        self.js_list.append(js_text)
+    def all_elements(self):
+        '''Return self.elements and self.ordered_elements as a single list.'''
+        output = list(self.elements)
+        for z in sorted(self.ordered_elements):
+            output.extend(self.ordered_elements[z])
+        return output
+    def as_svg(self, output_file=None, randomize_ids=False):
+        if output_file is None:
+            with StringIO() as f:
+                self.as_svg(f, randomize_ids=randomize_ids)
+                return f.getvalue()
+        img_width, img_height = self.calc_render_size()
+        start_str = SVG_START_FMT.format(img_width, img_height, *self.view_box)
+        output_file.write(start_str)
+        elements_module.write_xml_node_args(self.svg_args, output_file)
+        output_file.write('>\n')
+        if self.css_list:
+            output_file.write(SVG_CSS_FMT.format('\n'.join(self.css_list)))
+            output_file.write('\n')
+        if self.js_list:
+            output_file.write(SVG_JS_FMT.format('\n'.join(self.js_list)))
+            output_file.write('\n')
+        output_file.write('<defs>\n')
+        # Write definition elements
+        id_prefix = self.id_prefix
+        id_prefix = self._random_id() if randomize_ids else self.id_prefix
+        id_index = 0
+        def id_gen(base=''):
+            nonlocal id_index
+            id_str = f'{id_prefix}{base}{id_index}'
+            id_index += 1
+            return id_str
+        id_map = defaultdict(id_gen)
+        prev_set = set((id(defn) for defn in self.other_defs))
+        def is_duplicate(obj):
+            nonlocal prev_set
+            dup = id(obj) in prev_set
+            prev_set.add(id(obj))
+            return dup
+        for element in self.other_defs:
+            if hasattr(element, 'write_svg_element'):
+                element.write_svg_element(
+                        id_map, is_duplicate, output_file, False)
+                output_file.write('\n')
+        all_elements = self.all_elements()
+        for element in all_elements:
+            if hasattr(element, 'write_svg_defs'):
+                element.write_svg_defs(
+                        id_map, is_duplicate, output_file, False)
+        output_file.write('</defs>\n')
+        # Generate ids for normal elements
+        prev_def_set = set(prev_set)
+        for element in all_elements:
+            if hasattr(element, 'write_svg_element'):
+                element.write_svg_element(
+                        id_map, is_duplicate, output_file, True)
+        prev_set = prev_def_set
+        # Write normal elements
+        for element in all_elements:
+            if hasattr(element, 'write_svg_element'):
+                element.write_svg_element(
+                        id_map, is_duplicate, output_file, False)
+                output_file.write('\n')
+        output_file.write(SVG_END)
+    @staticmethod
+    def _random_id(length=8):
+        return (random.choice(string.ascii_letters)
+                + ''.join(random.choices(
+                    string.ascii_letters+string.digits, k=length-1)))
+    def save_svg(self, fname, encoding='utf-8'):
+        with open(fname, 'w', encoding=encoding) as f:
+            self.as_svg(output_file=f)
+    def save_png(self, fname):
+        self.rasterize(to_file=fname)
+    def rasterize(self, to_file=None):
+        if to_file:
+            return Raster.from_svg_to_file(self.as_svg(), to_file)
+        else:
+            return Raster.from_svg(self.as_svg())
     def _repr_svg_(self):
-        ''' Display in Jupyter notebook '''
-        if not self.displayInline:
-            return None
-        return self.asSvg()
-    def _repr_html_(self):
-        ''' Display in Jupyter notebook '''
-        if self.displayInline:
-            return None
-        prefix = b'data:image/svg+xml;base64,'
-        data = base64.b64encode(self.asSvg().encode(encoding='utf-8'))
-        src = (prefix+data).decode(encoding='ascii')
-        return '<img src="{}">'.format(src)
-    def asDataUri(self, strip_chars=STRIP_CHARS):
-        ''' Returns a data URI with base64 encoding. '''
-        data = self.asSvg()
-        search = re.compile('|'.join(strip_chars))
-        data_safe = search.sub(lambda m: '', data)
-        b64 = base64.b64encode(data_safe.encode())
-        return 'data:image/svg+xml;base64,' + b64.decode(encoding='ascii')
-    def asUtf8DataUri(self, unsafe_chars='"', strip_chars=STRIP_CHARS):
-        ''' Returns a data URI without base64 encoding.
-
-            The characters '#&%' are always escaped.  '#' and '&' break parsing
-            of the data URI.  If '%' is not escaped, plain text like '%50' will
-            be incorrectly decoded to 'P'.  The characters in `strip_chars`
-            cause the SVG not to render even if they are escaped. '''
-        data = self.asSvg()
-        unsafe_chars = (unsafe_chars or '') + '#&%'
-        replacements = {
-            char: urllib.parse.quote(char, safe='')
-            for char in unsafe_chars
-        }
-        replacements.update({
-            char: ''
-            for char in strip_chars
-        })
-        search = re.compile('|'.join(map(re.escape, replacements.keys())))
-        data_safe = search.sub(lambda m: replacements[m.group(0)], data)
-        return 'data:image/svg+xml;utf8,' + data_safe
+        '''Display in Jupyter notebook.'''
+        return self.as_svg(randomize_ids=True)
+    def display_inline(self):
+        '''Display inline in the Jupyter web page.'''
+        return jupyter.JupyterSvgInline(self.as_svg(randomize_ids=True))
+    def display_iframe(self):
+        '''Display within an iframe the Jupyter web page.'''
+        w, h = self.calc_render_size()
+        return jupyter.JupyterSvgFrame(self.as_svg(), w, h)
+    def display_image(self):
+        '''Display within an img in the Jupyter web page.'''
+        return jupyter.JupyterSvgImage(self.as_svg())
