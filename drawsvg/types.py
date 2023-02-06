@@ -1,17 +1,22 @@
+from typing import Optional, Sequence, Union
+
 from collections import defaultdict
 import dataclasses
 
 from . import elements
+from .native_animation import SyncedAnimationConfig, AnimationHelperData
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class Context:
     '''Additional drawing configuration that can modify element's SVG output.'''
     invert_y: bool = False
+    animation_config: Optional[SyncedAnimationConfig] = None
 
     def drawing_creation_hook(self, d):
         '''Called by Drawing on initialization.'''
-        ...
+        if self.animation_config:
+            self.animation_config.drawing_creation_hook(d, context=self)
 
     def override_view_box(self, view_box):
         if self.invert_y:
@@ -25,12 +30,13 @@ class Context:
     def override_args(self, args):
         args = dict(args)
         if self.invert_y:
-            if 'cy' in args:
-                # Flip y for circle and ellipse
-                try:
-                    args['cy'] = -args['cy']
-                except TypeError:
-                    pass
+            for y_like_arg in ('cy', 'y1', 'y2'):
+                if y_like_arg in args:
+                    # Flip y for circle, ellipse, line, gradient, etc.
+                    try:
+                        args[y_like_arg] = -args[y_like_arg]
+                    except TypeError:
+                        pass
             if 'y' in args:
                 # Flip y for most elements
                 try:
@@ -100,7 +106,7 @@ class Context:
             if v is None: continue
             if isinstance(v, DrawingElement):
                 mapped_id = v.id
-                if id_map and id(v) in id_map:
+                if id_map is not None and id(v) in id_map:
                     mapped_id = id_map[id(v)]
                 if mapped_id is None:
                     continue
@@ -150,29 +156,40 @@ class DrawingBasicElement(DrawingElement):
     def __init__(self, **args):
         self.args = {}
         for k, v in args.items():
-            k = k.replace('__', ':')
-            k = k.replace('_', '-')
-            if k[-1] == '-':
-                k = k[:-1]
-            self.args[k] = v
+            self.args[normalize_attribute_name(k)] = v
         self.children = []
         self.ordered_children = defaultdict(list)
+        self.animation_data = AnimationHelperData()
+        self._cached_context = None
+        self._cached_extra_children_with_context = None
     def check_children_allowed(self):
         if not self.has_content:
             raise RuntimeError(
                     '{} does not support children'.format(type(self)))
-    def all_children(self):
+    def _extra_children_with_context_avoid_recompute(self, context=None):
+        if (self._cached_extra_children_with_context is not None
+                and self._cached_context == context):
+            return self._cached_extra_children_with_context
+        self._cached_context = context
+        self._cached_extra_children_with_context = (
+                self.extra_children_with_context(context))
+        return self._cached_extra_children_with_context
+    def extra_children_with_context(self, context=None):
+        return self.animation_data.children_with_context(context)
+    def all_children(self, context=None):
         '''Return self.children and self.ordered_children as a single list.'''
         output = list(self.children)
         for z in sorted(self.ordered_children):
             output.extend(self.ordered_children[z])
+        output.extend(
+                self._extra_children_with_context_avoid_recompute(context))
         return output
     @property
     def id(self):
         return self.args.get('id', None)
     def write_svg_element(self, id_map, is_duplicate, output_file, context,
                           dry_run, force_dup=False):
-        children = self.all_children()
+        children = self.all_children(context=context)
         if dry_run:
             if is_duplicate(self) and self.id is None:
                 id_map[id(self)]
@@ -182,13 +199,13 @@ class DrawingBasicElement(DrawingElement):
             if self.has_content:
                 self.write_content(
                         id_map, is_duplicate, output_file, context, dry_run)
-            if children:
+            if children is not None and len(children):
                 self.write_children_content(
                         id_map, is_duplicate, output_file, context, dry_run)
             return
         if is_duplicate(self) and not force_dup:
             mapped_id = self.id
-            if id_map and id(self) in id_map:
+            if id_map is not None and id(self) in id_map:
                 mapped_id = id_map[id(self)]
             output_file.write('<use xlink:href="#{}" />'.format(mapped_id))
             return
@@ -199,14 +216,14 @@ class DrawingBasicElement(DrawingElement):
             override_args = dict(override_args)
             override_args['id'] = id_map[id(self)]
         context.write_tag_args(override_args, output_file, id_map)
-        if not self.has_content and not children:
+        if not self.has_content and (children is None or len(children) == 0):
             output_file.write(' />')
         else:
             output_file.write('>')
             if self.has_content:
                 self.write_content(
                         id_map, is_duplicate, output_file, context, dry_run)
-            if children:
+            if children is not None and len(children):
                 self.write_children_content(
                         id_map, is_duplicate, output_file, context, dry_run)
             output_file.write('</')
@@ -225,7 +242,7 @@ class DrawingBasicElement(DrawingElement):
 
         This will not be called if has_content is False.
         '''
-        children = self.all_children()
+        children = self.all_children(context=context)
         if dry_run:
             for child in children:
                 child.write_svg_element(
@@ -242,7 +259,7 @@ class DrawingBasicElement(DrawingElement):
                        dry_run):
         super().write_svg_defs(
                 id_map, is_duplicate, output_file, context, dry_run)
-        for child in self.all_children():
+        for child in self.all_children(context=context):
             child.write_svg_defs(
                     id_map, is_duplicate, output_file, context, dry_run)
     def __eq__(self, other):
@@ -258,6 +275,15 @@ class DrawingBasicElement(DrawingElement):
         self.children.extend(animate_iterable)
     def append_title(self, text, **kwargs):
         self.children.append(elements.Title(text, **kwargs))
+    def add_key_frame(self, time, animation_args=None, **attr_values):
+        self._cached_extra_children_with_context = None
+        self.animation_data.add_key_frame(
+                time, animation_args=animation_args, **attr_values)
+    def add_attribute_key_sequence(self, attr, times, values, *,
+                                   animation_args=None):
+        self._cached_extra_children_with_context = None
+        self.animation_data.add_attribute_key_sequence(
+                attr, times, values, animation_args=animation_args)
 
 
 class DrawingParentElement(DrawingBasicElement):
@@ -266,7 +292,7 @@ class DrawingParentElement(DrawingBasicElement):
     def __init__(self, children=(), ordered_children=None, **args):
         super().__init__(**args)
         self.children = list(children)
-        if ordered_children:
+        if ordered_children is not None and len(ordered_children):
             self.ordered_children.update(
                 (z, list(v)) for z, v in ordered_children.items())
         if self.children or self.ordered_children:
@@ -277,7 +303,8 @@ class DrawingParentElement(DrawingBasicElement):
         if not hasattr(obj, 'write_svg_element'):
             elements = obj.to_drawables(**kwargs)
         else:
-            assert len(kwargs) == 0
+            if len(kwargs) > 0:
+                raise ValueError('unexpected kwargs')
             elements = obj
         if hasattr(elements, 'write_svg_element'):
             self.append(elements, z=z)
@@ -298,3 +325,11 @@ class DrawingParentElement(DrawingBasicElement):
     def write_content(self, id_map, is_duplicate, output_file, context,
                       dry_run):
         pass
+
+
+def normalize_attribute_name(name):
+    name = name.replace('__', ':')
+    name = name.replace('_', '-')
+    if name[-1] == '-':
+        name = name[:-1]
+    return name

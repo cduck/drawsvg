@@ -7,6 +7,10 @@ from . import url_encode
 from .types import DrawingElement, DrawingBasicElement, DrawingParentElement
 
 
+def escape_cdata(content):
+    return content.replace(']]>', ']]]]><![CDATA[>')
+
+
 class NoElement(DrawingElement):
     ''' A drawing element that has no effect '''
     def __init__(self):
@@ -27,7 +31,7 @@ class Group(DrawingParentElement):
     '''
     TAG_NAME = 'g'
 
-class Raw(DrawingBasicElement):
+class Raw(DrawingElement):
     '''Raw unescaped text to include in the SVG output.
 
     Special XML characters like '<' and '&' in the content may have unexpected
@@ -38,8 +42,8 @@ class Raw(DrawingBasicElement):
         super().__init__()
         self.content = content
         self.defs = defs
-    def write_content(self, id_map, is_duplicate, output_file, context,
-                      dry_run):
+    def write_svg_element(self, id_map, is_duplicate, output_file, context,
+                          dry_run, force_dup=False):
         if dry_run:
             return
         output_file.write(self.content)
@@ -82,10 +86,11 @@ class Animate(DrawingBasicElement):
             from_ = from_or_values
         if isinstance(other_elem, str) and not other_elem.startswith('#'):
             other_elem = '#' + other_elem
-        kwargs.update(attributeName=attributeName, to=to, dur=dur, begin=begin)
-        kwargs.setdefault('values', values)
-        kwargs.setdefault('from_', from_)
-        super().__init__(xlink__href=other_elem, **kwargs)
+        args = dict(
+                attributeName=attributeName, dur=dur, begin=begin, from_=from_,
+                to=to, values=values)
+        args.update(kwargs)
+        super().__init__(xlink__href=other_elem, **args)
 
     def get_svg_defs(self):
         return [v for k, v in self.args.items()
@@ -222,7 +227,8 @@ class Text(DrawingParentElement):
 
     Useful SVG attributes:
     - text_anchor: start, middle, end
-    - dominant_baseline: auto, central, middle, hanging, text-top, ...
+    - dominant_baseline:
+        auto, central, middle, hanging, text-top, mathematical, ...
     See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/text
 
     CairoSVG bug with letter spacing text on a path: The first two letters are
@@ -312,7 +318,7 @@ class Text(DrawingParentElement):
                 assert sum(bool(line) for line in text) <= 1, (
                         'Logic error, __new__ should handle multi-line paths')
                 for i, line in enumerate(text):
-                    if not line:
+                    if line is None or len(line) == 0:
                         continue
                     dy = '{}em'.format(line_offset + i*line_height)
                     tspan = TSpan(line, dy=dy, **tspan_args)
@@ -338,7 +344,7 @@ class Text(DrawingParentElement):
         output_file.write(self.escaped_text)
     def write_children_content(self, id_map, is_duplicate, output_file, context,
                                dry_run):
-        children = self.all_children()
+        children = self.all_children(context=context)
         for child in children:
             child.write_svg_element(
                     id_map, is_duplicate, output_file, context, dry_run)
@@ -560,7 +566,10 @@ class Lines(Path):
     def __init__(self, sx, sy, *points, close=False, **kwargs):
         super().__init__(d='', **kwargs)
         self.M(sx, sy)
-        assert len(points) % 2 == 0
+        if len(points) % 2 != 0:
+            raise TypeError(
+                    'expected an even number of positional arguments x0, y0, '
+                    'x1, y1, ...')
         for i in range(len(points) // 2):
             self.L(points[2*i], points[2*i+1])
         if close:
