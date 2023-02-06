@@ -86,3 +86,13 @@ from .frame_animation import (
     frame_animate_video,
     frame_animate_jupyter,
 )
+from .native_animation import (
+    SyncedAnimationConfig,
+    animate_element_sequence,
+    animate_text_sequence,
+)
+from .url_encode import (
+    bytes_as_data_uri,
+    svg_as_data_uri,
+    svg_as_utf8_data_uri,
+)

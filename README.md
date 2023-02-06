@@ -72,9 +72,9 @@ d.append(draw.Text(['Multi-line', 'text'], 8, path=p, text_anchor='end', center=
 # Draw multiple circular arcs
 d.append(draw.ArcLine(60, 20, 20, 60, 270,
         stroke='red', stroke_width=5, fill='red', fill_opacity=0.2))
-d.append(draw.Arc(60, 20, 20, 60, 270, cw=False,
+d.append(draw.Arc(60, 20, 20, 90, -60, cw=True,
         stroke='green', stroke_width=3, fill='none'))
-d.append(draw.Arc(60, 20, 20, 270, 60, cw=True,
+d.append(draw.Arc(60, 20, 20, -60, 90, cw=False,
         stroke='blue', stroke_width=1, fill='black', fill_opacity=0.3))
 
 # Draw arrows
@@ -100,6 +100,51 @@ d  # Display as SVG
 
 [![Example output image](https://raw.githubusercontent.com/cduck/drawsvg/master/examples/example1.png)](https://github.com/cduck/drawsvg/blob/master/examples/example1.svg)
 
+### SVG-Native Animation with playback controls
+```python
+import drawsvg as draw
+
+d = draw.Drawing(400, 200, origin='center',
+    animation_config=draw.types.SyncedAnimationConfig(
+        # Animation configuration
+        duration=8,  # Seconds
+        show_playback_progress=True,
+        show_playback_controls=True,
+    )
+)
+d.append(draw.Rectangle(-200, -100, 400, 200, fill='#eee'))  # Background
+d.append(draw.Circle(0, 0, 40, fill='green'))  # Center circle
+circle = draw.Circle(0, 0, 0, fill='silver', stroke='gray')  # Moving circle
+# Animation
+circle.add_key_frame(0, cx=-100, cy=0, r=0, stroke_width=0)
+circle.add_key_frame(2, cx=0, cy=-100, r=40, stroke_width=5)
+circle.add_key_frame(4, cx=100, cy=0, r=0, stroke_width=0)
+circle.add_key_frame(6, cx=0, cy=100, r=40, stroke_width=5)
+circle.add_key_frame(8, cx=-100, cy=0, r=0, stroke_width=0)
+d.append(circle)
+
+# Changing text
+draw.native_animation.animate_text_sequence(
+        d,
+        [0, 2, 4, 6],
+        ['0', '1', '2', '3'],
+        30, 0, 1, fill='yellow', center=True)
+
+# Save as a standalone animated SVG or HTML
+d.save_svg('examples/playback-controls.svg')
+d.save_html('examples/playback-controls.html')
+
+# Display in Jupyter notebook
+#d.display_image()  # Display SVG as an image (will not be interactive)
+#d.display_iframe()  # Display as interactive SVG (alternative)
+d.display_inline()  # Display as interactive SVG
+```
+
+[![Example animated image](https://github.com/cduck/drawsvg/blob/v2/examples/playback-controls.svg)](https://raw.githubusercontent.com/cduck/drawsvg/v2/examples/playback-controls.svg)
+
+Note: GitHub blocks the playback controls.
+Download the above SVG and open it in a web browser to try.
+
 ### Gradients
 ```python
 import drawsvg as draw
@@ -115,15 +160,15 @@ gradient.add_stop(1/10, 'red', 0)
 
 # Draw a shape to fill with the gradient
 p = draw.Path(fill=gradient, stroke='black', stroke_width=0.002)
-p.arc(0, 0.35, 0.7, 30, 120)
-p.arc(0, 0.35, 0.5, 120, 30, cw=True, include_l=True)
+p.arc(0, 0.35, 0.7, -30, -120, cw=False)
+p.arc(0, 0.35, 0.5, -120, -30, cw=True, include_l=True)
 p.Z()
 d.append(p)
 
 # Draw another shape to fill with the same gradient
 p = draw.Path(fill=gradient, stroke='red', stroke_width=0.002)
-p.arc(0, 0.35, 0.75, 130, 160)
-p.arc(0, 0.35, 0, 160, 130, cw=True, include_l=True)
+p.arc(0, 0.35, 0.75, -130, -160, cw=False)
+p.arc(0, 0.35, 0, -160, -130, cw=True, include_l=True)
 p.Z()
 d.append(p)
 
@@ -302,7 +347,7 @@ widget
 
 Note: The above example currently only works in `jupyter notebook`, not `jupyter lab`.
 
-### Animation with Python
+### Frame-by-Frame Animation
 ```python
 import drawsvg as draw
 
@@ -332,7 +377,7 @@ with draw.frame_animate_jupyter(draw_frame, delay=0.05) as anim:
 
 ![Example output image](https://raw.githubusercontent.com/cduck/drawsvg/master/examples/example6.gif)
 
-### Asynchronous Animation in Jupyter
+### Asynchronous Frame-based Animation in Jupyter
 ```python
 # Jupyter cell 1:
 import drawsvg as draw

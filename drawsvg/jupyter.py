@@ -26,7 +26,8 @@ class JupyterSvgFrame:
     svg: str
     width: float
     height: float
+    mime: str = 'image/svg+xml'
     def _repr_html_(self):
-        uri = url_encode.svg_as_utf8_data_uri(self.svg)
+        uri = url_encode.svg_as_data_uri(self.svg, mime=self.mime)
         return (f'<iframe src="{uri}" width="{self.width}" '
                 f'height="{self.height}" style="border:0" />')
