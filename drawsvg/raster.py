@@ -10,13 +10,18 @@ def delay_import_cairo():
     except OSError as e:
         raise ImportError(
             'Failed to load CairoSVG. '
-            'drawSvg will be unable to output PNG or other raster image formats. '
-            'See https://github.com/cduck/drawsvg#prerequisites for more details.'
+            'drawSvg will be unable to output PNG or other raster image '
+            'formats. '
+            'See https://github.com/cduck/drawsvg#full-feature-install '
+            'for more details.'
         ) from e
     except ImportError as e:
         raise ImportError(
             'CairoSVG will need to be installed to rasterize images. '
-            'Install with `pip3 install cairosvg`.'
+            'Install with `python3 -m pip install "drawsvg[all]"` '
+            'or `python3 -m pip install "drawsvg[raster]"`. '
+            'See https://github.com/cduck/drawsvg#full-feature-install '
+            'for more details.'
         ) from e
     return cairosvg
 
