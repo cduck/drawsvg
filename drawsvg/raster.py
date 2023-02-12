@@ -4,19 +4,21 @@ import warnings
 
 from .url_encode import bytes_as_data_uri
 
-try:
-    import cairosvg
-except OSError as e:
-    raise ImportError(
-        'Failed to load CairoSVG. '
-        'drawSvg will be unable to output PNG or other raster image formats. '
-        'See https://github.com/cduck/drawsvg#prerequisites for more details.'
-    ) from e
-except ImportError as e:
-    raise ImportError(
-        'CairoSVG will need to be installed to rasterize images. '
-        'Install with `pip3 install cairosvg`.'
-    ) from e
+def delay_import_cairo():
+    try:
+        import cairosvg
+    except OSError as e:
+        raise ImportError(
+            'Failed to load CairoSVG. '
+            'drawSvg will be unable to output PNG or other raster image formats. '
+            'See https://github.com/cduck/drawsvg#prerequisites for more details.'
+        ) from e
+    except ImportError as e:
+        raise ImportError(
+            'CairoSVG will need to be installed to rasterize images. '
+            'Install with `pip3 install cairosvg`.'
+        ) from e
+    return cairosvg
 
 
 class Raster:
@@ -28,10 +30,12 @@ class Raster:
             f.write(self.png_data)
     @staticmethod
     def from_svg(svg_data):
+        cairosvg = delay_import_cairo()
         png_data = cairosvg.svg2png(bytestring=svg_data)
         return Raster(png_data)
     @staticmethod
     def from_svg_to_file(svg_data, out_file):
+        cairosvg = delay_import_cairo()
         cairosvg.svg2png(bytestring=svg_data, write_to=out_file)
         return Raster(None, png_file=out_file)
     def _repr_png_(self):
