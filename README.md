@@ -101,7 +101,7 @@ d  # Display as SVG
 
 [![Example output image](https://raw.githubusercontent.com/cduck/drawsvg/master/examples/example1.png)](https://github.com/cduck/drawsvg/blob/master/examples/example1.svg)
 
-### SVG-Native Animation with playback controls
+### SVG-native animation with playback controls
 ```python
 import drawsvg as draw
 
@@ -188,7 +188,7 @@ d
 
 [![Example output image](https://raw.githubusercontent.com/cduck/drawsvg/master/examples/example2.png)](https://github.com/cduck/drawsvg/blob/master/examples/example2.svg)
 
-### Duplicate geometry and clip paths
+### Duplicate geometry, clip paths
 ```python
 import drawsvg as draw
 
@@ -206,6 +206,9 @@ d.append(circle)
 
 # Make a transparent copy, cropped again
 g = draw.Group(opacity=0.5, clip_path=clip)
+# Here, circle is not directly appended to the drawing.
+# drawsvg recognizes that `Use` references `circle` and automatically adds
+# `circle` to the <defs></defs> section of the SVG.
 g.append(draw.Use(circle, 0.25, -0.1))
 d.append(g)
 
@@ -215,6 +218,34 @@ d.rasterize()
 ```
 
 [![Example output image](https://raw.githubusercontent.com/cduck/drawsvg/master/examples/example3.png)](https://github.com/cduck/drawsvg/blob/master/examples/example3.svg)
+
+### Organizing and duplicating drawing elements
+```python
+import drawsvg as draw
+
+d = draw.Drawing(300, 100)
+d.set_pixel_scale(2)
+
+# Use groups to contain other elements
+# Children elements of groups inherit the coordinate system (transform)
+# and attribute values
+group = draw.Group(fill='orange', transform='rotate(-20)')
+group.append(draw.Rectangle(0, 10, 20, 40))  # This rectangle will be orange
+group.append(draw.Circle(30, 40, 10))  # This circle will also be orange
+group.append(draw.Circle(50, 40, 10, fill='green'))  # This circle will not
+d.append(group)
+
+# Use the Use element to make duplicates of elements
+# Each duplicate can be placed at an offset (x, y) location and any additional
+# attributes (like fill color) are inherited if the element didn't specify them.
+d.append(draw.Use(group, 80, 0, stroke='black', stroke_width=1))
+d.append(draw.Use(group, 80, 20, stroke='blue', stroke_width=2))
+d.append(draw.Use(group, 80, 40, stroke='red', stroke_width=3))
+
+d.display_inline()
+```
+
+[![Example output image](https://raw.githubusercontent.com/cduck/drawsvg/master/examples/example8.png)](https://github.com/cduck/drawsvg/blob/master/examples/example8.svg)
 
 ### Implementing other SVG tags
 ```python
