@@ -1,20 +1,21 @@
-# drawsvg
+[![drawsvg logo](https://raw.githubusercontent.com/cduck/drawsvg/v2/examples/logo.svg)](https://github.com/cduck/drawSvg/blob/v2/examples/logo.ipynb)
 
-A Python 3 library for programmatically generating SVG images (vector drawings) and rendering them or displaying them in a Jupyter notebook.
+A Python 3 library for programmatically generating SVG images and animations that can render and display your drawings in a Jupyter notebook or Jupyter lab.
 
-Most common SVG tags are supported and others can easily be added by writing a small subclass of `DrawableBasicElement` or `DrawableParentElement`.
+Most common SVG tags are supported and others can easily be added by writing a small subclass of `DrawableBasicElement` or `DrawableParentElement`.  [Nearly all SVG attributes](https://developer.mozilla.org/en-US/docs/Web/SVG) are supported via keyword args (e.g. Python keyword argument `fill_opacity=0.5` becomes SVG attribute `fill-opacity="0.5"`).
 
-An interactive [Jupyter notebook](https://jupyter.org) widget, `drawsvg.widgets.DrawingWidget`, is included that can update drawings based on mouse events.
+An interactive [Jupyter notebook](https://jupyter.org) widget, `drawsvg.widgets.DrawingWidget`, [is included](#interactive-widget) that can update drawings based on mouse events.  The widget does not yet work in Jupyter lab.
 
 # Install
 
-drawsvg is available on PyPI:
+~drawsvg is available on PyPI:~ Install the pre-release of drawsvg 2.0:
 
 ```bash
-$ pip3 install "drawsvg[all]"
+$ python3 -m pip install -e "git+https://github.com/cduck/drawsvg.git@v2#egg=drawsvg[all]"
 ```
+~`$ pip3 install "drawsvg[all]"`~
 
-## Prerequisites
+## Prerequisites (optional)
 
 Cairo needs to be installed separately. When Cairo is installed, drawsvg can output PNG or other image formats in addition to SVG. See platform-specific [instructions for Linux, Windows, and macOS from Cairo](https://www.cairographics.org/download/). Below are some examples for installing Cairo on Linux distributions and macOS.
 
@@ -131,8 +132,8 @@ draw.native_animation.animate_text_sequence(
         30, 0, 1, fill='yellow', center=True)
 
 # Save as a standalone animated SVG or HTML
-d.save_svg('examples/playback-controls.svg')
-d.save_html('examples/playback-controls.html')
+d.save_svg('playback-controls.svg')
+d.save_html('playback-controls.html')
 
 # Display in Jupyter notebook
 #d.display_image()  # Display SVG as an image (will not be interactive)
@@ -140,7 +141,7 @@ d.save_html('examples/playback-controls.html')
 d.display_inline()  # Display as interactive SVG
 ```
 
-[![Example animated image](https://github.com/cduck/drawsvg/blob/v2/examples/playback-controls.svg)](https://raw.githubusercontent.com/cduck/drawsvg/v2/examples/playback-controls.svg)
+[![Example animated image](https://raw.githubusercontent.com/cduck/drawsvg/master/examples/playback-controls.svg)](https://github.com/cduck/drawsvg/blob/master/examples/playback-controls.svg)
 
 Note: GitHub blocks the playback controls.
 Download the above SVG and open it in a web browser to try.
