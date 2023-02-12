@@ -25,6 +25,7 @@ class LinearGradient(DrawingDef):
         stop = GradientStop(offset=offset, stop_color=color,
                             stop_opacity=opacity, **kwargs)
         self.append(stop)
+        return stop
 
 class RadialGradient(DrawingDef):
     '''
@@ -41,6 +42,7 @@ class RadialGradient(DrawingDef):
         stop = GradientStop(offset=offset, stop_color=color,
                             stop_opacity=opacity, **kwargs)
         self.append(stop)
+        return stop
 
 class GradientStop(DrawingDefSub):
     '''A control point for a radial or linear gradient.'''
