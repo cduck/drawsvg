@@ -1,4 +1,4 @@
-[![drawsvg logo](https://raw.githubusercontent.com/cduck/drawsvg/v2/examples/logo.svg?sanitize=true)](https://github.com/cduck/drawSvg/blob/v2/examples/logo.ipynb)
+[![drawsvg logo](https://raw.githubusercontent.com/cduck/drawsvg/master/examples/logo.svg?sanitize=true)](https://github.com/cduck/drawSvg/blob/master/examples/logo.svg)
 
 A Python 3 library for programmatically generating SVG images and animations that can render and display your drawings in a Jupyter notebook or Jupyter lab.
 
@@ -6,32 +6,25 @@ Most common SVG tags are supported and others can easily be added by writing a s
 
 An interactive [Jupyter notebook](https://jupyter.org) widget, `drawsvg.widgets.DrawingWidget`, [is included](#interactive-widget) that can update drawings based on mouse events.  The widget does not yet work in Jupyter lab.
 
+
 # Install
 
-~drawsvg is available on PyPI:~ Install the pre-release of drawsvg 2.0:
-
+Drawsvg is available on PyPI:
 ```bash
-$ python3 -m pip install -e "git+https://github.com/cduck/drawsvg.git@v2#egg=drawsvg[all]"
-```
-~`$ pip3 install "drawsvg[all]"`~
-
-## Prerequisites (optional)
-
-Cairo needs to be installed separately. When Cairo is installed, drawsvg can output PNG or other image formats in addition to SVG. See platform-specific [instructions for Linux, Windows, and macOS from Cairo](https://www.cairographics.org/download/). Below are some examples for installing Cairo on Linux distributions and macOS.
-
-**Ubuntu**
-
-```bash
-$ sudo apt-get install libcairo2
+$ python3 -m pip install "drawsvg~=2.0"
 ```
 
-**macOS**
+To enable raster image support (PNG, MP4, and GIF), follow the [full-feature install instructions](#full-feature-install).
 
-Using [homebrew](https://brew.sh/):
 
-```bash
-$ brew install cairo
-```
+## Upgrading from version 1.x
+
+Major breaking changes:
+
+- camelCase method and argument names are now snake\_case and the package name is lowercase (except for arguments that correspond to camelCase SVG attributes).
+- The default coordinate system y-axis now matches the SVG coordinate system (y increases down the screen, x increases right)
+- How to fix `ModuleNotFoundError: No module named 'drawSvg'` (with a capital S)?  Either pip install `"drawSvg~=1.9"` or update your code for drawsvg 2.x (for example, change `drawSvg` to `drawsvg` and `d.saveSvg` to `d.save_svg`).
+
 
 # Examples
 
@@ -95,7 +88,7 @@ d.save_svg('example.svg')
 d.save_png('example.png')
 
 # Display in Jupyter notebook
-d.rasterize()  # Display as PNG
+#d.rasterize()  # Display as PNG
 d  # Display as SVG
 ```
 
@@ -106,23 +99,29 @@ d  # Display as SVG
 import drawsvg as draw
 
 d = draw.Drawing(400, 200, origin='center',
-    animation_config=draw.types.SyncedAnimationConfig(
-        # Animation configuration
-        duration=8,  # Seconds
-        show_playback_progress=True,
-        show_playback_controls=True,
-    )
-)
+        animation_config=draw.types.SyncedAnimationConfig(
+            # Animation configuration
+            duration=8,  # Seconds
+            show_playback_progress=True,
+            show_playback_controls=True))
 d.append(draw.Rectangle(-200, -100, 400, 200, fill='#eee'))  # Background
 d.append(draw.Circle(0, 0, 40, fill='green'))  # Center circle
-circle = draw.Circle(0, 0, 0, fill='silver', stroke='gray')  # Moving circle
+
 # Animation
-circle.add_key_frame(0, cx=-100, cy=0, r=0, stroke_width=0)
-circle.add_key_frame(2, cx=0, cy=-100, r=40, stroke_width=5)
-circle.add_key_frame(4, cx=100, cy=0, r=0, stroke_width=0)
-circle.add_key_frame(6, cx=0, cy=100, r=40, stroke_width=5)
-circle.add_key_frame(8, cx=-100, cy=0, r=0, stroke_width=0)
+circle = draw.Circle(0, 0, 0, fill='gray')  # Moving circle
+circle.add_key_frame(0, cx=-100, cy=0,    r=0)
+circle.add_key_frame(2, cx=0,    cy=-100, r=40)
+circle.add_key_frame(4, cx=100,  cy=0,    r=0)
+circle.add_key_frame(6, cx=0,    cy=100,  r=40)
+circle.add_key_frame(8, cx=-100, cy=0,    r=0)
 d.append(circle)
+r = draw.Rectangle(0, 0, 0, 0, fill='silver')  # Moving square
+r.add_key_frame(0, x=-100, y=0,       width=0,  height=0)
+r.add_key_frame(2, x=0-20, y=-100-20, width=40, height=40)
+r.add_key_frame(4, x=100,  y=0,       width=0,  height=0)
+r.add_key_frame(6, x=0-20, y=100-20,  width=40, height=40)
+r.add_key_frame(8, x=-100, y=0,       width=0,  height=0)
+d.append(r)
 
 # Changing text
 draw.native_animation.animate_text_sequence(
@@ -138,6 +137,8 @@ d.save_html('playback-controls.html')
 # Display in Jupyter notebook
 #d.display_image()  # Display SVG as an image (will not be interactive)
 #d.display_iframe()  # Display as interactive SVG (alternative)
+#d.as_gif('orbit.gif', fps=10)  # Render as a GIF image, optionally save to file
+#d.as_mp4('orbig.mp4', fps=60)  # Render as an MP4 video, optionally save to file
 d.display_inline()  # Display as interactive SVG
 ```
 
@@ -146,13 +147,15 @@ d.display_inline()  # Display as interactive SVG
 Note: GitHub blocks the playback controls.
 Download the above SVG and open it in a web browser to try.
 
+https://user-images.githubusercontent.com/2476062/221400434-1529d237-e9bf-4363-a143-0ece75cd349a.mp4
+
 ### Patterns and gradients
 ```python
 import drawsvg as draw
 
 d = draw.Drawing(1.5, 0.8, origin='center')
 
-# Background pattern (not supported by Cairo, rasterize will not show it)
+# Background pattern (not supported by Cairo, d.rasterize() will not show it)
 pattern = draw.Pattern(width=0.13, height=0.23)
 pattern.append(draw.Rectangle(0, 0, .1, .1, fill='yellow'))
 pattern.append(draw.Rectangle(0, .1, .1, .1, fill='orange'))
@@ -218,7 +221,8 @@ d.append(g)
 
 # Display
 d.set_render_size(400)
-d.rasterize()
+#d.rasterize()  # Display as PNG
+d  # Display as SVG
 ```
 
 [![Example output image](https://raw.githubusercontent.com/cduck/drawsvg/master/examples/example3.png)](https://github.com/cduck/drawsvg/blob/master/examples/example3.svg)
@@ -329,7 +333,7 @@ d  # Display in Jupyter notebook
 ```python
 import drawsvg as draw
 from drawsvg.widgets import DrawingWidget
-import hyperbolic.poincare.shapes as hyper  # pip3 install hyperbolic
+import hyperbolic.poincare.shapes as hyper  # python3 -m pip install hyperbolic
 from hyperbolic import euclid
 
 # Patch the hyperbolic package for drawsvg version 2
@@ -439,3 +443,41 @@ global_variable = 'b'  # Animation above now displays 'b'
 ![Example output image](https://raw.githubusercontent.com/cduck/drawsvg/master/examples/example7.gif)
 
 Note: The above example currently only works in `jupyter notebook`, not `jupyter lab`.
+
+
+---
+
+# Full-feature install
+Drawsvg may be either be installed with no dependencies (only SVG and SVG-native animation will work):
+```bash
+$ python3 -m pip install "drawsvg~=2.0"
+```
+
+Or drawsvg may be installed with extra dependencies to support PNG, MP4, and GIF output:
+```bash
+$ python3 -m pip install "drawsvg[all]~=2.0"
+```
+
+An additional required package, [Cairo](https://www.cairographics.org/download/), cannot be installed with pip and must be installed separately.  When Cairo is installed, drawsvg can output PNG and other image formats in addition to SVG.  Install it with your preferred package manager.  Examples:
+
+**Ubuntu**
+
+```bash
+$ sudo apt install libcairo2
+```
+
+**macOS**
+
+Using [homebrew](https://brew.sh/) (may require a Python version installed with `brew install python`):
+
+```bash
+$ brew install cairo
+```
+
+**All platforms**
+
+Using [Anaconda](https://docs.conda.io/en/latest/miniconda.html) (may require Python and cairo installed in the same conda environment):
+
+```bash
+$ conda install -c anaconda cairo
+```

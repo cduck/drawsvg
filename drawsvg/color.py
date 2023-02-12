@@ -6,7 +6,10 @@ try:
 except ImportError as e:
     raise ImportError(
         'Optional dependencies not installed. '
-        'Install with `python3 -m pip install "drawsvg[color]"'
+        'Install with `python3 -m pip install "drawsvg[all]"` '
+        'or `python3 -m pip install "drawsvg[color]"`. '
+        'See https://github.com/cduck/drawsvg#full-feature-install '
+        'for more details.'
     ) from e
 
 

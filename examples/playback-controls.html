@@ -4,17 +4,22 @@
 </head>
 <body>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-    width="400" height="200" viewBox="-200.0 -100.0 400 200" onload="svgOnLoad(event)">
+    width="400" height="200" viewBox="-200.0 -100.0 400 200" onload="svgOnLoad(event);">
 <defs>
 </defs>
 <rect x="-200" y="-100" width="400" height="200" fill="#eee" />
 <circle cx="0" cy="0" r="40" fill="green" />
-<circle cx="0" cy="0" r="0" fill="silver" stroke="gray">
+<circle cx="0" cy="0" r="0" fill="gray">
 <animate attributeName="cx" dur="8s" values="-100;0;100;0;-100" keyTimes="0;0.25;0.5;0.75;1" repeatCount="indefinite" fill="freeze" />
 <animate attributeName="cy" dur="8s" values="0;-100;0;100;0" keyTimes="0;0.25;0.5;0.75;1" repeatCount="indefinite" fill="freeze" />
 <animate attributeName="r" dur="8s" values="0;40;0;40;0" keyTimes="0;0.25;0.5;0.75;1" repeatCount="indefinite" fill="freeze" />
-<animate attributeName="stroke-width" dur="8s" values="0;5;0;5;0" keyTimes="0;0.25;0.5;0.75;1" repeatCount="indefinite" fill="freeze" />
 </circle>
+<rect x="0" y="0" width="0" height="0" fill="silver">
+<animate attributeName="x" dur="8s" values="-100;-20;100;-20;-100" keyTimes="0;0.25;0.5;0.75;1" repeatCount="indefinite" fill="freeze" />
+<animate attributeName="y" dur="8s" values="0;-120;0;80;0" keyTimes="0;0.25;0.5;0.75;1" repeatCount="indefinite" fill="freeze" />
+<animate attributeName="width" dur="8s" values="0;40;0;40;0" keyTimes="0;0.25;0.5;0.75;1" repeatCount="indefinite" fill="freeze" />
+<animate attributeName="height" dur="8s" values="0;40;0;40;0" keyTimes="0;0.25;0.5;0.75;1" repeatCount="indefinite" fill="freeze" />
+</rect>
 <text x="0" y="1" font-size="30" fill="yellow" text-anchor="middle" dominant-baseline="central">0<animate attributeName="visibility" dur="8s" values="visible;hidden;hidden" keyTimes="0;0.25;1" repeatCount="indefinite" fill="freeze" /></text>
 <text x="0" y="1" font-size="30" fill="yellow" text-anchor="middle" dominant-baseline="central">1<animate attributeName="visibility" dur="8s" values="hidden;visible;hidden;hidden" keyTimes="0;0.25;0.5;1" repeatCount="indefinite" fill="freeze" /></text>
 <text x="0" y="1" font-size="30" fill="yellow" text-anchor="middle" dominant-baseline="central">2<animate attributeName="visibility" dur="8s" values="hidden;hidden;visible;hidden;hidden" keyTimes="0;0.25;0.5;0.75;1" repeatCount="indefinite" fill="freeze" /></text>
