@@ -1,4 +1,4 @@
-[![drawsvg logo](https://raw.githubusercontent.com/cduck/drawsvg/v2/examples/logo.svg)](https://github.com/cduck/drawSvg/blob/v2/examples/logo.ipynb)
+[![drawsvg logo](https://raw.githubusercontent.com/cduck/drawsvg/v2/examples/logo.svg?sanitize=true)](https://github.com/cduck/drawSvg/blob/v2/examples/logo.ipynb)
 
 A Python 3 library for programmatically generating SVG images and animations that can render and display your drawings in a Jupyter notebook or Jupyter lab.
 
@@ -141,18 +141,22 @@ d.save_html('playback-controls.html')
 d.display_inline()  # Display as interactive SVG
 ```
 
-[![Example animated image](https://raw.githubusercontent.com/cduck/drawsvg/master/examples/playback-controls.svg)](https://github.com/cduck/drawsvg/blob/master/examples/playback-controls.svg)
+[![Example animated image](https://raw.githubusercontent.com/cduck/drawsvg/master/examples/playback-controls.svg?sanitize=true)](https://github.com/cduck/drawsvg/blob/master/examples/playback-controls.svg)
 
 Note: GitHub blocks the playback controls.
 Download the above SVG and open it in a web browser to try.
 
-### Gradients
+### Patterns and gradients
 ```python
 import drawsvg as draw
 
 d = draw.Drawing(1.5, 0.8, origin='center')
 
-d.draw(draw.Rectangle(-0.75, -0.5, 1.5, 1, fill='#ddd'))
+# Background pattern (not supported by Cairo, rasterize will not show it)
+pattern = draw.Pattern(width=0.13, height=0.23)
+pattern.append(draw.Rectangle(0, 0, .1, .1, fill='yellow'))
+pattern.append(draw.Rectangle(0, .1, .1, .1, fill='orange'))
+d.draw(draw.Rectangle(-0.75, -0.5, 1.5, 1, fill=pattern, fill_opacity=0.4))
 
 # Create gradient
 gradient = draw.RadialGradient(0, 0.35, 0.7*10)
@@ -186,9 +190,9 @@ d.set_render_size(w=600)
 d
 ```
 
-[![Example output image](https://raw.githubusercontent.com/cduck/drawsvg/master/examples/example2.png)](https://github.com/cduck/drawsvg/blob/master/examples/example2.svg)
+[![Example output image](https://raw.githubusercontent.com/cduck/drawsvg/master/examples/example2.svg?sanitize=true)](https://github.com/cduck/drawsvg/blob/master/examples/example2.svg)
 
-### Duplicate geometry, clip paths
+### Duplicate geometry and clip paths
 ```python
 import drawsvg as draw
 

@@ -29,7 +29,7 @@ class LinearGradient(DrawingDef):
 
 class RadialGradient(DrawingDef):
     '''
-    A radial gradient to use as a fill or other color
+    A radial gradient to use as a fill or other color.
 
     Has <stop> nodes as children, added with `.add_stop()`.
     '''
@@ -48,6 +48,20 @@ class GradientStop(DrawingDefSub):
     '''A control point for a radial or linear gradient.'''
     TAG_NAME = 'stop'
     has_content = False
+
+class Pattern(DrawingDef):
+    '''
+    A repeating pattern of other drawing elements to use as a fill or other
+    color.
+
+    Width and height specify the repetition period.  Append regular drawing
+    elements to create the pattern.
+    '''
+    TAG_NAME = 'pattern'
+    def __init__(self, width, height, x=None, y=None,
+                 patternUnits='userSpaceOnUse', **kwargs):
+        super().__init__(width=width, height=height, x=x, y=y,
+                         patternUnits=patternUnits, **kwargs)
 
 class ClipPath(DrawingDef):
     '''
