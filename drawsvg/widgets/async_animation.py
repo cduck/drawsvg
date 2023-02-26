@@ -5,8 +5,7 @@ from .drawing_widget import DrawingWidget
 
 
 class AsyncAnimation(DrawingWidget):
-    '''AsyncAnimation is a Jupyter notebook widget for asynchronously displaying
-    an animation.
+    '''A Jupyter notebook widget for asynchronously displaying an animation.
 
     Example:
         # Jupyter cell 1:
