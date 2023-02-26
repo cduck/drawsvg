@@ -32,7 +32,7 @@ setup(
     install_requires = [
     ],
     extras_require = {
-        'render': [
+        'raster': [
             'cairoSVG~=2.3',
             'numpy~=1.16',
             'imageio~=2.5',
