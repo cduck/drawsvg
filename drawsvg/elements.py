@@ -44,6 +44,7 @@ class Raw(DrawingElement):
         super().__init__()
         self.content = content
         self.defs = defs
+        self.id = None
     def write_svg_element(self, id_map, is_duplicate, output_file, lcontext,
                           dry_run, force_dup=False):
         if dry_run:
