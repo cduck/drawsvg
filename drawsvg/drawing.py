@@ -5,8 +5,7 @@ import random
 import string
 import xml.sax.saxutils as xml
 
-from . import Raster
-from . import types, elements as elements_module, jupyter
+from . import types, elements as elements_module, raster, video, jupyter
 
 
 XML_HEADER = '<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -322,10 +321,60 @@ svg {{
         self.rasterize(to_file=fname, context=context)
     def rasterize(self, to_file=None, context=None):
         if to_file is not None:
-            return Raster.from_svg_to_file(
+            return raster.Raster.from_svg_to_file(
                     self.as_svg(context=context), to_file)
         else:
-            return Raster.from_svg(self.as_svg(context=context))
+            return raster.Raster.from_svg(self.as_svg(context=context))
+    def as_animation_frames(self, fps=10, duration=None, context=None):
+        '''Returns a list of synced animation frames that can be converted to a
+        video.'''
+        if context is None:
+            context = self.context
+        if duration is None and context.animation_config is not None:
+            duration = context.animation_config.duration
+        if duration is None:
+            raise ValueError('unknown animation duration, specify duration')
+        frames = []
+        for i in range(int(duration * fps + 1)):
+            time = i / fps
+            frame_context = dataclasses.replace(
+                    context,
+                    animation_config=dataclasses.replace(
+                        context.animation_config,
+                        freeze_frame_at=time,
+                        show_playback_controls=False))
+            frames.append(self.display_inline(context=frame_context))
+        return frames
+    def save_gif(self, fname, fps=10, duration=None, context=None):
+        self.as_gif(fname, fps=fps, duration=duration, context=context)
+    def save_mp4(self, fname, fps=10, duration=None, context=None):
+        self.as_mp4(fname, fps=fps, duration=duration, context=context)
+    def as_video(self, to_file=None, fps=10, duration=None,
+                  mime_type=None, file_type=None, context=None, verbose=False):
+        if file_type is None and mime_type is None:
+            if to_file is None or '.' not in str(to_file):
+                file_type = 'mp4'
+            else:
+                file_type = str(to_file).split('.')[-1]
+        if file_type is None:
+            file_type = mime_type.split('/')[-1]
+        elif mime_type is None:
+            mime_type = f'video/{file_type}'
+        frames = self.as_animation_frames(
+                fps=fps, duration=duration, context=context)
+        return video.RasterVideo.from_frames(
+                frames, to_file=to_file, fps=fps, mime_type=mime_type,
+                file_type=file_type, verbose=verbose)
+    def as_gif(self, to_file=None, fps=10, duration=None, context=None,
+               verbose=False):
+        return self.as_video(
+                to_file=to_file, fps=fps, duration=duration, context=context,
+                mime_type='image/gif', file_type='gif', verbose=verbose)
+    def as_mp4(self, to_file=None, fps=10, duration=None, context=None,
+               verbose=False):
+        return self.as_video(
+                to_file=to_file, fps=fps, duration=duration, context=context,
+                mime_type='video/mp4', file_type='mp4', verbose=verbose)
     def _repr_svg_(self):
         '''Display in Jupyter notebook.'''
         return self.as_svg(randomize_ids=True)

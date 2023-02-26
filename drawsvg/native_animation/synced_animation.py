@@ -194,12 +194,10 @@ class AnimationHelperData:
         timeline.extend(times, values)
 
     def interpolate_at_time(self, at_time):
-        r = {
+        return {
             name: timeline.interpolate_at_time(at_time)
             for name, timeline in self.attr_timelines.items()
         }
-        print(r)
-        return r
 
     def _timelines_adjusted_for_context(self, lcontext=None):
         all_timelines = dict(self.attr_timelines)
@@ -255,7 +253,6 @@ class AnimationHelperData:
 
 
 def linear_interpolate_value(times, values, at_time):
-    print(times, values, at_time)
     if len(times) == 0:
         return 0
     idx = sum(t <= at_time for t in times)
