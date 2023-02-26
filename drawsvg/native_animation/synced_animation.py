@@ -47,18 +47,29 @@ class SyncedAnimationConfig:
     def total_duration(self):
         return self.start_delay + self.duration + self.end_delay
 
-    def drawing_creation_hook(self, d, context):
-        '''Called by Drawing on initialization.'''
+    def extra_css(self, d, context):
+        return []
+
+    def extra_javascript(self, d, context):
+        config = self._with_filled_defaults(d, context)
+        if self.show_playback_controls:
+            return [config.controls_js]
+        return []
+
+    def extra_onload_js(self, d, context):
+        config = self._with_filled_defaults(d, context)
+        if self.show_playback_controls:
+            return [config.controls_js_onload]
+        return []
+
+    def extra_drawing_elements(self, d, context):
         config = self._with_filled_defaults(d, context)
         if self.show_playback_progress or self.show_playback_controls:
-            # Append control UI
+            # Control UI
             controls = config.controls_draw_function(
                     config, hidden=not self.show_playback_progress)
-            d.append(controls, z=float('inf'))
-        if self.show_playback_controls:
-            # Add control JavaScript
-            d.append_javascript(config.controls_js,
-                                onload=config.controls_js_onload)
+            return [controls]
+        return []
 
     def _with_filled_defaults(self, d, context):
         # By default place the controls along the bottom edge
@@ -122,18 +133,20 @@ class AnimatedAttributeTimeline:
             repeat_count = 1
             fill = 'freeze'
         dur_str = f'{total_duration}s'
+        values = self.values
+        times = self.times
         key_times = ';'.join(
             str(max(0, min(1, round(
                     (start_delay + t) / total_duration, 3))))
-            for t in self.times
+            for t in times
         )
-        values_str = ';'.join(map(str, self.values))
+        values_str = ';'.join(map(str, values))
         if not key_times.startswith('0;'):
             key_times = '0;' + key_times
-            values_str = f'{self.values[0]};' + values_str
+            values_str = f'{values[0]};' + values_str
         if not key_times.endswith(';1'):
             key_times = key_times + ';1'
-            values_str = values_str + f';{self.values[-1]}'
+            values_str = values_str + f';{values[-1]}'
         attrs = dict(
                 dur=dur_str,
                 values=values_str,
@@ -167,12 +180,112 @@ class AnimationHelperData:
             self.attr_timelines[attr] = timeline
         timeline.extend(times, values)
 
-    def children_with_context(self, context=None):
+    def _timelines_adjusted_for_context(self, lcontext=None):
+        all_timelines = dict(self.attr_timelines)
+        if lcontext is not None and lcontext.context.invert_y:
+            # Invert cy, y1, y2, ...
+            for name, timeline in self.attr_timelines.items():
+                if name != 'y' and lcontext.context.is_attr_inverted(name):
+                    inv_timeline = AnimatedAttributeTimeline(
+                            timeline.name, timeline.animate_attrs,
+                            timeline.times, [-v for v in timeline.values])
+                    all_timelines[name] = inv_timeline
+            # Invert -y - height
+            y_attrs = None
+            if 'height' in all_timelines.keys():
+                height_timeline = all_timelines['height']
+                htimes = height_timeline.times
+                hvalues = height_timeline.values
+                y_attrs = height_timeline.animate_attrs
+            else:
+                height_timeline = None
+                htimes = [0]
+                hvalues = [lcontext.element.args.get('height', 0)]
+            if 'y' in all_timelines.keys():
+                y_timeline = all_timelines['y']
+                ytimes = y_timeline.times
+                yvalues = y_timeline.values
+                y_attrs = y_timeline.animate_attrs
+            else:
+                y_timeline = None
+                ytimes = [0]
+                yvalues = [lcontext.element.args.get('y', 0)]
+            if y_timeline is not None or height_timeline is not None:
+                ytimes, yvalues = _merge_timeline_inverted_y_values(
+                        ytimes, yvalues, htimes, hvalues)
+                if ytimes is not None:
+                    y_timeline = AnimatedAttributeTimeline(
+                            'y', y_attrs, ytimes, yvalues)
+                    all_timelines['y'] = y_timeline
+        return all_timelines
+
+    def children_with_context(self, lcontext=None):
+        all_timelines = self._timelines_adjusted_for_context(lcontext)
         return [
-            timeline.as_animate_element(context.animation_config)
-            for timeline in self.attr_timelines.values()
+            timeline.as_animate_element(lcontext.context.animation_config)
+            for timeline in all_timelines.values()
         ]
 
+
+def _merge_timeline_inverted_y_values(ytimes, yvalues, htimes, hvalues):
+    if len(yvalues) == 1:
+        try:
+            return htimes, [-yvalues[0]-h for h in hvalues]
+        except TypeError:
+            return None, None
+    elif len(hvalues) == 1:
+        try:
+            return ytimes, [-y-hvalues[0] for y in yvalues]
+        except TypeError:
+            return None, None
+    elif ytimes == htimes:
+        try:
+            return ytimes, [-y-h for y, h in zip(yvalues, hvalues)]
+        except TypeError:
+            return None, None
+    def interpolate(times, values, at_time):
+        if len(times) == 0:
+            return 0
+        idx = sum(t <= at_time for t in times)
+        if idx >= len(times):
+            return values[-1]
+        elif idx <= 0:
+            return values[0]
+        elif at_time == times[idx-1]:
+            return values[idx-1]
+        else:
+            fraction = (at_time-times[idx-1]) / (times[idx]-times[idx-1])
+            return values[idx-1] * (1-fraction)+ (values[idx] * fraction)
+    try:
+        # Offset y-value by height if invert_y
+        # Merge key_times for y and height animations
+        new_times = []
+        new_values = []
+        hi = yi = 0
+        inf = float('inf')
+        ht = htimes[0] if len(htimes) else inf
+        yt = ytimes[0] if len(ytimes) else inf
+        while ht < inf and yt < inf:
+            if yt < ht:
+                h_val = interpolate(htimes, hvalues, yt)
+                new_times.append(yt)
+                new_values.append(-yvalues[yi] - h_val)
+                yi += 1
+            elif ht < yt:
+                y_val = interpolate(ytimes, yvalues, ht)
+                new_times.append(ht)
+                new_values.append(-y_val - hvalues[hi])
+                hi += 1
+            else:
+                new_times.append(yt)
+                new_values.append(-yvalues[yi] - hvalues[hi])
+                yi += 1
+                hi += 1
+            yt = ytimes[yi] if yi < len(ytimes) else inf
+            ht = htimes[hi] if hi < len(htimes) else inf
+        return new_times, new_values
+    except TypeError:
+        return None, None
 
 def animate_element_sequence(times, element_sequence):
     '''Animate a list of elements to appear one-at-a-time in sequence.

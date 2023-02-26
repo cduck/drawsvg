@@ -13,10 +13,27 @@ class Context:
     invert_y: bool = False
     animation_config: Optional[SyncedAnimationConfig] = None
 
-    def drawing_creation_hook(self, d):
-        '''Called by Drawing on initialization.'''
+    def extra_prepost_drawing_elements(self, d):
+        pre, post = [], []
         if self.animation_config:
-            self.animation_config.drawing_creation_hook(d, context=self)
+            post.extend(self.animation_config.extra_drawing_elements(
+                    d, context=self))
+        return pre, post
+
+    def extra_css(self, d):
+        if self.animation_config:
+            return self.animation_config.extra_css(d, context=self)
+        return []
+
+    def extra_javascript(self, d):
+        if self.animation_config:
+            return self.animation_config.extra_javascript(d, context=self)
+        return []
+
+    def extra_onload_js(self, d):
+        if self.animation_config:
+            return self.animation_config.extra_onload_js(d, context=self)
+        return []
 
     def override_view_box(self, view_box):
         if self.invert_y:
@@ -26,6 +43,9 @@ class Context:
             x, y, w, h = view_box
             view_box = (x, -y-h, w, h)
         return view_box
+
+    def is_attr_inverted(self, name):
+        return self.invert_y and name in ('y', 'cy', 'y1', 'y2')
 
     def override_args(self, args):
         args = dict(args)
@@ -90,15 +110,15 @@ class Context:
                     raise
         return args
 
-    def write_svg_document_args(self, args, output_file):
+    def write_svg_document_args(self, d, args, output_file):
         '''Called by Drawing during SVG output of the <svg> tag.'''
         args['viewBox'] = self.override_view_box(args['viewBox'])
+        onload_list = self.extra_onload_js(d)
+        onload_list.extend(args.get('onload', '').split(';'))
+        onload = ';'.join(onload_list)
+        if onload:
+            args['onload'] = onload
         self._write_tag_args(args, output_file)
-
-    def write_tag_args(self, args, output_file, id_map=None):
-        '''Called by an element during SVG output of its tag.'''
-        self._write_tag_args(
-                self.override_args(args), output_file, id_map=id_map)
 
     def _write_tag_args(self, args, output_file, id_map=None):
         '''Called by an element during SVG output of its tag.'''
@@ -117,29 +137,43 @@ class Context:
             output_file.write(' {}="{}"'.format(k,v))
 
 
+@dataclasses.dataclass(frozen=True)
+class LocalContext:
+    context: Context
+    element: 'DrawingElement'
+    parent: Union['DrawingElement', 'Drawing']
+    siblings: Sequence['DrawingElement'] = ()
+
+    def write_tag_args(self, args, output_file, id_map=None):
+        '''Called by an element during SVG output of its tag.'''
+        self.context._write_tag_args(
+                self.context.override_args(args), output_file, id_map=id_map)
+
+
 class DrawingElement:
     '''Base class for drawing elements.
 
     Subclasses must implement write_svg_element.
     '''
-    def write_svg_element(self, id_map, is_duplicate, output_file, context,
+    def write_svg_element(self, id_map, is_duplicate, output_file, lcontext,
                           dry_run, force_dup=False):
         raise NotImplementedError('Abstract base class')
     def get_svg_defs(self):
         return ()
     def get_linked_elems(self):
         return ()
-    def write_svg_defs(self, id_map, is_duplicate, output_file, context,
+    def write_svg_defs(self, id_map, is_duplicate, output_file, lcontext,
                        dry_run):
         for defn in self.get_svg_defs():
+            local = LocalContext(lcontext.context, defn, self, ())
             if is_duplicate(defn):
                 continue
             defn.write_svg_defs(
-                    id_map, is_duplicate, output_file, context, dry_run)
+                    id_map, is_duplicate, output_file, local, dry_run)
             if defn.id is None:
                 id_map[id(defn)]
             defn.write_svg_element(
-                    id_map, is_duplicate, output_file, context, dry_run,
+                    id_map, is_duplicate, output_file, local, dry_run,
                     force_dup=True)
             if not dry_run:
                 output_file.write('\n')
@@ -166,30 +200,30 @@ class DrawingBasicElement(DrawingElement):
         if not self.has_content:
             raise RuntimeError(
                     '{} does not support children'.format(type(self)))
-    def _extra_children_with_context_avoid_recompute(self, context=None):
+    def _extra_children_with_context_avoid_recompute(self, lcontext=None):
         if (self._cached_extra_children_with_context is not None
-                and self._cached_context == context):
+                and self._cached_context == lcontext.context):
             return self._cached_extra_children_with_context
-        self._cached_context = context
+        self._cached_context = lcontext.context
         self._cached_extra_children_with_context = (
-                self.extra_children_with_context(context))
+                self.extra_children_with_context(lcontext))
         return self._cached_extra_children_with_context
-    def extra_children_with_context(self, context=None):
-        return self.animation_data.children_with_context(context)
-    def all_children(self, context=None):
+    def extra_children_with_context(self, lcontext=None):
+        return self.animation_data.children_with_context(lcontext)
+    def all_children(self, lcontext=None):
         '''Return self.children and self.ordered_children as a single list.'''
         output = list(self.children)
         for z in sorted(self.ordered_children):
             output.extend(self.ordered_children[z])
         output.extend(
-                self._extra_children_with_context_avoid_recompute(context))
+                self._extra_children_with_context_avoid_recompute(lcontext))
         return output
     @property
     def id(self):
         return self.args.get('id', None)
-    def write_svg_element(self, id_map, is_duplicate, output_file, context,
+    def write_svg_element(self, id_map, is_duplicate, output_file, lcontext,
                           dry_run, force_dup=False):
-        children = self.all_children(context=context)
+        children = self.all_children(lcontext=lcontext)
         if dry_run:
             if is_duplicate(self) and self.id is None:
                 id_map[id(self)]
@@ -198,10 +232,10 @@ class DrawingBasicElement(DrawingElement):
                     id_map[id(elem.id)]
             if self.has_content:
                 self.write_content(
-                        id_map, is_duplicate, output_file, context, dry_run)
+                        id_map, is_duplicate, output_file, lcontext, dry_run)
             if children is not None and len(children):
                 self.write_children_content(
-                        id_map, is_duplicate, output_file, context, dry_run)
+                        id_map, is_duplicate, output_file, lcontext, dry_run)
             return
         if is_duplicate(self) and not force_dup:
             mapped_id = self.id
@@ -215,53 +249,58 @@ class DrawingBasicElement(DrawingElement):
         if id(self) in id_map:
             override_args = dict(override_args)
             override_args['id'] = id_map[id(self)]
-        context.write_tag_args(override_args, output_file, id_map)
+        lcontext.write_tag_args(override_args, output_file, id_map)
         if not self.has_content and (children is None or len(children) == 0):
             output_file.write(' />')
         else:
             output_file.write('>')
             if self.has_content:
                 self.write_content(
-                        id_map, is_duplicate, output_file, context, dry_run)
+                        id_map, is_duplicate, output_file, lcontext, dry_run)
             if children is not None and len(children):
                 self.write_children_content(
-                        id_map, is_duplicate, output_file, context, dry_run)
+                        id_map, is_duplicate, output_file, lcontext, dry_run)
             output_file.write('</')
             output_file.write(self.TAG_NAME)
             output_file.write('>')
-    def write_content(self, id_map, is_duplicate, output_file, context,
+    def write_content(self, id_map, is_duplicate, output_file, lcontext,
                       dry_run):
         '''Override in a subclass to add data between the start and end tags.
 
         This will not be called if has_content is False.
         '''
         raise RuntimeError('This element has no content')
-    def write_children_content(self, id_map, is_duplicate, output_file, context,
-                               dry_run):
+    def write_children_content(self, id_map, is_duplicate, output_file,
+                               lcontext, dry_run):
         '''Override in a subclass to add data between the start and end tags.
 
         This will not be called if has_content is False.
         '''
-        children = self.all_children(context=context)
+        children = self.all_children(lcontext=lcontext)
         if dry_run:
             for child in children:
+                local = LocalContext(lcontext.context, child, self, children)
                 child.write_svg_element(
-                        id_map, is_duplicate, output_file, context, dry_run)
+                        id_map, is_duplicate, output_file, local, dry_run)
             return
         output_file.write('\n')
         for child in children:
-            child.write_svg_element(id_map, is_duplicate, output_file, context, dry_run)
+            local = LocalContext(lcontext.context, child, self, children)
+            child.write_svg_element(
+                    id_map, is_duplicate, output_file, local, dry_run)
             output_file.write('\n')
     def get_svg_defs(self):
         return [v for v in self.args.values()
                 if isinstance(v, DrawingElement)]
-    def write_svg_defs(self, id_map, is_duplicate, output_file, context,
+    def write_svg_defs(self, id_map, is_duplicate, output_file, lcontext,
                        dry_run):
         super().write_svg_defs(
-                id_map, is_duplicate, output_file, context, dry_run)
-        for child in self.all_children(context=context):
+                id_map, is_duplicate, output_file, lcontext, dry_run)
+        children = self.all_children(lcontext=lcontext)
+        for child in children:
+            local = LocalContext(lcontext.context, child, self, children)
             child.write_svg_defs(
-                    id_map, is_duplicate, output_file, context, dry_run)
+                    id_map, is_duplicate, output_file, local, dry_run)
     def __eq__(self, other):
         if isinstance(other, type(self)):
             return (self.TAG_NAME == other.TAG_NAME and
@@ -322,7 +361,7 @@ class DrawingParentElement(DrawingBasicElement):
             self.ordered_children[z].extend(iterable)
         else:
             self.children.extend(iterable)
-    def write_content(self, id_map, is_duplicate, output_file, context,
+    def write_content(self, id_map, is_duplicate, output_file, lcontext,
                       dry_run):
         pass
 
