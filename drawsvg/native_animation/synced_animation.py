@@ -2,6 +2,7 @@ from typing import Any, Callable, Dict, List, Optional, Union
 
 import dataclasses
 from collections import defaultdict
+from numbers import Number
 
 from .. import elements, types
 from . import playback_control_ui, playback_control_js
@@ -15,6 +16,7 @@ class SyncedAnimationConfig:
     end_delay: float = 0
     repeat_count: Union[int, str] = 'indefinite'
     fill: str = 'freeze'
+    freeze_frame_at: Optional[float] = None
 
     # Playback controls
     show_playback_progress: bool = False
@@ -93,6 +95,14 @@ class SyncedAnimationConfig:
                 self, controls_width=width, controls_x=x, controls_center_y=y,
                 controls_js=js)
 
+    def override_args(self, args, lcontext):
+        if (self.freeze_frame_at is not None
+                and hasattr(lcontext.element, 'animation_data')):
+            args = dict(args)
+            data = lcontext.element.animation_data
+            args.update(data.interpolate_at_time(self.freeze_frame_at))
+        return args
+
 
 @dataclasses.dataclass
 class AnimatedAttributeTimeline:
@@ -119,6 +129,9 @@ class AnimatedAttributeTimeline:
             raise ValueError('out-of-order key frame times')
         self.times.extend(times)
         self.values.extend(values)
+
+    def interpolate_at_time(self, at_time):
+        return linear_interpolate_value(self.times, self.values, at_time)
 
     def as_animate_element(self, config: Optional[SyncedAnimationConfig]=None):
         if config is not None:
@@ -180,6 +193,14 @@ class AnimationHelperData:
             self.attr_timelines[attr] = timeline
         timeline.extend(times, values)
 
+    def interpolate_at_time(self, at_time):
+        r = {
+            name: timeline.interpolate_at_time(at_time)
+            for name, timeline in self.attr_timelines.items()
+        }
+        print(r)
+        return r
+
     def _timelines_adjusted_for_context(self, lcontext=None):
         all_timelines = dict(self.attr_timelines)
         if lcontext is not None and lcontext.context.invert_y:
@@ -212,7 +233,8 @@ class AnimationHelperData:
                 yvalues = [lcontext.element.args.get('y', 0)]
             if y_timeline is not None or height_timeline is not None:
                 ytimes, yvalues = _merge_timeline_inverted_y_values(
-                        ytimes, yvalues, htimes, hvalues)
+                        ytimes, yvalues, htimes, hvalues,
+                        linear_interpolate_value, linear_interpolate_value)
                 if ytimes is not None:
                     y_timeline = AnimatedAttributeTimeline(
                             'y', y_attrs, ytimes, yvalues)
@@ -220,6 +242,11 @@ class AnimationHelperData:
         return all_timelines
 
     def children_with_context(self, lcontext=None):
+        if (lcontext is not None
+                and lcontext.context.animation_config is not None
+                and lcontext.context.animation_config.freeze_frame_at
+                    is not None):
+            return []  # Don't animate if frame is frozen
         all_timelines = self._timelines_adjusted_for_context(lcontext)
         return [
             timeline.as_animate_element(lcontext.context.animation_config)
@@ -227,7 +254,25 @@ class AnimationHelperData:
         ]
 
 
-def _merge_timeline_inverted_y_values(ytimes, yvalues, htimes, hvalues):
+def linear_interpolate_value(times, values, at_time):
+    print(times, values, at_time)
+    if len(times) == 0:
+        return 0
+    idx = sum(t <= at_time for t in times)
+    if idx >= len(times):
+        return values[-1]
+    elif idx <= 0:
+        return values[0]
+    elif at_time == times[idx-1]:
+        return values[idx-1]
+    elif isinstance(values[idx], Number) and isinstance(values[idx-1], Number):
+        fraction = (at_time-times[idx-1]) / (times[idx]-times[idx-1])
+        return values[idx-1] * (1-fraction) + (values[idx] * fraction)
+    else:
+        return values[idx-1]
+
+def _merge_timeline_inverted_y_values(ytimes, yvalues, htimes, hvalues,
+                                      yinterpolate, hinterpolate):
     if len(yvalues) == 1:
         try:
             return htimes, [-yvalues[0]-h for h in hvalues]
@@ -243,19 +288,6 @@ def _merge_timeline_inverted_y_values(ytimes, yvalues, htimes, hvalues):
             return ytimes, [-y-h for y, h in zip(yvalues, hvalues)]
         except TypeError:
             return None, None
-    def interpolate(times, values, at_time):
-        if len(times) == 0:
-            return 0
-        idx = sum(t <= at_time for t in times)
-        if idx >= len(times):
-            return values[-1]
-        elif idx <= 0:
-            return values[0]
-        elif at_time == times[idx-1]:
-            return values[idx-1]
-        else:
-            fraction = (at_time-times[idx-1]) / (times[idx]-times[idx-1])
-            return values[idx-1] * (1-fraction)+ (values[idx] * fraction)
     try:
         # Offset y-value by height if invert_y
         # Merge key_times for y and height animations
@@ -267,12 +299,12 @@ def _merge_timeline_inverted_y_values(ytimes, yvalues, htimes, hvalues):
         yt = ytimes[0] if len(ytimes) else inf
         while ht < inf and yt < inf:
             if yt < ht:
-                h_val = interpolate(htimes, hvalues, yt)
+                h_val = hinterpolate(htimes, hvalues, yt)
                 new_times.append(yt)
                 new_values.append(-yvalues[yi] - h_val)
                 yi += 1
             elif ht < yt:
-                y_val = interpolate(ytimes, yvalues, ht)
+                y_val = yinterpolate(ytimes, yvalues, ht)
                 new_times.append(ht)
                 new_values.append(-y_val - hvalues[hi])
                 hi += 1
