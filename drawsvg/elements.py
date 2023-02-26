@@ -4,7 +4,9 @@ import warnings
 import xml.sax.saxutils as xml
 
 from . import url_encode
-from .types import DrawingElement, DrawingBasicElement, DrawingParentElement
+from .types import (
+    DrawingElement, DrawingBasicElement, DrawingParentElement, LocalContext
+)
 
 
 def escape_cdata(content):
@@ -16,7 +18,7 @@ class NoElement(DrawingElement):
     def __init__(self):
         pass
     def write_svg_element(self, id_map, is_duplicate, output_file, dry_run,
-                          context, force_dup=False):
+                          lcontext, force_dup=False):
         pass
     def __eq__(self, other):
         if isinstance(other, type(self)):
@@ -42,7 +44,7 @@ class Raw(DrawingElement):
         super().__init__()
         self.content = content
         self.defs = defs
-    def write_svg_element(self, id_map, is_duplicate, output_file, context,
+    def write_svg_element(self, id_map, is_duplicate, output_file, lcontext,
                           dry_run, force_dup=False):
         if dry_run:
             return
@@ -337,17 +339,18 @@ class Text(DrawingParentElement):
             single_line = False
             text = tuple(text)
         return text, single_line
-    def write_content(self, id_map, is_duplicate, output_file, context,
+    def write_content(self, id_map, is_duplicate, output_file, lcontext,
                       dry_run):
         if dry_run:
             return
         output_file.write(self.escaped_text)
-    def write_children_content(self, id_map, is_duplicate, output_file, context,
-                               dry_run):
-        children = self.all_children(context=context)
+    def write_children_content(self, id_map, is_duplicate, output_file,
+                               lcontext, dry_run):
+        children = self.all_children(lcontext=lcontext)
         for child in children:
+            local = LocalContext(lcontext.context, child, self, children)
             child.write_svg_element(
-                    id_map, is_duplicate, output_file, context, dry_run)
+                    id_map, is_duplicate, output_file, local, dry_run)
     def append_line(self, line, **kwargs):
         if self._text_path is not None:
             raise ValueError('appendLine is not supported for text on a path')
@@ -366,7 +369,7 @@ class _TextContainingElement(DrawingBasicElement):
     def __init__(self, text, **kwargs):
         super().__init__(**kwargs)
         self.escaped_text = xml.escape(text)
-    def write_content(self, id_map, is_duplicate, output_file, context,
+    def write_content(self, id_map, is_duplicate, output_file, lcontext,
                       dry_run):
         if dry_run:
             return
