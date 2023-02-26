@@ -36,6 +36,7 @@ setup(
             'cairoSVG~=2.3',
             'numpy~=1.16',
             'imageio~=2.5',
+            'imageio_ffmpeg~=0.4',
         ],
         'color': [
             'pwkit~=1.0',
@@ -45,6 +46,7 @@ setup(
             'cairoSVG~=2.3',
             'numpy~=1.16',
             'imageio~=2.5',
+            'imageio_ffmpeg~=0.4',
             'pwkit~=1.0',
         ],
     },

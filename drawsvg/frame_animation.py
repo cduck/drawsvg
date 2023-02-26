@@ -84,7 +84,7 @@ def frame_animate_video(out_file, draw_func=None, jupyter=False, **video_args):
     ```
     '''
     return FrameAnimationContext(draw_func=draw_func, out_file=out_file,
-                            jupyter=jupyter, video_args=video_args)
+                                 jupyter=jupyter, video_args=video_args)
 
 
 def frame_animate_jupyter(draw_func=None, pause=False, clear=True, delay=0.1,

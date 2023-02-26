@@ -1,17 +1,25 @@
 import dataclasses
 
 from . import url_encode
+from . import raster
 
+
+class _Rasterizable:
+    def rasterize(self, to_file=None):
+        if to_file is not None:
+            return raster.Raster.from_svg_to_file(self.svg, to_file)
+        else:
+            return raster.Raster.from_svg(self.svg)
 
 @dataclasses.dataclass
-class JupyterSvgInline:
+class JupyterSvgInline(_Rasterizable):
     '''Jupyter-displayable SVG displayed inline on the Jupyter web page.'''
     svg: str
     def _repr_html_(self):
         return self.svg
 
 @dataclasses.dataclass
-class JupyterSvgImage:
+class JupyterSvgImage(_Rasterizable):
     '''Jupyter-displayable SVG displayed within an img tag on the Jupyter web
     page.
     '''
