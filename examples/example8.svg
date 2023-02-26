@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+    width="600" height="200" viewBox="0 0 300 100">
+<defs>
+<g fill="orange" transform="rotate(-20)" id="d0">
+<rect x="0" y="10" width="20" height="40" />
+<circle cx="30" cy="40" r="10" />
+<circle cx="50" cy="40" r="10" fill="green" />
+</g>
+</defs>
+<use xlink:href="#d0" />
+<use xlink:href="#d0" x="80" y="0" stroke="black" stroke-width="1" />
+<use xlink:href="#d0" x="80" y="20" stroke="blue" stroke-width="2" />
+<use xlink:href="#d0" x="80" y="40" stroke="red" stroke-width="3" />
+</svg>

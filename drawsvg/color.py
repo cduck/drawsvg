@@ -1,7 +1,16 @@
-
 import math
-import numpy as np
-import pwkit.colormaps  # pip3 install pwkit
+
+try:
+    import numpy as np
+    import pwkit.colormaps
+except ImportError as e:
+    raise ImportError(
+        'Optional dependencies not installed. '
+        'Install with `python3 -m pip install "drawsvg[all]"` '
+        'or `python3 -m pip install "drawsvg[color]"`. '
+        'See https://github.com/cduck/drawsvg#full-feature-install '
+        'for more details.'
+    ) from e
 
 
 # Most calculations from http://www.chilliant.com/rgb2hsv.html
@@ -26,10 +35,10 @@ class Srgb:
         if wts is None: wts = self.LUMA_WEIGHTS
         rw, gw, bw = wts
         return rw*self.r + gw*self.g + bw*self.b
-    def toSrgb(self):
+    def to_srgb(self):
         return self
     @staticmethod
-    def fromHue(h):
+    def from_hue(h):
         h = h % 1
         r = abs(h * 6 - 3) - 1
         g = 2 - abs(h * 6 - 2)
@@ -46,10 +55,11 @@ class Hsl:
     def __repr__(self):
         return 'HSL({}, {}, {})'.format(self.h, self.s, self.l)
     def __str__(self):
-        r, g, b = self.toSrgb()
-        return 'rgb({}%,{}%,{}%)'.format(round(r*100), round(g*100), round(b*100))
-    def toSrgb(self):
-        hs = Srgb.fromHue(self.h)
+        r, g, b = self.to_srgb()
+        return 'rgb({}%,{}%,{}%)'.format(
+                round(r*100, 2), round(g*100, 2), round(b*100, 2))
+    def to_srgb(self):
+        hs = Srgb.from_hue(self.h)
         c = (1 - abs(2 * self.l - 1)) * self.s
         return Srgb(
             (hs.r - 0.5) * c + self.l,
@@ -67,10 +77,11 @@ class Hsv:
     def __repr__(self):
         return 'HSV({}, {}, {})'.format(self.h, self.s, self.v)
     def __str__(self):
-        r, g, b = self.toSrgb()
-        return 'rgb({}%,{}%,{}%)'.format(round(r*100), round(g*100), round(b*100))
-    def toSrgb(self):
-        hs = Srgb.fromHue(self.h)
+        r, g, b = self.to_srgb()
+        return 'rgb({}%,{}%,{}%)'.format(
+                round(r*100, 2), round(g*100, 2), round(b*100, 2))
+    def to_srgb(self):
+        hs = Srgb.from_hue(self.h)
         c = self.v * self.s
         hp = self.h * 6
         x = c * (1 - abs(hp % 2 - 1))
@@ -99,9 +110,10 @@ class Sin:
     def __repr__(self):
         return 'Sin({}, {}, {})'.format(self.h, self.s, self.l)
     def __str__(self):
-        r, g, b = self.toSrgb()
-        return 'rgb({}%,{}%,{}%)'.format(round(r*100), round(g*100), round(b*100))
-    def toSrgb(self):
+        r, g, b = self.to_srgb()
+        return 'rgb({}%,{}%,{}%)'.format(
+                round(r*100, 2), round(g*100, 2), round(b*100, 2))
+    def to_srgb(self):
         h = self.h
         scale = self.s / 2
         shift = self.l #* (1-2*scale)
@@ -122,10 +134,10 @@ class Hcy:
     def __repr__(self):
         return 'HCY({}, {}, {})'.format(self.h, self.c, self.y)
     def __str__(self):
-        r, g, b = self.toSrgb()
+        r, g, b = self.to_srgb()
         return 'rgb({}%,{}%,{}%)'.format(r*100, g*100, b*100)
-    def toSrgb(self):
-        hs = Srgb.fromHue(self.h)
+    def to_srgb(self):
+        hs = Srgb.from_hue(self.h)
         y = hs.luma(wts=self.HCY_WEIGHTS)
         c = self.c
         if self.y < y:
@@ -138,7 +150,7 @@ class Hcy:
             (hs.b - y) * c + self.y,
         )
     @staticmethod
-    def _rgbToHcv(srgb):
+    def _rgb_to_hcv(srgb):
         if srgb.g < srgb.b:
             p = (srgb.b, srgb.g, -1., 2./3.)
         else:
@@ -151,11 +163,11 @@ class Hcy:
         h = abs((q[3] - q[1]) / (6*c + 1e-10) + q[2])
         return (h, c, q[0])
     @classmethod
-    def fromSrgb(cls, srgb):
-        hcv = list(cls._rgbToHcv(srgb))
+    def from_srgb(cls, srgb):
+        hcv = list(cls._rgb_to_hcv(srgb))
         rw, gw, bw = cls.HCY_WEIGHTS
         y = rw*srgb.r + gw*srgb.g + bw*srgb.b
-        hs = Srgb.fromHue(hcv[0])
+        hs = Srgb.from_hue(hcv[0])
         z = rw*hs.r + gw*hs.g + bw*hs.b
         if y < z:
             hcv[1] *= z / (y + 1e-10)
@@ -174,26 +186,20 @@ class Cielab:
     def __repr__(self):
         return 'CIELAB({}, {}, {})'.format(self.l, self.a, self.b)
     def __str__(self):
-        r, g, b = self.toSrgb()
-        return 'rgb({}%,{}%,{}%)'.format(round(r*100), round(g*100), round(b*100))
-    def toSrgb(self):
-        inArr = np.array((*self.l,), dtype=float)
-        xyz = pwkit.colormaps.cielab_to_xyz(inArr, self.REF_WHITE)
-        linSrgb = pwkit.colormaps.xyz_to_linsrgb(xyz)
-        r, g, b = pwkit.colormaps.linsrgb_to_srgb(linSrgb)
+        r, g, b = self.to_srgb()
+        return 'rgb({}%,{}%,{}%)'.format(
+                round(r*100, 2), round(g*100, 2), round(b*100, 2))
+    def to_srgb(self):
+        in_arr = np.array((self.l, self.a, self.b))
+        xyz = pwkit.colormaps.cielab_to_xyz(in_arr, self.REF_WHITE)
+        lin_srgb = pwkit.colormaps.xyz_to_linsrgb(xyz)
+        r, g, b = pwkit.colormaps.linsrgb_to_srgb(lin_srgb)
         return Srgb(r, g, b)
     @classmethod
-    def fromSrgb(cls, srgb, refWhite=None):
-        if refWhite is None: refWhite = cls.REF_WHITE
-        inArr = np.array((*srgb,), dtype=float)
-        linSrgb = pwkit.colormaps.srgb_to_linsrgb(inArr)
-        xyz = pwkit.colormaps.linsrgb_to_xyz(linSrgb)
-        l, a, b = pwkit.colormaps.xyz_to_cielab(xyz, refWhite)
+    def from_srgb(cls, srgb, ref_white=None):
+        if ref_white is None: ref_white = cls.REF_WHITE
+        in_arr = np.array((*srgb,), dtype=float)
+        lin_srgb = pwkit.colormaps.srgb_to_linsrgb(in_arr)
+        xyz = pwkit.colormaps.linsrgb_to_xyz(lin_srgb)
+        l, a, b = pwkit.colormaps.xyz_to_cielab(xyz, ref_white)
         return Cielab(l, a, b)
-    def toSrgb(self):
-        inArr = np.array((self.l, self.a, self.b))
-        xyz = pwkit.colormaps.cielab_to_xyz(inArr, self.REF_WHITE)
-        linSrgb = pwkit.colormaps.xyz_to_linsrgb(xyz)
-        r, g, b = pwkit.colormaps.linsrgb_to_srgb(linSrgb)
-        return Srgb(r, g, b)
-
