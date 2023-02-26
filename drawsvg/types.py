@@ -146,6 +146,8 @@ class LocalContext:
 
     def write_tag_args(self, args, output_file, id_map=None):
         '''Called by an element during SVG output of its tag.'''
+        if self.context.animation_config is not None:
+            args = self.context.animation_config.override_args(args, self)
         self.context._write_tag_args(
                 self.context.override_args(args), output_file, id_map=id_map)
 
