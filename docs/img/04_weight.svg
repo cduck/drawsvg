@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="600" height="200" viewBox="0 0 600 200">
+<defs>
+</defs>
+<text x="20" y="35" font-size="30" font-weight="bold" dy="0em">bold</text>
+<text x="20" y="75" font-size="30" font-style="italic" dy="0em">italic</text>
+<text x="20" y="115" font-size="30" text-decoration="underline" dy="0em">under</text>
+<text x="20" y="155" font-size="30" text-decoration="overline" dy="0em">over</text>
+<text x="20" y="195" font-size="30" text-decoration="line-through" dy="0em">through</text>
+<text x="200" y="35" font-size="30" dy="0em">normal word space</text>
+<text x="200" y="75" font-size="30" word-spacing="10" dy="0em">more word space</text>
+<text x="200" y="115" font-size="30" word-spacing="-5" dy="0em">less word space</text>
+<text x="200" y="155" font-size="30" letter-spacing="8" dy="0em">wide letter space</text>
+<text x="200" y="195" font-size="30" letter-spacing="-2" dy="0em">narrow letter space</text>
+</svg>

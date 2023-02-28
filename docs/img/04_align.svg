@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="250" height="120" viewBox="0 0 250 120">
+<defs>
+</defs>
+<path d="M75,100 L75,0" stroke="gray" />
+<path d="M140,30 L250,30" stroke="gray" />
+<path d="M140,60 L250,60" stroke="gray" />
+<path d="M140,90 L250,90" stroke="gray" />
+<text x="75" y="30" font-size="24" text-anchor="start" dy="0em">Start</text>
+<text x="75" y="60" font-size="24" text-anchor="middle" dy="0em">Middle</text>
+<text x="75" y="90" font-size="24" text-anchor="end" dy="0em">End</text>
+<text x="150" y="30" font-size="24" dy="0em">Bottom</text>
+<text x="150" y="60" font-size="24" dy="0.4em">Middle</text>
+<text x="150" y="90" font-size="24" dy="1em">Top</text>
+</svg>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="250" height="150" viewBox="0 0 250 150">
+<defs>
+<mask maskContentUnits="objectBoundingBox" id="mask20">
+<rect x="0" y="0" width="1" height="1" fill="#f00" />
+</mask>
+<mask maskContentUnits="objectBoundingBox" id="mask21">
+<rect x="0" y="0" width="1" height="1" fill="#0f0" />
+</mask>
+<mask maskContentUnits="objectBoundingBox" id="mask22">
+<rect x="0" y="0" width="1" height="1" fill="#00f" />
+</mask>
+<mask maskContentUnits="objectBoundingBox" id="mask23">
+<rect x="0" y="0" width="1" height="1" fill="#fff" />
+</mask>
+</defs>
+<rect x="10" y="10" width="50" height="50" fill="#f00" />
+<rect x="70" y="10" width="50" height="50" fill="#0f0" />
+<rect x="130" y="10" width="50" height="50" fill="#00f" />
+<rect x="190" y="10" width="50" height="50" fill="#fff" stroke="black" />
+<g mask="url(#mask20)">
+<circle cx="35" cy="115" r="25" fill="black" />
+<text x="35" y="80" font-size="14" text-anchor="middle" dy="0em">Red</text>
+</g>
+<g mask="url(#mask21)">
+<circle cx="95" cy="115" r="25" fill="black" />
+<text x="95" y="80" font-size="14" text-anchor="middle" dy="0em">Green</text>
+</g>
+<g mask="url(#mask22)">
+<circle cx="155" cy="115" r="25" fill="black" />
+<text x="155" y="80" font-size="14" text-anchor="middle" dy="0em">Blue</text>
+</g>
+<g mask="url(#mask23)">
+<circle cx="215" cy="115" r="25" fill="black" />
+<text x="215" y="80" font-size="14" text-anchor="middle" dy="0em">White</text>
+</g>
+</svg>

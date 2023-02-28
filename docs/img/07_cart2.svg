@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="200" height="200" viewBox="0 0 200 200">
+<defs>
+</defs>
+<g transform="translate(0,200) scale(1,-1)">
+<path d="M0,0 L100,0" stroke="black" />
+<path d="M0,0 L0,100" stroke="black" />
+<path d="M40,40 L100,40 L70,70 L40,70" fill="gray" stroke="black" />
+</g>
+</svg>

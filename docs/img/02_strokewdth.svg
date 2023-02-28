@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="320" height="100" viewBox="0 0 320 100">
+<defs>
+</defs>
+<path d="M15,10 L15,90" stroke="black" stroke-width="11" />
+<path d="M30,10 L30,90" stroke="black" stroke-width="10" />
+<path d="M45,10 L45,90" stroke="black" stroke-width="9" />
+<path d="M60,10 L60,90" stroke="black" stroke-width="8" />
+<path d="M75,10 L75,90" stroke="black" stroke-width="7" />
+<path d="M90,10 L90,90" stroke="black" stroke-width="6" />
+<path d="M105,10 L105,90" stroke="black" stroke-width="5" />
+<path d="M120,10 L120,90" stroke="black" stroke-width="4" />
+<path d="M135,10 L135,90" stroke="black" stroke-width="3" />
+<path d="M150,10 L150,90" stroke="black" stroke-width="2" />
+<path d="M165,10 L165,90" stroke="black" stroke-width="1" />
+<path d="M180,10 L180,90" stroke="black" stroke-width="2" />
+<path d="M195,10 L195,90" stroke="black" stroke-width="3" />
+<path d="M210,10 L210,90" stroke="black" stroke-width="4" />
+<path d="M225,10 L225,90" stroke="black" stroke-width="5" />
+<path d="M240,10 L240,90" stroke="black" stroke-width="6" />
+<path d="M255,10 L255,90" stroke="black" stroke-width="7" />
+<path d="M270,10 L270,90" stroke="black" stroke-width="8" />
+<path d="M285,10 L285,90" stroke="black" stroke-width="9" />
+<path d="M300,10 L300,90" stroke="black" stroke-width="10" />
+</svg>

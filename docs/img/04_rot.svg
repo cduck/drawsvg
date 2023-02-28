@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="200" height="100" viewBox="0 0 200 100">
+<defs>
+</defs>
+<text x="20" y="20" font-size="20" letter-spacing="20" rotate="90" dy="0em">Rotate</text>
+<text x="20" y="80" font-size="20" letter-spacing="20" rotate="0 90 180 270" dy="0em">Rotate</text>
+</svg>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="500" height="200" viewBox="0 0 500 200">
+<defs>
+<path d="M30,50 C50,20,70,20,120,50 S150,10,200,50" stroke="gray" fill="none" id="textpath0" />
+<path d="M250,30 L300,30 A30,30,0,0,1,330,60 L330,110" stroke="gray" fill="none" id="textpath1" />
+<path d="M30,110 L100,110 L100,160" stroke="gray" fill="none" id="textpath2" />
+<path d="M150,110 A40,30,0,1,0,230,110 M250,110 L270,140" stroke="gray" fill="none" id="textpath3" />
+<path d="M330,130 L330,160 A30,30,0,0,1,300,180 L200,180" stroke="gray" fill="none" id="textpath4" />
+</defs>
+<use xlink:href="#textpath0" />
+<use xlink:href="#textpath1" />
+<use xlink:href="#textpath2" />
+<use xlink:href="#textpath3" />
+<use xlink:href="#textpath4" />
+<text font-size="14"><textPath xlink:href="#textpath0">
+<tspan dy="0em">Following a cubic Bézier curve</tspan>
+</textPath></text>
+<text font-size="14"><textPath xlink:href="#textpath1">
+<tspan dy="0em">Going 'round the bend</tspan>
+</textPath></text>
+<text font-size="14"><textPath xlink:href="#textpath2">
+<tspan dy="0em">Making a quick turn</tspan>
+</textPath></text>
+<text font-size="14"><textPath xlink:href="#textpath3">
+<tspan dy="0em">Text along a broken path</tspan>
+</textPath></text>
+<text font-size="14" offset="50%" text-anchor="middle"><textPath xlink:href="#textpath4" startOffset="50%">
+<tspan dy="0em">centered</tspan>
+</textPath></text>
+</svg>

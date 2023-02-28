@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="100" height="100" viewBox="0 0 100 100">
+<defs>
+</defs>
+<text x="50" y="20" font-size="14" text-anchor="middle"><tspan x="50" dy="0em">this is</tspan><tspan x="50" dy="1em">a</tspan><tspan x="50" dy="1em">multiline text</tspan><tspan x="50" dy="1em">given as a</tspan><tspan x="50" dy="1em">list</tspan></text>
+</svg>

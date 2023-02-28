@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="400" height="200" viewBox="0 0 400 200">
+<defs>
+</defs>
+<text x="20" y="30" font-size="20" textLength="250" lengthAdjust="spacing" dy="0em">Two words</text>
+<text x="20" y="70" font-size="20" textLength="250" lengthAdjust="spacingAndGlyphs" dy="0em">Two words</text>
+<text x="20" y="110" font-size="20" dy="0em">Two words (normal length)</text>
+<text x="20" y="150" font-size="20" textLength="80" lengthAdjust="spacing" dy="0em">Two words</text>
+<text x="20" y="190" font-size="20" textLength="80" lengthAdjust="spacingAndGlyphs" dy="0em">Two words</text>
+<path d="M20,10 L20,195" stroke="gray" />
+<path d="M270,80 L270,10" stroke="gray" />
+<path d="M100,130 L100,195" stroke="gray" />
+</svg>

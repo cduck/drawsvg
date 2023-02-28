@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="300" height="200" viewBox="0 0 300 200">
+<defs>
+<g id="arrow" stroke="black">
+<path d="M110,100 L160,100" />
+<path d="M160,100 L155,95 L155,105" fill="black" />
+</g>
+</defs>
+<circle cx="100" cy="100" r="3" flii="black" />
+<use xlink:href="#arrow" />
+<use xlink:href="#arrow" x="0" y="0" transform="rotate (60,100,100)" />
+<use xlink:href="#arrow" x="0" y="0" transform="rotate (-90,100,100)" />
+<use xlink:href="#arrow" x="0" y="0" transform="rotate (-150,100,100)" />
+</svg>

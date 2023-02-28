@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="550" height="370" viewBox="0 0 550 370">
+<defs>
+</defs>
+<path d="M20,0 V370 M10,60 H500 M10,120 H500 M10,180 H500 M10,240 H500 M10,300 H500 M10,360 H500" stroke="gray" />
+<text x="20" y="60" font-size="50" dy="0em">Simplest Text</text>
+<text x="20" y="120" font-size="50" stroke="black" dy="0em">Outline / Filled</text>
+<text x="20" y="180" font-size="50" stroke="black" stroke-width="5" dy="0em">Too big stroke</text>
+<text x="20" y="240" font-size="50" stroke="black" stroke-width="0.5" fill="none" dy="0em">Outlined only</text>
+<text x="20" y="300" font-size="50" stroke="black" fill="red" dy="0em">Outlined and colored</text>
+<text x="20" y="360" font-size="50" fill="blue" dy="0em">Colored fill only</text>
+</svg>

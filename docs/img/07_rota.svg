@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="200" height="200" viewBox="0 0 200 200">
+<defs>
+</defs>
+<rect x="0" y="0" width="200" height="200" stroke="gray" fill="none" />
+<rect x="70" y="30" width="40" height="40" fill="gray" />
+<rect x="70" y="30" width="40" height="40" fill="black" transform="rotate(45)" />
+</svg>

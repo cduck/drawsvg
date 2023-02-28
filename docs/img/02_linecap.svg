@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="150" height="100" viewBox="0 0 150 100">
+<defs>
+</defs>
+<path d="M10,15 L50,15" stroke="black" stroke-linecap="butt" stroke-width="15" />
+<path d="M10,45 L50,45" stroke="black" stroke-linecap="round" stroke-width="15" />
+<path d="M10,75 L50,75" stroke="black" stroke-linecap="square" stroke-width="15" />
+<path d="M10,0 L10,100" stroke="#999" />
+<path d="M50,0 L50,100" stroke="#999" />
+</svg>

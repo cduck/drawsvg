@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="600" height="200" viewBox="0 0 600 200">
+<defs>
+<path d="M150,150 L25,8 L59,5 L204,99 L285,63 L19,58 L127,89 L136,111 L82,30 L173,92 L203,159 L300,31 L256,119 L261,91 L5,191 L284,179 L181,104 L20,23 L262,194 L267,86 L75,181 L287,149 L264,20 L208,42 L101,106 L76,99 L156,133 L44,147 L214,189 L230,144 L121,153 L211,62 L84,175 L68,6 L166,29 L78,109 L122,167 L107,137 L43,166 L162,107 L127,173" stroke="black" stroke-width="2" fill="none" id="clip20" />
+<clipPath id="clip21">
+<circle cx="150" cy="100" r="75" />
+</clipPath>
+</defs>
+<use xlink:href="#clip20" />
+<use xlink:href="#clip20" x="300" y="0" clip-path="url(#clip21)" />
+</svg>

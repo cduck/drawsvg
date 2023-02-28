@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="200" height="100" viewBox="0 0 200 100">
+<defs>
+<rect x="0" y="0" width="40" height="40" fill="none" stroke="black" stroke-width="2" id="scale20" />
+</defs>
+<use xlink:href="#scale20" x="10" y="10" />
+<use xlink:href="#scale20" x="10" y="10" transform="scale(3,1.5)" />
+</svg>

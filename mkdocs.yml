@@ -1,0 +1,4 @@
+site_name: drawsvg Quick Reference
+nav:
+  - Home: index.md
+theme: readthedocs
