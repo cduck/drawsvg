@@ -5,7 +5,9 @@ import random
 import string
 import xml.sax.saxutils as xml
 
-from . import types, elements as elements_module, raster, video, jupyter
+from . import (
+    types, elements as elements_module, raster, video, jupyter, native_animation
+)
 
 
 XML_HEADER = '<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -330,27 +332,41 @@ svg {{
         video.'''
         if context is None:
             context = self.context
-        if duration is None and context.animation_config is not None:
-            duration = context.animation_config.duration
+        config = context.animation_config
+        if duration is None and config is not None:
+            duration = config.duration
         if duration is None:
             raise ValueError('unknown animation duration, specify duration')
+        if config is None:
+            config = native_animation.SyncedAnimationConfig(duration)
         frames = []
         for i in range(int(duration * fps + 1)):
             time = i / fps
             frame_context = dataclasses.replace(
                     context,
                     animation_config=dataclasses.replace(
-                        context.animation_config,
+                        config,
                         freeze_frame_at=time,
                         show_playback_controls=False))
             frames.append(self.display_inline(context=frame_context))
         return frames
-    def save_gif(self, fname, fps=10, duration=None, context=None):
-        self.as_gif(fname, fps=fps, duration=duration, context=context)
-    def save_mp4(self, fname, fps=10, duration=None, context=None):
-        self.as_mp4(fname, fps=fps, duration=duration, context=context)
+    def save_video(self, fname, fps=10, duration=None, mime_type=None,
+                   file_type=None, context=None, verbose=False):
+        self.as_video(
+                fname, fps=fps, duration=duration, mime_type=mime_type,
+                file_type=file_type, context=context, verbose=verbose)
+    def save_gif(self, fname, fps=10, duration=None, context=None,
+                 verbose=False):
+        self.as_gif(
+                fname, fps=fps, duration=duration, context=context,
+                verbose=verbose)
+    def save_mp4(self, fname, fps=10, duration=None, context=None,
+                 verbose=False):
+        self.as_mp4(
+                fname, fps=fps, duration=duration, context=context,
+                verbose=verbose)
     def as_video(self, to_file=None, fps=10, duration=None,
-                  mime_type=None, file_type=None, context=None, verbose=False):
+                 mime_type=None, file_type=None, context=None, verbose=False):
         if file_type is None and mime_type is None:
             if to_file is None or '.' not in str(to_file):
                 file_type = 'mp4'

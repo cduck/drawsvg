@@ -333,14 +333,8 @@ d  # Display in Jupyter notebook
 ```python
 import drawsvg as draw
 from drawsvg.widgets import DrawingWidget
-import hyperbolic.poincare.shapes as hyper  # python3 -m pip install hyperbolic
+import hyperbolic.poincare as hyper  # python3 -m pip install hyperbolic
 from hyperbolic import euclid
-
-# Patch the hyperbolic package for drawsvg version 2
-patch = lambda m: lambda self, **kw: m(self, draw, **kw)
-hyper.Circle.to_drawables = patch(hyper.Circle.toDrawables)
-hyper.Line.to_drawables = patch(hyper.Line.toDrawables)
-euclid.Arc.Arc.drawToPath = lambda self, path, includeM=True, includeL=False: path.arc(self.cx, self.cy, self.r, self.startDeg, self.endDeg, cw=not self.cw, include_m=includeM, include_l=includeL)
 
 # Create drawing
 d = draw.Drawing(2, 2, origin='center', context=draw.Context(invert_y=True))
@@ -356,14 +350,14 @@ def redraw(points):
     for x1, y1 in points:
         for x2, y2 in points:
             if (x1, y1) == (x2, y2): continue
-            p1 = hyper.Point.fromEuclid(x1, y1)
-            p2 = hyper.Point.fromEuclid(x2, y2)
-            if p1.distanceTo(p2) <= 2:
-                line = hyper.Line.fromPoints(*p1, *p2, segment=True)
+            p1 = hyper.Point.from_euclid(x1, y1)
+            p2 = hyper.Point.from_euclid(x2, y2)
+            if p1.distance_to(p2) <= 2:
+                line = hyper.Line.from_points(*p1, *p2, segment=True)
                 group.draw(line, hwidth=0.2, fill='white')
     for x, y in points:
-        p = hyper.Point.fromEuclid(x, y)
-        group.draw(hyper.Circle.fromCenterRadius(p, 0.1),
+        p = hyper.Point.from_euclid(x, y)
+        group.draw(hyper.Circle.from_center_radius(p, 0.1),
                    fill='green')
 redraw(click_list)
 
