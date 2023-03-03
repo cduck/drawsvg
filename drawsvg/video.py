@@ -148,3 +148,41 @@ def save_video(frames, file, verbose=False, **kwargs):
         print()
         print(f'Converting to video')
     imageio.mimsave(file, frames, **kwargs)
+
+def save_spritesheet(frames, file, row_length=None, verbose=False, **kwargs):
+    '''
+    Save a series of drawings as a bitmap spritesheet
+
+    Arguments:
+        frames: A list of `Drawing`s or a list of `numpy.array`s.
+        file: File name or file like object to write the spritesheet to.  The
+            extension determines the output format.
+        row_length: The length of one row in the spritesheet. Once the frame
+            number becomes larger than this, it will be placed on the next row
+            of the spritesheet. Use None to always put frames on one row.
+        align_bottom: If frames are different sizes, align the bottoms of each
+            frame in the video.
+        align_right: If frames are different sizes, align the right edge of each
+            frame in the video.
+        bg: If frames are different sizes, fill the background with this color.
+            (default is white: (255, 255, 255, 255))
+        **kwargs: Other arguments to imageio.mimsave().
+
+    '''
+    np, imageio = delay_import_np_imageio()
+    if not isinstance(frames[0], np.ndarray):
+        frames = render_svg_frames(frames, verbose=verbose, **kwargs)
+    kwargs.pop('align_bottom', None)
+    kwargs.pop('align_right', None)
+    kwargs.pop('bg', None)
+    kwargs.pop('duration', None)
+
+    if row_length is not None:
+        rows = len(frames) // row_length + 1
+        cols = row_length
+    else:
+        rows = 1
+        cols = len(frames)
+
+    spritesheet = np.block([[frame] for frame in frames])
+    imageio.imsave(file, spritesheet, **kwargs)
