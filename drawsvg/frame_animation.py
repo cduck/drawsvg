@@ -102,7 +102,7 @@ def frame_animate_spritesheet(out_file, draw_func=None, jupyter=False,
 
     Example:
     ```
-    with animate_video('video.mp4') as anim:
+    with frame_animate_spritesheet('video.mp4', row_length=10) as anim:
         while True:
             ...
             anim.draw_frame(...)

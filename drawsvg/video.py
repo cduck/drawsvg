@@ -165,7 +165,7 @@ def save_spritesheet(frames, file, verbose=False, **kwargs):
             frame in the video.
         bg: If frames are different sizes, fill the background with this color.
             (default is white: (255, 255, 255, 255))
-        **kwargs: Other arguments to imageio.mimsave().
+        **kwargs: Other arguments to imageio.imsave().
 
     '''
     np, imageio = delay_import_np_imageio()
@@ -180,7 +180,8 @@ def save_spritesheet(frames, file, verbose=False, **kwargs):
     rows = (len(frames) - 1) // cols + 1
 
     if rows * cols > len(frames): # Unfilled final row
-        frames.extend([np.zeros(frames[0].shape)] * (rows * cols - len(frames)))
+        empty_frame = np.zeros(frames[0].shape, dtype=frames[0].dtype)
+        frames.extend([empty_frame] * (rows * cols - len(frames)))
 
     block_arrangement = []
     for row in range(rows):
@@ -188,5 +189,6 @@ def save_spritesheet(frames, file, verbose=False, **kwargs):
         block_arrangement.append([
             [frame] for frame in frames[row*cols:next_row_end]
         ])
+
     spritesheet = np.block(block_arrangement)
     imageio.imsave(file, spritesheet, **kwargs)

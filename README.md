@@ -398,8 +398,9 @@ def draw_frame(t):
 
 with draw.frame_animate_jupyter(draw_frame, delay=0.05) as anim:
 # Or:
-#with draw.animate_video('example6.gif', draw_frame, duration=0.05
-#                       ) as anim:
+#with draw.frame_animate_video('example6.gif', draw_frame, duration=0.05) as anim:
+# Or:
+#with draw.frame_animate_spritesheet('example6.png', draw_frame, row_length=10) as anim
     # Add each frame to the animation
     for i in range(20):
         anim.draw_frame(i/10)
