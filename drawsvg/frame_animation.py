@@ -25,9 +25,8 @@ class FrameAnimation:
     def save_video(self, file, **kwargs):
         video.save_video(self.frames, file, **kwargs)
 
-    def save_spritesheet(self, file, row_length=None, **kwargs):
-        video.save_spritesheet(self.frames, file, row_length=row_length, 
-                               **kwargs)
+    def save_spritesheet(self, file, **kwargs):
+        video.save_spritesheet(self.frames, file, **kwargs)
 
 
 class FrameAnimationContext:
@@ -95,8 +94,8 @@ def frame_animate_video(out_file, draw_func=None, jupyter=False, **video_args):
     return FrameAnimationContext(draw_func=draw_func, out_file=out_file,
                                  jupyter=jupyter, video_args=video_args)
 
-def frame_animate_spritesheet(out_file, draw_func=None, 
-                              jupyter=False, **video_args):
+def frame_animate_spritesheet(out_file, draw_func=None, jupyter=False, 
+                              **video_args):
     '''
     Returns a context manager that stores frames and saves a spritesheet when
     the context exits.

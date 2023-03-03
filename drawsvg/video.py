@@ -149,7 +149,7 @@ def save_video(frames, file, verbose=False, **kwargs):
         print(f'Converting to video')
     imageio.mimsave(file, frames, **kwargs)
 
-def save_spritesheet(frames, file, row_length=None, verbose=False, **kwargs):
+def save_spritesheet(frames, file, verbose=False, **kwargs):
     '''
     Save a series of drawings as a bitmap spritesheet
 
@@ -157,9 +157,8 @@ def save_spritesheet(frames, file, row_length=None, verbose=False, **kwargs):
         frames: A list of `Drawing`s or a list of `numpy.array`s.
         file: File name or file like object to write the spritesheet to.  The
             extension determines the output format.
-        row_length: The length of one row in the spritesheet. Once the frame
-            number becomes larger than this, it will be placed on the next row
-            of the spritesheet. Use None to always put frames on one row.
+        row_length: The length (in frames) of one row in the spritesheet. 
+            If not provided, all frames go on one row.
         align_bottom: If frames are different sizes, align the bottoms of each
             frame in the video.
         align_right: If frames are different sizes, align the right edge of each
@@ -177,12 +176,17 @@ def save_spritesheet(frames, file, row_length=None, verbose=False, **kwargs):
     kwargs.pop('bg', None)
     kwargs.pop('duration', None)
 
-    if row_length is not None:
-        rows = len(frames) // row_length + 1
-        cols = row_length
-    else:
-        rows = 1
-        cols = len(frames)
+    cols = kwargs.pop('row_length', len(frames))
+    rows = (len(frames) - 1) // cols + 1
 
-    spritesheet = np.block([[frame] for frame in frames])
+    if rows * cols > len(frames): # Unfilled final row
+        frames.extend([np.zeros(frames[0].shape)] * (rows * cols - len(frames)))
+
+    block_arrangement = []
+    for row in range(rows):
+        next_row_end = (row+1)*cols
+        block_arrangement.append([
+            [frame] for frame in frames[row*cols:next_row_end]
+        ])
+    spritesheet = np.block(block_arrangement)
     imageio.imsave(file, spritesheet, **kwargs)
