@@ -85,6 +85,7 @@ from .frame_animation import (
     FrameAnimation,
     frame_animate_video,
     frame_animate_jupyter,
+    frame_animate_spritesheet,
 )
 from .native_animation import (
     SyncedAnimationConfig,

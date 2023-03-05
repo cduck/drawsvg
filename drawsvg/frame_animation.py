@@ -25,12 +25,17 @@ class FrameAnimation:
     def save_video(self, file, **kwargs):
         video.save_video(self.frames, file, **kwargs)
 
+    def save_spritesheet(self, file, **kwargs):
+        video.save_spritesheet(self.frames, file, **kwargs)
+
 
 class FrameAnimationContext:
     def __init__(self, draw_func=None, out_file=None,
-                 jupyter=False, pause=False, clear=True, delay=0, disable=False,
-                 video_args=None, _patch_delay=0.05):
+                 jupyter=False, spritesheet=False, pause=False,
+                 clear=True, delay=0, disable=False, video_args=None,
+                 _patch_delay=0.05):
         self.jupyter = jupyter
+        self.spritesheet = spritesheet
         self.disable = disable
         if self.jupyter and not self.disable:
             from IPython import display
@@ -67,7 +72,10 @@ class FrameAnimationContext:
         if exc_value is None:
             # No error
             if self.out_file is not None and not self.disable:
-                self.anim.save_video(self.out_file, **self.video_args)
+                if self.spritesheet:
+                    self.anim.save_spritesheet(self.out_file, **self.video_args)
+                else:
+                    self.anim.save_video(self.out_file, **self.video_args)
 
 
 def frame_animate_video(out_file, draw_func=None, jupyter=False, **video_args):
@@ -77,7 +85,7 @@ def frame_animate_video(out_file, draw_func=None, jupyter=False, **video_args):
 
     Example:
     ```
-    with animate_video('video.mp4') as anim:
+    with frame_animate_video('video.mp4') as anim:
         while True:
             ...
             anim.draw_frame(...)
@@ -85,6 +93,24 @@ def frame_animate_video(out_file, draw_func=None, jupyter=False, **video_args):
     '''
     return FrameAnimationContext(draw_func=draw_func, out_file=out_file,
                                  jupyter=jupyter, video_args=video_args)
+
+def frame_animate_spritesheet(out_file, draw_func=None, jupyter=False,
+                              **video_args):
+    '''
+    Returns a context manager that stores frames and saves a spritesheet when
+    the context exits.
+
+    Example:
+    ```
+    with frame_animate_spritesheet('sheet.png', row_length=10) as anim:
+        while True:
+            ...
+            anim.draw_frame(...)
+    ```
+    '''
+    return FrameAnimationContext(draw_func=draw_func, out_file=out_file,
+                                jupyter=jupyter, spritesheet=True,
+                                video_args=video_args)
 
 
 def frame_animate_jupyter(draw_func=None, pause=False, clear=True, delay=0.1,
@@ -94,7 +120,7 @@ def frame_animate_jupyter(draw_func=None, pause=False, clear=True, delay=0.1,
 
     Example:
     ```
-    with animate_jupyter(delay=0.5) as anim:
+    with frame_animate_jupyter(delay=0.5) as anim:
         while True:
             ...
             anim.draw_frame(...)
