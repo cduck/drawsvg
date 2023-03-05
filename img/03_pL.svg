@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="100" height="70" viewBox="0 0 100 70">
+<defs>
+</defs>
+<g stroke="black" fill="none">
+<path d="M10,10 L100,10" />
+<path d="M10,20 L100,20 L100,50" />
+<path d="M40,60 L10,60 L40,42 M60,60 L90,60 L60,42" />
+</g>
+</svg>

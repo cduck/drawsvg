@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="250" height="150" viewBox="0 0 250 150">
+<defs>
+</defs>
+<path d="M30,100 C50,30,70,50,100,100 S150,40,200,80" stroke="black" fill="none" stroke-width="3" />
+<circle cx="30" cy="100" r="4" />
+<circle cx="50" cy="30" r="2" stroke="gray" fill="gray" />
+<path d="M30,100 L50,30" stroke="gray" />
+<circle cx="100" cy="100" r="4" />
+<circle cx="70" cy="50" r="2" stroke="gray" fill="gray" />
+<path d="M100,100 L70,50" stroke="gray" />
+<circle cx="200" cy="80" r="4" />
+<circle cx="150" cy="40" r="2" stroke="gray" fill="gray" />
+<path d="M200,80 L150,40" stroke="gray" />
+</svg>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="700" height="130" viewBox="0 0 700 130">
+<defs>
+<path d="M30,75 Q240,30,300,120" stroke="black" fill="none" stroke-width="3" id="pathQ0" />
+</defs>
+<use xlink:href="#pathQ0" />
+<use xlink:href="#pathQ0" x="300" y="0" />
+<g stroke="gray" fill="gray">
+<circle cx="330" cy="75" r="3" />
+<circle cx="600" cy="120" r="3" />
+<circle cx="540" cy="30" r="3" />
+<path d="M330,75 L540,30" />
+<path d="M540,30 L600,120" />
+<path d="M330,75 L600,120" stroke-dasharray="5,5" />
+<circle cx="435" cy="52.5" r="3" />
+<circle cx="570" cy="75" r="3" />
+<path d="M435,52.5 L570,75" />
+<circle cx="502.5" cy="63.75" r="4" fill="none" />
+</g>
+</svg>

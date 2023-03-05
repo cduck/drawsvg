@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="400" height="100" viewBox="0 0 400 100">
+<defs>
+</defs>
+<path d="M30,60 Q80,-10,100,60 Q130,25,200,40" stroke="black" fill="none" stroke-width="3" />
+<path d="M30,60 Q80,-10,100,60 T200,40" stroke="black" fill="none" stroke-width="3" transform="translate(200,0)" />
+</svg>

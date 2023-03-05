@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="200" height="80" viewBox="0 0 200 80">
+<defs>
+<linearGradient x1="150" y1="0" x2="0" y2="0" gradientUnits="userSpaceOnUse" id="grad10">
+<stop offset="0" stop-color="green" />
+<stop offset="1" stop-color="yellow" />
+</linearGradient>
+</defs>
+<rect x="10" y="10" width="150" height="60" stroke="black" fill="url(#grad10)" />
+</svg>

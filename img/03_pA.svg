@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="400" height="200" viewBox="0 0 400 200" stroke-width="3" fill="none">
+<defs>
+</defs>
+<path d="M125,75 A100,50,0,0,0,225,125" stroke="red" />
+<path d="M125,75 A100,50,0,0,1,225,125" stroke="blue" />
+<path d="M125,75 A100,50,0,1,0,225,125" stroke="rgb(0 80 255)" stroke-dasharray="5 3" />
+<path d="M125,75 A100,50,0,1,1,225,125" stroke="rgb(255 80 0)" stroke-dasharray="5 3" />
+</svg>
