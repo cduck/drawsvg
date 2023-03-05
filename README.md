@@ -6,6 +6,8 @@ Most common SVG tags are supported and others can easily be added by writing a s
 
 An interactive [Jupyter notebook](https://jupyter.org) widget, `drawsvg.widgets.DrawingWidget`, [is included](#interactive-widget) that can update drawings based on mouse events.  The widget does not yet work in Jupyter lab.
 
+[SVG quick reference docs](https://cduck.github.io/drawsvg/)
+
 
 # Install
 
