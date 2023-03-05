@@ -6,7 +6,8 @@ import string
 import xml.sax.saxutils as xml
 
 from . import (
-    types, elements as elements_module, raster, video, jupyter, native_animation
+    types, elements as elements_module, raster, video, jupyter,
+    native_animation, font_embed,
 )
 
 
@@ -160,6 +161,19 @@ class Drawing:
         self.append(elements_module.Title(text, **kwargs))
     def append_css(self, css_text):
         self.css_list.append(css_text)
+    def embed_google_font(self, family, text=None, display='swap', **kwargs):
+        '''Download SVG-embeddable CSS from Google fonts.
+
+        Args:
+            family: Name of font family or list of font families.
+            text: The set of characters required from the font.  Only a font
+                subset with these characters will be downloaded.
+            display: The font-display CSS value.
+            **kwargs: Other URL parameters sent to
+                https://fonts.googleapis.com/css?...
+        '''
+        self.append_css(font_embed.download_google_font_css(
+                family, text=text, display=display, **kwargs))
     def append_javascript(self, js_text, onload=None):
         if onload:
             if self.svg_args.get('onload'):
