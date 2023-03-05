@@ -25,6 +25,19 @@ def delay_import_cairo():
         ) from e
     return cairosvg
 
+def delay_import_imageio():
+    try:
+        import imageio
+    except ImportError as e:
+        raise ImportError(
+            'Optional dependencies not installed. '
+            'Install with `python3 -m pip install "drawsvg[all]"` '
+            'or `python3 -m pip install "drawsvg[raster]"`. '
+            'See https://github.com/cduck/drawsvg#full-feature-install '
+            'for more details.'
+        ) from e
+    return imageio
+
 
 class Raster:
     def __init__(self, png_data=None, png_file=None):
@@ -43,6 +56,17 @@ class Raster:
         cairosvg = delay_import_cairo()
         cairosvg.svg2png(bytestring=svg_data, write_to=out_file)
         return Raster(None, png_file=out_file)
+    @staticmethod
+    def from_arr(arr, out_file=None):
+        imageio = delay_import_imageio()
+        if out_file is None:
+            with io.BytesIO() as f:
+                imageio.imwrite(f, arr, format='png')
+                f.seek(0)
+                return Raster(f.read())
+        else:
+            imageio.imwrite(out_file, arr, format='png')
+            return Raster(None, png_file=out_file)
     def _repr_png_(self):
         if self.png_data:
             return self.png_data

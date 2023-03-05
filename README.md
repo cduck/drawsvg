@@ -140,7 +140,8 @@ d.save_html('playback-controls.html')
 #d.display_image()  # Display SVG as an image (will not be interactive)
 #d.display_iframe()  # Display as interactive SVG (alternative)
 #d.as_gif('orbit.gif', fps=10)  # Render as a GIF image, optionally save to file
-#d.as_mp4('orbig.mp4', fps=60)  # Render as an MP4 video, optionally save to file
+#d.as_mp4('orbig.mp4', fps=60, verbose=True)  # Render as an MP4 video, optionally save to file
+#d.as_spritesheet('orbit-spritesheet.png', row_length=10, fps=3)  # Render as a spritesheet
 d.display_inline()  # Display as interactive SVG
 ```
 

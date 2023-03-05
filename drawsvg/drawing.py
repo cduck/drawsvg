@@ -365,6 +365,11 @@ svg {{
         self.as_mp4(
                 fname, fps=fps, duration=duration, context=context,
                 verbose=verbose)
+    def save_spritesheet(self, fname, fps=10, duration=None, context=None,
+                         row_length=None, verbose=False):
+        self.as_spritesheet(
+                fname, fps=fps, duration=duration, context=context,
+                row_length=row_length, verbose=verbose)
     def as_video(self, to_file=None, fps=10, duration=None,
                  mime_type=None, file_type=None, context=None, verbose=False):
         if file_type is None and mime_type is None:
@@ -391,6 +396,13 @@ svg {{
         return self.as_video(
                 to_file=to_file, fps=fps, duration=duration, context=context,
                 mime_type='video/mp4', file_type='mp4', verbose=verbose)
+    def as_spritesheet(self, to_file=None, fps=10, duration=None, context=None,
+               row_length=None, verbose=False):
+        frames = self.as_animation_frames(
+                fps=fps, duration=duration, context=context)
+        sheet = video.render_spritesheet(
+                frames, row_length=row_length, verbose=verbose)
+        return raster.Raster.from_arr(sheet, out_file=to_file)
     def _repr_svg_(self):
         '''Display in Jupyter notebook.'''
         return self.as_svg(randomize_ids=True)

@@ -149,6 +149,48 @@ def save_video(frames, file, verbose=False, **kwargs):
         print(f'Converting to video')
     imageio.mimsave(file, frames, **kwargs)
 
+def render_spritesheet(frames, row_length=None, verbose=False, **kwargs):
+    '''
+    Save a series of drawings as a bitmap spritesheet
+
+    Arguments:
+        frames: A list of `Drawing`s or a list of `numpy.array`s.
+        row_length: The length (in frames) of one row in the spritesheet.
+            If not provided, all frames go on one row.
+        align_bottom: If frames are different sizes, align the bottoms of each
+            frame in the video.
+        align_right: If frames are different sizes, align the right edge of each
+            frame in the video.
+        bg: If frames are different sizes, fill the background with this color.
+            (default is white: (255, 255, 255, 255))
+        **kwargs: Other arguments to imageio.imsave().
+
+    '''
+    np, _ = delay_import_np_imageio()
+    if not isinstance(frames[0], np.ndarray):
+        frames = render_svg_frames(frames, verbose=verbose, **kwargs)
+    kwargs.pop('align_bottom', None)
+    kwargs.pop('align_right', None)
+    bg = kwargs.pop('bg', (255, 255, 255, 255))
+
+    cols = row_length if row_length is not None else len(frames)
+    rows = (len(frames) - 1) // cols + 1
+
+    if rows * cols > len(frames):  # Unfilled final row
+        empty_frame = np.zeros(frames[0].shape, dtype=frames[0].dtype)
+        empty_frame[..., :] = bg[:empty_frame.shape[-1]]
+        frames.extend([empty_frame] * (rows * cols - len(frames)))
+
+    block_arrangement = []
+    for row in range(rows):
+        next_row_end = (row+1)*cols
+        block_arrangement.append([
+            [frame] for frame in frames[row*cols:next_row_end]
+        ])
+
+    spritesheet = np.block(block_arrangement)
+    return spritesheet
+
 def save_spritesheet(frames, file, row_length=None, verbose=False, **kwargs):
     '''
     Save a series of drawings as a bitmap spritesheet
@@ -168,26 +210,10 @@ def save_spritesheet(frames, file, row_length=None, verbose=False, **kwargs):
         **kwargs: Other arguments to imageio.imsave().
 
     '''
-    np, imageio = delay_import_np_imageio()
-    if not isinstance(frames[0], np.ndarray):
-        frames = render_svg_frames(frames, verbose=verbose, **kwargs)
+    _, imageio = delay_import_np_imageio()
+    spritesheet = render_spritesheet(
+            frames, row_length=row_length, verbose=verbose, **kwargs)
     kwargs.pop('align_bottom', None)
     kwargs.pop('align_right', None)
     kwargs.pop('bg', None)
-
-    cols = row_length if row_length is not None else len(frames)
-    rows = (len(frames) - 1) // cols + 1
-
-    if rows * cols > len(frames):  # Unfilled final row
-        empty_frame = np.zeros(frames[0].shape, dtype=frames[0].dtype)
-        frames.extend([empty_frame] * (rows * cols - len(frames)))
-
-    block_arrangement = []
-    for row in range(rows):
-        next_row_end = (row+1)*cols
-        block_arrangement.append([
-            [frame] for frame in frames[row*cols:next_row_end]
-        ])
-
-    spritesheet = np.block(block_arrangement)
     imageio.imsave(file, spritesheet, **kwargs)
