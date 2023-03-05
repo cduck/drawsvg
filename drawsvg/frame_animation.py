@@ -31,7 +31,7 @@ class FrameAnimation:
 
 class FrameAnimationContext:
     def __init__(self, draw_func=None, out_file=None,
-                 jupyter=False, spritesheet=False, pause=False, 
+                 jupyter=False, spritesheet=False, pause=False,
                  clear=True, delay=0, disable=False, video_args=None,
                  _patch_delay=0.05):
         self.jupyter = jupyter
@@ -71,7 +71,7 @@ class FrameAnimationContext:
     def __exit__(self, exc_type, exc_value, exc_traceback):
         if exc_value is None:
             # No error
-            if self.out_file is not None and not self.disable: 
+            if self.out_file is not None and not self.disable:
                 if self.spritesheet:
                     self.anim.save_spritesheet(self.out_file, **self.video_args)
                 else:
@@ -85,7 +85,7 @@ def frame_animate_video(out_file, draw_func=None, jupyter=False, **video_args):
 
     Example:
     ```
-    with animate_video('video.mp4') as anim:
+    with frame_animate_video('video.mp4') as anim:
         while True:
             ...
             anim.draw_frame(...)
@@ -94,7 +94,7 @@ def frame_animate_video(out_file, draw_func=None, jupyter=False, **video_args):
     return FrameAnimationContext(draw_func=draw_func, out_file=out_file,
                                  jupyter=jupyter, video_args=video_args)
 
-def frame_animate_spritesheet(out_file, draw_func=None, jupyter=False, 
+def frame_animate_spritesheet(out_file, draw_func=None, jupyter=False,
                               **video_args):
     '''
     Returns a context manager that stores frames and saves a spritesheet when
@@ -102,7 +102,7 @@ def frame_animate_spritesheet(out_file, draw_func=None, jupyter=False,
 
     Example:
     ```
-    with frame_animate_spritesheet('video.mp4', row_length=10) as anim:
+    with frame_animate_spritesheet('sheet.png', row_length=10) as anim:
         while True:
             ...
             anim.draw_frame(...)
@@ -120,7 +120,7 @@ def frame_animate_jupyter(draw_func=None, pause=False, clear=True, delay=0.1,
 
     Example:
     ```
-    with animate_jupyter(delay=0.5) as anim:
+    with frame_animate_jupyter(delay=0.5) as anim:
         while True:
             ...
             anim.draw_frame(...)

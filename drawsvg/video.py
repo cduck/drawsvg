@@ -149,7 +149,7 @@ def save_video(frames, file, verbose=False, **kwargs):
         print(f'Converting to video')
     imageio.mimsave(file, frames, **kwargs)
 
-def save_spritesheet(frames, file, verbose=False, **kwargs):
+def save_spritesheet(frames, file, row_length=None, verbose=False, **kwargs):
     '''
     Save a series of drawings as a bitmap spritesheet
 
@@ -157,7 +157,7 @@ def save_spritesheet(frames, file, verbose=False, **kwargs):
         frames: A list of `Drawing`s or a list of `numpy.array`s.
         file: File name or file like object to write the spritesheet to.  The
             extension determines the output format.
-        row_length: The length (in frames) of one row in the spritesheet. 
+        row_length: The length (in frames) of one row in the spritesheet.
             If not provided, all frames go on one row.
         align_bottom: If frames are different sizes, align the bottoms of each
             frame in the video.
@@ -174,12 +174,11 @@ def save_spritesheet(frames, file, verbose=False, **kwargs):
     kwargs.pop('align_bottom', None)
     kwargs.pop('align_right', None)
     kwargs.pop('bg', None)
-    kwargs.pop('duration', None)
 
-    cols = kwargs.pop('row_length', len(frames))
+    cols = row_length if row_length is not None else len(frames)
     rows = (len(frames) - 1) // cols + 1
 
-    if rows * cols > len(frames): # Unfilled final row
+    if rows * cols > len(frames):  # Unfilled final row
         empty_frame = np.zeros(frames[0].shape, dtype=frames[0].dtype)
         frames.extend([empty_frame] * (rows * cols - len(frames)))
 

@@ -400,7 +400,7 @@ with draw.frame_animate_jupyter(draw_frame, delay=0.05) as anim:
 # Or:
 #with draw.frame_animate_video('example6.gif', draw_frame, duration=0.05) as anim:
 # Or:
-#with draw.frame_animate_spritesheet('example6.png', draw_frame, row_length=10) as anim
+#with draw.frame_animate_spritesheet('example6.png', draw_frame, row_length=10) as anim:
     # Add each frame to the animation
     for i in range(20):
         anim.draw_frame(i/10)
@@ -410,7 +410,11 @@ with draw.frame_animate_jupyter(draw_frame, delay=0.05) as anim:
         anim.draw_frame(i/10)
 ```
 
-![Example output image](https://raw.githubusercontent.com/cduck/drawsvg/master/examples/example6.gif)
+GIF:
+![Example output gif](https://raw.githubusercontent.com/cduck/drawsvg/master/examples/example6.gif)
+
+Spritesheet (usable in most 2D game engines):
+![Example output spritesheet](https://raw.githubusercontent.com/cduck/drawsvg/master/examples/example6.png)
 
 ### Asynchronous Frame-based Animation in Jupyter
 ```python
