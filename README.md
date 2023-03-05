@@ -411,9 +411,11 @@ with draw.frame_animate_jupyter(draw_frame, delay=0.05) as anim:
 ```
 
 GIF:
+
 ![Example output gif](https://raw.githubusercontent.com/cduck/drawsvg/master/examples/example6.gif)
 
 Spritesheet (usable in most 2D game engines):
+
 ![Example output spritesheet](https://raw.githubusercontent.com/cduck/drawsvg/master/examples/example6.png)
 
 ### Asynchronous Frame-based Animation in Jupyter
