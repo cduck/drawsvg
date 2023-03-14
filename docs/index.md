@@ -604,9 +604,9 @@ d.append(dw.Line(140, 90, 250, 90, stroke='gray'))
 d.append(dw.Text('Start', 24, 75, 30, text_anchor='start'))
 d.append(dw.Text('Middle', 24, 75, 60, text_anchor='middle'))
 d.append(dw.Text('End', 24, 75, 90, text_anchor='end'))
-d.append(dw.Text('Auto', 24, 150, 30, dominant_baseline='bottom'))
+d.append(dw.Text('Auto', 24, 150, 30, dominant_baseline='auto'))
 d.append(dw.Text('Middle', 24, 150, 60, dominant_baseline='middle'))
-d.append(dw.Text('Hanging', 24, 150, 90, dominant_baseline='top'))
+d.append(dw.Text('Hanging', 24, 150, 90, dominant_baseline='hanging'))
 ```
 
 ![svg](img/04_align.svg)
