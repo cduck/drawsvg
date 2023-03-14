@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-     width="250" height="120" viewBox="0 0 250 120">
+    width="250" height="120" viewBox="0 0 250 120">
 <defs>
 </defs>
 <path d="M75,100 L75,0" stroke="gray" />
@@ -10,7 +10,7 @@
 <text x="75" y="30" font-size="24" text-anchor="start">Start</text>
 <text x="75" y="60" font-size="24" text-anchor="middle">Middle</text>
 <text x="75" y="90" font-size="24" text-anchor="end">End</text>
-<text x="150" y="30" font-size="24" dominant-baseline="bottom">Auto</text>
+<text x="150" y="30" font-size="24" dominant-baseline="auto">Auto</text>
 <text x="150" y="60" font-size="24" dominant-baseline="middle">Middle</text>
-<text x="150" y="90" font-size="24" dominant-baseline="top">Hanging</text>
+<text x="150" y="90" font-size="24" dominant-baseline="hanging">Hanging</text>
 </svg>
