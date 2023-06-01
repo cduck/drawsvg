@@ -239,7 +239,7 @@ class Text(DrawingParentElement):
     '''
     TAG_NAME = 'text'
     has_content = True
-    def __new__(cls, text, *args, path=None, id=None, _skip_check=False,
+    def __new__(cls, text='', *args, path=None, id=None, _skip_check=False,
                 **kwargs):
         # Check for the special case of multi-line text on a path
         # This is inconsistently implemented by renderers so we return a group
