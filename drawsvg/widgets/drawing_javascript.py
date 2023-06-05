@@ -71,6 +71,17 @@ define('drawingview', ['@jupyter-widgets/base'], function(widgets) {
             var svg_pt = this.cursor_point.matrixTransform(
                             this.svg_view.getScreenCTM().inverse());
 
+            var target_parents = [];
+            var target = e.target;
+            while(target && target != this.svg_view)
+            {
+                console.log(target, target.id);
+                if(target.id) {
+                    target_parents.push(target.id);
+                }
+                target = target.parentNode;
+            }
+
             this.send({
                 name: name,
                 x: svg_pt.x,
@@ -88,6 +99,7 @@ define('drawingview', ['@jupyter-widgets/base'], function(widgets) {
                 movementY: e.movementY,
                 timeStamp: e.timeStamp,
                 targetId: e.target ? e.target.id : null,
+                targetParentIds: target_parents,
                 currentTargetId: e.currentTarget ? e.currentTarget.id : null,
                 relatedTargetId: e.relatedTarget ? e.relatedTarget.id : null,
             });
