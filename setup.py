@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 import logging
 logger = logging.getLogger(__name__)
 
-version = '2.1.1'
+version = '2.2.0'
 
 try:
     with open('README.md', 'r') as f:
