@@ -75,8 +75,7 @@ define('drawingview', ['@jupyter-widgets/base'], function(widgets) {
             var target = e.target;
             while(target && target != this.svg_view)
             {
-                console.log(target, target.id);
-                if(target.id) {
+                if (target.id) {
                     target_parents.push(target.id);
                 }
                 target = target.parentNode;
