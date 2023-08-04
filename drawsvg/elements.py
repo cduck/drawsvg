@@ -605,6 +605,9 @@ class ForeignObject(DrawingBasicElement):
     could be omitted in the foreignObject content, but it is mandatory in the
     context of an SVG document.
 
+    This element works best when viewing the SVG in a browser. Drawing.rasterize()
+    and Drawing.save_png() are unable to display this element.
+
     Additional keyword arguments are output as additional arguments to the SVG
     node e.g. fill="red", stroke="#ff4477", stroke_width=2.
     '''
