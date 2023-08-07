@@ -597,3 +597,27 @@ class Arc(Path):
     def __init__(self, cx, cy, r, start_deg, end_deg, cw=False, **kwargs):
         super().__init__(d='', **kwargs)
         self.arc(cx, cy, r, start_deg, end_deg, cw=cw, include_m=True)
+
+class ForeignObject(DrawingBasicElement):
+    '''A foreign object, i.e. for embedding HTML.
+
+    In the context of SVG embedded in an HTML document, the XHTML namespace
+    could be omitted in the foreignObject content, but it is mandatory in the
+    context of an SVG document.
+
+    This element works best when viewing the SVG in a browser. Drawing.rasterize()
+    and Drawing.save_png() are unable to display this element.
+
+    Additional keyword arguments are output as additional arguments to the SVG
+    node e.g. fill="red", stroke="#ff4477", stroke_width=2.
+    '''
+    TAG_NAME = 'foreignObject'
+    has_content = True
+    def __init__(self, content, **kwargs):
+        super().__init__(**kwargs)
+        self.content = content
+    def write_content(self, id_map, is_duplicate, output_file, lcontext,
+                      dry_run):
+        if dry_run:
+            return
+        output_file.write(self.content)
