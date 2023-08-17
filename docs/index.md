@@ -775,6 +775,112 @@ d.append(dw.Text('Some text in Georgia.', 30, 10, 115, font_family='Georgia'))
 ![png](img/04_fonts2.png)
 
 
+### Advanced Text Features
+
+The text properties which are described in this section are currently (drawsvg 2.2.0)
+not provieded by the internal rendering. The solution for now is to export an svg file
+which is then rendered by inkscape.
+
+#### White Space
+White space is preserved with the `white__space='pre'` property. (See [W3C](https://www.w3.org/TR/css-text-3/#white-space-property) for all options.)
+
+```python
+d = dw.Drawing(300,100,id_prefix='whitespace')
+d.append(dw.Text('white   space   not   preserved',14,30,30))
+d.append(dw.Text('white   space   preserved',14,30,60,white_space='pre'))
+d.save_svg('white-space.svg')
+from os import system
+system('inkscape -o 04_whitespace.png white-space.svg')
+```
+
+![png](img/04_whitespace.png)
+
+
+#### Wrapping Text: 'inline-size'
+
+See [W3C](https://www.w3.org/TR/SVG/text.html#InlineSize) for details.
+
+```python
+d = dw.Drawing(300,100,id_prefix='inlinesize')
+t = 'This text wraps at 200 pixels.'
+x,y = 50,30
+d.append(dw.Text(t,20,x,y,style='font-style: sans-serif; inline-size: 200px;'))
+d.append(dw.Line(x,0,x,100,stroke='gray'))
+d.append(dw.Line(x+200,0,x+200,100,stroke='gray'))
+d.save_svg('inline-size.svg')
+from os import system
+system('inkscape -o 04_inlinesize.png inline-size.svg')
+```
+
+![png](img/04_inlinesize.png)
+
+
+#### Text Inside a Shape 
+
+See [W3C](https://www.w3.org/TR/SVG/text.html#TextShapeInside) for details.
+
+```python
+d = dw.Drawing(300,300,id_prefix='shapeinside')
+t = 'Lorem ipsum dolor sit amet, consectetur adipisici elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat.'
+x,y = 50,30
+d.append(dw.Circle(150,150,120,stroke='gray',fill='none',id='wrap'))
+d.append(dw.Text(t,20,0,0,style="""font-style: sans-serif;
+                text-align: center;
+                shape-inside: url(#wrap);"""))
+d.save_svg('shape-inside.svg')
+from os import system
+system('inkscape -o 04_shapeinside.png shape-inside.svg')
+```
+
+![png](img/04_shapeinside.png)
+
+
+#### The 'shape-subtract' property
+
+The result is here not completely according to [W3C](https://www.w3.org/TR/SVG2/text.html#TextShapeSubtract)
+because the justification does not work, but the `shape-subtract` works.
+
+```python
+d = dw.Drawing(450,300,id_prefix='shapesubtract')
+d.append(dw.Rectangle(25,25,225,175,fill='white',stroke='black',id='rect1'))
+d.append(dw.Rectangle(200,125,225,150,fill='white',stroke='black',id='rect2',style="shape-margin:25px;"))
+t = 'Lorem ipsum dolor sit amet, consectetur adipisici elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat.'
+d.append(dw.Text(t,12,0,0,style="""shape-inside:url(#rect1); 
+                                shape-subtract:url(#rect2); 
+                                shape-padding:25px; 
+                                font-family:DejaVu Sans; 
+                                text-align:justified; 
+                                line-height:110%"""))
+d.append(dw.Text(t,12,0,0,style="""shape-inside:url(#rect2);
+                            shape-padding:25px;
+                            font-family:DejaVu Sans;
+                            text-align:justified;
+                            line-height:110%"""))
+d.save_svg('shape-subtract.svg')
+from os import system
+system('inkscape -o 04_shapesubtract.png shape-subtract.svg')
+d
+```
+
+![png](img/04_shapesubtract.png)
+
+#### The 'shape-padding' property
+
+Again the justification is not correct in the inkscape output but the padding works as expected.
+
+```python
+d = dw.Drawing(300,300,id_prefix='shapepadding')
+d.append(dw.Circle(150,150,125,fill='none',stroke='black',id='circle'))
+t = 'This is a sample of wrapped text in SVG 2! There should be 25 pixel padding around the text. The text is justified on both sides. It looks good!'
+d.append(dw.Text(t,18,0,0,style='shape-inside: url(#circle); shape-padding: 25px; font-family: DejaVu Sans; text-align: justified; line-height: 110%;'))
+d.save_svg('shape-padding.svg')
+from os import system
+system('inkscape -o 04_shapepadding.png shape-padding.svg')
+d
+```
+
+![png](img/04_shapepadding.png)
+
 
 ## Gradient, Clip, Mask
 
