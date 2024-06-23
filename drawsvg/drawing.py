@@ -262,13 +262,11 @@ class Drawing:
             id_index += 1
             return id_str
         id_map = defaultdict(id_gen)
-        prev_set = set((id(defn) for defn in self.other_defs))
-        prev_list = []
+        prev_set = set()
         def is_duplicate(obj):
             nonlocal prev_set
             dup = id(obj) in prev_set
             prev_set.add(id(obj))
-            prev_list.append(obj)
             return dup
         for element in self.other_defs:
             if hasattr(element, 'write_svg_element'):
