@@ -133,16 +133,29 @@ class Drawing:
         else:
             self.elements.extend(iterable)
     def insert(self, i, element):
+        '''Inserts a top-level element at the given array index.'''
         self.elements.insert(i, element)
     def remove(self, element):
+        '''Removes a top-level element (except those with a z-index).'''
         self.elements.remove(element)
     def clear(self):
+        '''Clears all drawing elements, with or without a z-index, but keeps
+        defs-type elements added with `append_def()`.
+        '''
         self.elements.clear()
+        self.ordered_elements.clear()
     def index(self, *args, **kwargs):
+        '''Finds the array-index of a top-level element (except those with a
+        z-index).
+        '''
         return self.elements.index(*args, **kwargs)
     def count(self, element):
+        '''Counts the number of top-level elements (except those with a z-index
+        ).
+        '''
         return self.elements.count(element)
     def reverse(self):
+        '''Reverses the order of all elements (except those with a z-index).'''
         self.elements.reverse()
     def draw_def(self, obj, **kwargs):
         if not hasattr(obj, 'write_svg_element'):
