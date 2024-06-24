@@ -567,7 +567,7 @@ class Lines(Path):
     Additional keyword arguments are output as additional arguments to the SVG
     node e.g. fill="red", stroke="#ff4477", stroke_width=2.
     '''
-    def __init__(self, sx, sy, *points, close=False, **kwargs):
+    def __init__(self, sx, sy, *points, close=False, relative=False, **kwargs):
         super().__init__(d='', **kwargs)
         self.M(sx, sy)
         if len(points) % 2 != 0:
@@ -575,7 +575,16 @@ class Lines(Path):
                     'expected an even number of positional arguments x0, y0, '
                     'x1, y1, ...')
         for i in range(len(points) // 2):
-            self.L(points[2*i], points[2*i+1])
+            px = points[2*(i-1)] if i > 0 else sx
+            py = points[2*(i-1)+1] if i > 0 else sy
+            x = points[2*i]
+            y = points[2*i+1]
+            if x == px:
+                self.v(y - py) if relative else self.V(y)
+            elif y == py:
+                self.h(x - px) if relative else self.H(x)
+            else:
+                self.l(x - px, y - py) if relative else self.L(x, y)
         if close:
             self.Z()
 
@@ -585,8 +594,10 @@ class Line(Lines):
     Additional keyword arguments are output as additional arguments to the SVG
     node e.g. fill="red", stroke="#ff4477", stroke_width=2.
     '''
-    def __init__(self, sx, sy, ex, ey, **kwargs):
-        super().__init__(sx, sy, ex, ey, close=False, **kwargs)
+    def __init__(self, sx, sy, ex, ey, relative=False, **kwargs):
+        super().__init__(
+            sx, sy, ex, ey, close=False, relative=relative, **kwargs
+        )
 
 class Arc(Path):
     '''A circular arc.
