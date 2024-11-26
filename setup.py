@@ -34,17 +34,17 @@ setup(
     extras_require = {
         'raster': [
             'cairoSVG~=2.3',
-            'numpy~=1.16',
+            'numpy~=2.1',
             'imageio~=2.5',
             'imageio_ffmpeg~=0.4',
         ],
         'color': [
             'pwkit~=1.0',
-            'numpy~=1.16',
+            'numpy~=2.1',
         ],
         'all': [
             'cairoSVG~=2.3',
-            'numpy~=1.16',
+            'numpy~=2.1',
             'imageio~=2.5',
             'imageio_ffmpeg~=0.4',
             'pwkit~=1.0',
