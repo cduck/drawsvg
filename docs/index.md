@@ -1106,7 +1106,7 @@ Output:
 
 ```python
 dw.Image(x, y, width, height, path=None, data=None,
-         embed=False, mimeType=None, **kwargs)
+         embed=False, mime_type=None, **kwargs)
 ```
 
 ```python
