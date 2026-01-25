@@ -650,6 +650,8 @@ d.append(dw.Text('Fall', 24, 10, 30,
 
 ### Rotate
 
+#### Characters
+
 Either one angle (degrees), or a list which is applied to all characters.
 If the list is smaller than the number of characters, the last angle persists.
 
@@ -675,6 +677,24 @@ d.append(txt)
 ```
 
 ![svg](img/04_rot2.svg)
+
+#### Lines
+
+Rotating lines of text can be done via the *transform* keyword, holding a combination of *translate()* and *rotate()*. If the text's x/y coordinates are set to zero, the text is moved to and rotated around the x/y coordinates of *translate()*, in the angle given by *rotate()*. The result depends on the text anchor and on the dominant baseline. The example shows the default on the left side, the centered anchor in the middle, and the baseline set to middle on the right side. The red point is the rotating reference, the grey text is the text at the point's coordinates without rotation, and the black text the final result after rotation.
+
+```python
+text = ['default', 'centered', 'and baseline']
+anchor = ['', 'middle', 'middle']
+baseline = ['', '', 'middle']
+xpos = [10, 60, 110]
+for x,t,a,b in zip(xpos,text,anchor,baseline):
+    d.append(dw.Circle(x,50,3,stroke='red',fill='red'))
+    d.append(dw.Text(t,12,0,0,transform="translate(%d,50) rotate(-90)" % x,
+                     text_anchor='%s' % a, dominant_baseline='%s' % b,
+                     font_family='monospace'))
+```
+
+![svg](img/04_rot3.svg)
 
 
 ### Setting Text Length
