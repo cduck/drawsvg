@@ -363,6 +363,9 @@ class DrawingParentElement(DrawingBasicElement):
             self.ordered_children[z].extend(iterable)
         else:
             self.children.extend(iterable)
+    def insert(self, index, element):
+        self.check_children_allowed()
+        self.children.insert(index, element)
     def write_content(self, id_map, is_duplicate, output_file, lcontext,
                       dry_run):
         pass
