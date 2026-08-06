@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="600" height="200" viewBox="0 0 300 100">
+<defs>
+</defs>
+<circle cx="10" cy="50" r="3" stroke="red" fill="red" />
+<text x="10" y="50" font-size="12" fill="grey" text-anchor="" dominant-baseline="" font-family="monospace">default</text>
+<text x="0" y="0" font-size="12" transform="translate(10,50) rotate(-90)" text-anchor="" dominant-baseline="" font-family="monospace">default</text>
+<circle cx="110" cy="50" r="3" stroke="red" fill="red" />
+<text x="110" y="50" font-size="12" fill="grey" text-anchor="middle" dominant-baseline="" font-family="monospace">centered</text>
+<text x="0" y="0" font-size="12" transform="translate(110,50) rotate(-90)" text-anchor="middle" dominant-baseline="" font-family="monospace">centered</text>
+<circle cx="210" cy="50" r="3" stroke="red" fill="red" />
+<text x="210" y="50" font-size="12" fill="grey" text-anchor="middle" dominant-baseline="middle" font-family="monospace">and baseline</text>
+<text x="0" y="0" font-size="12" transform="translate(210,50) rotate(-90)" text-anchor="middle" dominant-baseline="middle" font-family="monospace">and baseline</text>
+</svg>
