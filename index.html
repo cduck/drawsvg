@@ -57,6 +57,8 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#circle">Circle</a>
     </li>
+    <li class="toctree-l3"><a class="reference internal" href="#circular-arc">Circular Arc</a>
+    </li>
     <li class="toctree-l3"><a class="reference internal" href="#ellipse">Ellipse</a>
     </li>
         </ul>
@@ -282,6 +284,28 @@ d.append(dw.Circle(250, 50, 40,
                    stroke_width=15))
 </code></pre>
 <p><img alt="svg" src="img/01_circ.svg" /></p>
+<h3 id="circular-arc">Circular Arc</h3>
+<pre><code class="language-python">dw.Arc(cx, cy, r, start_deg, end_deg, cw=False, **kwargs)
+</code></pre>
+<p><code>cx</code>, <code>cy</code> specify the center and <code>r</code> the radius. <code>start_deg</code> and <code>end_deg</code>
+locate the endpoints in degrees: 0 is along the positive x-axis and 90 is
+along the positive y-axis. In the default coordinate system, x increases right
+and y increases down, so these angles increase clockwise.</p>
+<p><code>cw</code> selects the direction from the start to the end: <code>True</code> draws clockwise
+and the default <code>False</code> draws counterclockwise. For example, from 0 to 90,
+<code>cw=True</code> draws a quarter circle, while <code>cw=False</code> draws the other three quarters.
+Transforms (including an inverted y-axis) can change the displayed direction.</p>
+<pre><code class="language-python">d = dw.Drawing(220, 110)
+d.append(dw.Arc(55, 50, 35, 0, 90, cw=True,
+                stroke='blue', stroke_width=3, fill='none'))
+d.append(dw.Arc(165, 50, 35, 0, 90,
+                stroke='orange', stroke_width=3, fill='none'))
+</code></pre>
+<p><img alt="Clockwise quarter arc in blue and counterclockwise three-quarter arc in orange" src="img/01_arc.svg" /></p>
+<p><code>Arc</code> creates a separate circular path. Use <a href="#a-elliptical-arc">Path.A</a> for an
+elliptical arc or to continue an existing path. Set <code>fill='none'</code> when only the
+arc's outline is wanted; a fill otherwise covers the region bounded by the arc
+and the straight line between its endpoints. Use <code>Circle</code> for a complete circle.</p>
 <h3 id="ellipse">Ellipse</h3>
 <pre><code class="language-python">dw.Ellipse(cx, cy, rx, ry, **kwarg)
 </code></pre>
@@ -1142,5 +1166,5 @@ d.append(dw.Text('upward y', 12, 5, 95))
 
 <!--
 MkDocs version : 1.4.2
-Build Date UTC : 2026-01-03 23:33:20.045026+00:00
+Build Date UTC : 2026-10-29 01:35:11.692859+00:00
 -->
