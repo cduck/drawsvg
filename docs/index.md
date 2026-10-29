@@ -147,6 +147,38 @@ d.append(dw.Circle(250, 50, 40,
 ![svg](img/01_circ.svg)
 
 
+### Circular Arc
+
+```python
+dw.Arc(cx, cy, r, start_deg, end_deg, cw=False, **kwargs)
+```
+
+`cx`, `cy` specify the center and `r` the radius. `start_deg` and `end_deg`
+locate the endpoints in degrees: 0 is along the positive x-axis and 90 is
+along the positive y-axis. In the default coordinate system, x increases right
+and y increases down, so these angles increase clockwise.
+
+`cw` selects the direction from the start to the end: `True` draws clockwise
+and the default `False` draws counterclockwise. For example, from 0 to 90,
+`cw=True` draws a quarter circle, while `cw=False` draws the other three quarters.
+Transforms (including an inverted y-axis) can change the displayed direction.
+
+```python
+d = dw.Drawing(220, 110)
+d.append(dw.Arc(55, 50, 35, 0, 90, cw=True,
+                stroke='blue', stroke_width=3, fill='none'))
+d.append(dw.Arc(165, 50, 35, 0, 90,
+                stroke='orange', stroke_width=3, fill='none'))
+```
+
+![Clockwise quarter arc in blue and counterclockwise three-quarter arc in orange](img/01_arc.svg)
+
+`Arc` creates a separate circular path. Use [Path.A](#a-elliptical-arc) for an
+elliptical arc or to continue an existing path. Set `fill='none'` when only the
+arc's outline is wanted; a fill otherwise covers the region bounded by the arc
+and the straight line between its endpoints. Use `Circle` for a complete circle.
+
+
 ### Ellipse
 
 ```python
