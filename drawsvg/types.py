@@ -77,7 +77,8 @@ class Context:
                     new_commands = []
                     for cmd in args['d'].split():
                         name = cmd[:1]
-                        vals = [float(s) if '.' in s else int(s)
+                        vals = [float(s) if '.' in s or 'e' in s.lower()
+                                else int(s)
                                 for s in  cmd[1:].split(',') if s]
                         if name in 'vV':
                             vals = [-y for y in vals]
