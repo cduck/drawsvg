@@ -77,8 +77,12 @@ class Context:
                     new_commands = []
                     for cmd in args['d'].split():
                         name = cmd[:1]
-                        vals = [float(s) if '.' in s else int(s)
-                                for s in  cmd[1:].split(',') if s]
+                        def float_or_int(s: str):
+                            try:
+                                return int(s)
+                            except ValueError:
+                                return float(s)
+                        vals = [float_or_int(s) for s in cmd[1:].split(',') if s]
                         if name in 'vV':
                             vals = [-y for y in vals]
                         elif name in 'hH':
@@ -92,8 +96,8 @@ class Context:
                         val_str = ','.join(map(str, vals))
                         new_commands.append(name + val_str)
                     args['d'] = ' '.join(new_commands)
-                except (TypeError, ValueError):
-                    pass
+                except (TypeError, ValueError, OverflowError):
+                    pass  # Skip invert-y if parsing any value in the path fails
             if ('cx' in args and 'cy' in args and 'r' in args
                     and 'stroke-dashoffset' in args
                     and 'stroke-dasharray' in args):

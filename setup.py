@@ -49,6 +49,9 @@ setup(
             'imageio_ffmpeg~=0.4',
             'pwkit~=1.0',
         ],
+        'dev': [
+            'pytest>=8.0',
+        ],
     },
 )
 
