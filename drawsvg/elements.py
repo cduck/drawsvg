@@ -588,6 +588,16 @@ class Line(Lines):
     def __init__(self, sx, sy, ex, ey, **kwargs):
         super().__init__(sx, sy, ex, ey, close=False, **kwargs)
 
+class AnimatableLine(DrawingBasicElement):
+    '''A line element that uses the SVG <line> tag.
+
+    The endpoints of this custom Line element can be animated.  This is a workaround to using `Line`
+    which is built on `<path>` and cannot be animated.'''
+    TAG_NAME = 'line'
+
+    def __init__(self, x1, y1, x2, y2, **kwargs):
+        super().__init__(x1=x1, y1=y1, x2=x2, y2=y2, **kwargs)
+
 class Arc(Path):
     '''A circular arc.
 
