@@ -116,6 +116,12 @@
     <li class="toctree-l3"><a class="reference internal" href="#tspan">TSpan</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#rotate">Rotate</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#characters">Characters</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#lines">Lines</a>
+    </li>
+        </ul>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#setting-text-length">Setting Text Length</a>
     </li>
@@ -645,6 +651,7 @@ d.append(txt)
 </code></pre>
 <p><img alt="svg" src="img/04_tspan3.svg" /></p>
 <h3 id="rotate">Rotate</h3>
+<h4 id="characters">Characters</h4>
 <p>Either one angle (degrees), or a list which is applied to all characters.
 If the list is smaller than the number of characters, the last angle persists.</p>
 <pre><code class="language-python">d.append(dw.Text('Rotate', 20, 20, 20, letter_spacing=20, rotate='90'))
@@ -663,6 +670,19 @@ txt.append(dw.TSpan('ATE', rotate=rotate))
 d.append(txt)
 </code></pre>
 <p><img alt="svg" src="img/04_rot2.svg" /></p>
+<h4 id="lines">Lines</h4>
+<p>Rotating lines of text can be done via the <em>transform</em> keyword, holding a combination of <em>translate()</em> and <em>rotate()</em>. If the text's x/y coordinates are set to zero, the text is moved to and rotated around the x/y coordinates of <em>translate()</em>, in the angle given by <em>rotate()</em>. The result depends on the text anchor and on the dominant baseline. The example shows the default on the left side, the centered anchor in the middle, and the baseline set to middle on the right side. The red point is the rotating reference, the grey text is the text at the point's coordinates without rotation, and the black text the final result after rotation.</p>
+<pre><code class="language-python">text = ['default', 'centered', 'and baseline']
+anchor = ['', 'middle', 'middle']
+baseline = ['', '', 'middle']
+xpos = [10, 60, 110]
+for x,t,a,b in zip(xpos,text,anchor,baseline):
+    d.append(dw.Circle(x,50,3,stroke='red',fill='red'))
+    d.append(dw.Text(t,12,0,0,transform=&quot;translate(%d,50) rotate(-90)&quot; % x,
+                     text_anchor='%s' % a, dominant_baseline='%s' % b,
+                     font_family='monospace'))
+</code></pre>
+<p><img alt="svg" src="img/04_rot3.svg" /></p>
 <h3 id="setting-text-length">Setting Text Length</h3>
 <pre><code class="language-python">s = 'Two words'
 d.append(dw.Text(s, 20, 20, 30, textLength=250, lengthAdjust='spacing'))
@@ -1166,5 +1186,5 @@ d.append(dw.Text('upward y', 12, 5, 95))
 
 <!--
 MkDocs version : 1.4.2
-Build Date UTC : 2026-10-29 01:35:11.692859+00:00
+Build Date UTC : 2026-11-18 02:13:16.247329+00:00
 -->
