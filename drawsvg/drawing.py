@@ -31,7 +31,25 @@ class Drawing:
     displayed as an SVG below.
     '''
     def __init__(self, width, height, origin=(0,0), context: types.Context=None,
-                 animation_config=None, id_prefix='d', **svg_args):
+                 animation_config: SyncedAnimationConfig | None=None, id_prefix='d', unit='',
+                 **svg_args):
+        '''
+        Args:
+            width: The width of the SVG canvas, in units of pixels by default.
+            height: The height of the SVG canvas, in units of pixels by default.
+            origin: Either the string 'center' or a tuple of two floats.  If 'center', a shape drawn
+                at x=0, y=0 will appear in the center of the image.  If `(-5, -10)`, a shape drawn
+                at x=0, y=0 will appear 5 units down from the top of the image (or up from the
+                bottom if y-inverted) and 10 units from the left edge of the image.
+            context: A global configuration that may affect how elements are displayed.
+            animation_config: Optional configuration of SVG-native animation in your drawing along
+                with UI controls for that animation.
+            id_prefix: When elements reference other elements, an id attribute is auto-assigned in
+                the produced SVG using this string prefix and a number.
+            unit: Any supported SVG unit, such as 'px' or 'mm', to be used in the `width` and
+                `height` attributes of the `<svg>` tag.  All position and size values in this
+                drawing will be in this unit.
+        '''
         if context is None:
             context = types.Context()
         if animation_config is not None:
@@ -68,6 +86,7 @@ class Drawing:
         self.render_height = None
         self.context = context
         self.id_prefix = str(id_prefix)
+        self.unit = unit
         self.svg_args = {}
         self._cached_context = None
         self._cached_extra_prepost_with_context = None
@@ -239,6 +258,9 @@ class Drawing:
             context = self.context
         output_file.write(header)
         img_width, img_height = self.calc_render_size()
+        if self.unit:
+            img_width = f'{img_width}{self.unit}'
+            img_height = f'{img_height}{self.unit}'
         svg_args = dict(
                 width=img_width, height=img_height,
                 viewBox=' '.join(map(str, self.view_box)))
