@@ -31,8 +31,8 @@ class Drawing:
     displayed as an SVG below.
     '''
     def __init__(self, width, height, origin=(0,0), context: types.Context=None,
-                 animation_config: SyncedAnimationConfig | None=None, id_prefix='d', unit='',
-                 **svg_args):
+                 animation_config: native_animation.SyncedAnimationConfig | None=None,
+                 id_prefix='d', unit='', **svg_args):
         '''
         Args:
             width: The width of the SVG canvas, in units of pixels by default.
