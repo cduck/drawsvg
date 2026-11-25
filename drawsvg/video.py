@@ -179,7 +179,7 @@ def render_spritesheet(frames, row_length=None, verbose=False, **kwargs):
     if rows * cols > len(frames):  # Unfilled final row
         empty_frame = np.zeros(frames[0].shape, dtype=frames[0].dtype)
         empty_frame[..., :] = bg[:empty_frame.shape[-1]]
-        frames.extend([empty_frame] * (rows * cols - len(frames)))
+        frames = list(frames) + [empty_frame] * (rows * cols - len(frames))
 
     block_arrangement = []
     for row in range(rows):
