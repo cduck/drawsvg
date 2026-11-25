@@ -89,6 +89,7 @@ class Context:
                             pass
                         elif name in 'aA':
                             if len(vals) >= 7:
+                                vals[2] = -vals[2]
                                 vals[6] = -vals[6]
                                 vals[4] = int(bool(not vals[4]))
                         else:
