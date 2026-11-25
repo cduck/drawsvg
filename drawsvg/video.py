@@ -27,11 +27,10 @@ class RasterVideo:
         self._file_handle = _file_handle
         self.mime_type = mime_type
     def save_video(self, fname):
-        with open(fname, 'wb') as f:
-            if self.video_file is not None:
-                with open(self.video_file, 'rb') as source:
-                    shutil.copyfileobj(source, f)
-            else:
+        if self.video_file is not None:
+            shutil.copyfile(self.video_file, fname)
+        else:
+            with open(fname, 'wb') as f:
                 f.write(self.video_data)
     @staticmethod
     def from_frames(svg_or_raster_frames, to_file=None, fps=10, *,
