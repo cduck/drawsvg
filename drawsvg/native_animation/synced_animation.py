@@ -294,7 +294,7 @@ def _merge_timeline_inverted_y_values(ytimes, yvalues, htimes, hvalues,
         inf = float('inf')
         ht = htimes[0] if len(htimes) else inf
         yt = ytimes[0] if len(ytimes) else inf
-        while ht < inf and yt < inf:
+        while ht < inf or yt < inf:
             if yt < ht:
                 h_val = hinterpolate(htimes, hvalues, yt)
                 new_times.append(yt)
